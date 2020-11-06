@@ -1,0 +1,15 @@
+---
+title: "quotabasket_model"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+# Packages
+library(tidyverse)
+```
+
+# Multi-Species Fishery Model
+
+This is a multi-species fishery model that allows us to reflect how quota baskets affect stock levels 
