@@ -10,6 +10,113 @@ knitr::opts_chunk$set(echo = TRUE)
 library(tidyverse)
 ```
 
+
+
 # Multi-Species Fishery Model
 
 This is a multi-species fishery model that allows us to reflect how quota baskets affect stock levels 
+
+
+Assumptions:
+
+
+Variables:
+
+
+# Population growth rates
+
+The variables included in this model are...
+
+* X0 = initial population size
+* r = intrinsic growth rate
+* K = Carrying capacity
+
+with the equation 
+
+X(t+1) = X(t) + rX(t)(1-r/K).
+
+We can add in harvest, where harvest is dependent on variables:
+
+* q = catchability coefficient
+* E = fishing effort
+
+by subtracting the harvest from the stock in each period.
+
+We can then calculate revenue, with the additional variables 
+
+* p = price of 1 unit of fish
+
+where the revenue is the price * harvest.
+
+```{r}
+stock_size_fx <- function(r = 0.1, K = 1, X0 = 0.1, years = 100, q = 0.01, E = 1, p = 1){
+ 
+  ## Stock size ##
+  # Create a stock size vector
+  stock <- vector(length = years)
+  stock[1] <- X0
+  # And write a stock size equation
+  for(y in 2:years){
+    stock[y] = stock[y-1] + (r*stock[y-1])*(1-(stock[y-1]/K)) - q*E*stock[y-1]
+  }
+  
+  ## Harvest ##
+  # Create harvest vector:
+  harvest <- vector(length = years)
+  stock[1] <- 0
+  # And write an equation...
+  for(y in 2:years){
+    harvest[y] = q*E*stock[y]
+  }
+  ## Profit
+  # Create profit vector
+  revenue <- vector(length = y)
+  revenue[1] = 0
+  # Write an equation...
+  for(y in 2:years){
+    revenue[y] = p*stock[y]
+  }
+  
+  data.frame(year = seq(1, years, by = 1), 
+             stock = stock, 
+             harvest = harvest, 
+             revenue = revenue)
+}
+
+test <- stock_size_fx(0.1, 1, 0.1, 100, 0.01, 1, 1)
+plot(test)
+```
+
+##### Great, this works for a single species. Can we include this for multiple species?
+
+We will need to define parameters for each of these species. We can do this by creating a list of:
+
+* r, K, X0, years, q, E, p 
+
+Then, we can write a function that allows us to plug these parameters in as a list of values, as many times as we want.
+
+```{r}
+# We first need to define species parameters 
+params1 = list(0.1, 1, 0.1, 100, 0.01, 1, 1)
+params2 = list(0.1, 5, 0.1, 100, 0.01, 1, 1)
+
+
+multi_speciesfx <- function(...){
+  # Define input arguments as a list to use with lapply later
+  x = list(...)
+
+  dcfx <- function(y){
+    # This applies a function over a vector of parameters...
+    # Unlist the params so we can plug them into our fx
+    unlist(y)
+    # do.call runs the function for certain parameters
+    do.call(stock_size_fx, y)
+  }
+    # Apply it to every set of parameters
+    lapply(x, dcfx)
+  }
+
+ms_test <- multi_speciesfx(params1, params2)
+
+```
+
