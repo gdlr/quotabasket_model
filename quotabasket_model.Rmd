@@ -1,54 +1,61 @@
 ---
-title: "quotabasket_model"
+title: ""
 output: html_document
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_chunk$set(echo = FALSE)
 
 # Packages
 library(tidyverse)
+library(Matrix)
+library(kableExtra)
 ```
 
 
 
-# Multi-Species Fishery Model
+<center><h1>Multi-Species Fishery Model</h1></center>
 
-This is a multi-species fishery model that allows us to reflect how quota baskets affect stock levels 
+<center><p>This is a multi-species fishery model that allows us to reflect how quota baskets affect stock levels</p></center>
 
+<br>
 
-Assumptions:
+### Our Model: Population Growth & Revenue
+<br>
+<center><p>**Stock$_{t+1}$ = Stock$_t$ $+$ Stock$_t$ growth $-$ Harvest: **</p></center>
 
+<center><p><mark>$X_{t+1} = X_t + rX_t\times (1-{X_t\over K}) - H_t$</mark></p></center>
 
-Variables:
+<center><p>**Harvest:**</p></center>
 
+<center><p><mark>$H_t = qX_tE_t$</mark></p></center>
 
-# Population growth rates
+<center><p>**Revenue = Price $\times$ Harvest $-$ Cost:**</p></center>
 
-The variables included in this model are...
+<center><p><mark>$\pi_t = p \times H_t - c$</mark></p></center>
+*where,*<br>
 
-* X0 = initial population size
-* r = intrinsic growth rate
-* K = Carrying capacity
+- *$X_0$ = initial population size*<br>
 
-with the equation 
+- *$r$ = intrinsic growth rate*<br>
 
-X(t+1) = X(t) + rX(t)(1-r/K).
+- *$K$ = carrying capacity*<br>
 
-We can add in harvest, where harvest is dependent on variables:
+- *$q$ = catchability coefficient*<br>
 
-* q = catchability coefficient
-* E = fishing effort
+- *$E$ = fishing effort*<br>
 
-by subtracting the harvest from the stock in each period.
+- *$p$ = price of 1 unit of fish*<br>
 
-We can then calculate revenue, with the additional variables 
+- *$\pi$ = revenue* <br>
 
-* p = price of 1 unit of fish
+- *$c$ = cost*<br>
 
-where the revenue is the price * harvest.
+<br>
 
-```{r}
+### Check Our Model for Single Species
+
+```{r, echo=FALSE}
 stock_size_fx <- function(r = 0.1, K = 1, X0 = 0.1, years = 100, q = 0.01, E = 1, p = 1){
  
   ## Stock size ##
@@ -87,7 +94,7 @@ test <- stock_size_fx(0.1, 1, 0.1, 100, 0.01, 1, 1)
 plot(test)
 ```
 
-##### Great, this works for a single species. Can we include this for multiple species?
+**Great, this works for a single species. Can we include this for multiple species? **
 
 We will need to define parameters for each of these species. We can do this by creating a list of:
 
@@ -95,7 +102,7 @@ We will need to define parameters for each of these species. We can do this by c
 
 Then, we can write a function that allows us to plug these parameters in as a list of values, as many times as we want.
 
-```{r}
+```{r, echo=FALSE}
 # We first need to define species parameters 
 params1 = list(0.1, 1, 0.1, 100, 0.01, 1, 1)
 params2 = list(0.1, 5, 0.1, 100, 0.01, 1, 1)
@@ -120,3 +127,128 @@ ms_test <- multi_speciesfx(params1, params2)
 
 ```
 
+<br>
+
+### Maxmize Revenue
+
+1. Imagine a *Species-Technology Catchability Coefficient Matrix*, and the cost and effort for each technology are given
+
+```{r}
+# create a catchability coefficient matrix for species 1-4 and technology 1-10
+
+# First, set seed to ensure we have the same result 
+set.seed(666)
+
+# set the number of species and technologies
+species_num <- 4
+tech_num <- 10
+
+# randomly generate catchability coefficient 
+species_tech_matrix <- data.frame(matrix(runif(species_num*tech_num, max = 0.01, min = 0), nrow = tech_num, ncol = species_num))
+colnames(species_tech_matrix) <- c("species_1",
+                               "species_2",
+                               "species_3",
+                               "species_4")
+row.names(species_tech_matrix)<-c("tech_1",
+                             "tech_2",
+                             "tech_3",
+                             "tech_4",
+                             "tech_5",
+                             "tech_6",
+                             "tech_7",
+                             "tech_8",
+                             "tech_9",
+                             "tech_10")
+
+```
+
+```{r}
+# Addin cost and effort for each technology. 
+
+
+# randomly generate the cost, then append the cost to our catchability dataframe
+species_tech_matrix$cost <- runif(tech_num, min = 0.2, max = 8)
+
+
+# randomly generate the effort ,then append the effort to our catchability dataframe
+species_tech_matrix$effort <- runif(tech_num, min = 0.1, max = 6)
+```
+
+```{r}
+# print the catchability table in a nice formet 
+matrix_table = kbl(species_tech_matrix, caption = "Catchability Coefficient Matrix") %>% 
+  kable_classic(full_width = F, html_font = "Cambria")
+matrix_table
+```
+
+<br>
+
+2. Calculate the stock sizes for each of the 4 species for a period of 50 years. 
+```{r}
+# set the number of years we want to model the stock dynamic 
+year = 50
+
+# set the parameters for species 1-4:
+r = c(0.2, 0.1, 0.4,0.18)
+K = c(2, 1, 5, 2.6)
+X0 = c(0.5, 0.3, 0.2, 0.33)
+
+```
+
+```{r}
+# write a function to calculate the stock dynamic
+stock_dynamic <- function(species_index, 
+                          year, 
+                          r, 
+                          K, 
+                          X0, 
+                          catchability){
+  
+  stock= NULL
+  stock=append(stock, X0)
+  
+  for( i in 2:50){
+  # apply the first equation in the "Our Model" section
+  X = stock[i-1]+r*stock[i-1]*(1-stock[i-1]/K) - sum(species_tech_matrix[species_index]*species_tech_matrix$effort)*stock[i-1] 
+  
+  stock=append(stock, X)
+  
+  }
+  return(stock)
+}
+```
+
+```{r}
+# use the function above to simulate the stock dynamics for the 4 species
+simulated_stock_dynamic = NULL
+
+for(i in 1:length(r)){
+  stock = stock_dynamic(species_index = i, 
+                        year = 50, 
+                        r = r[i], 
+                        K = K[i], 
+                        X0 = X0[i], 
+                        catchability = species_tech_matrix)
+  
+  simulated_stock_dynamic = cbind(simulated_stock_dynamic, stock)
+  
+}
+
+```
+
+```{r}
+# turn the simulated result into a dataframe
+simulated_stock_dynamic <- data.frame(simulated_stock_dynamic)
+
+# create the column names for the simulated result
+stock_col_name <-  paste("stock_", 1:length(r), sep = "")
+colnames(simulated_stock_dynamic) <- stock_col_name
+```
+
+
+*Assumptions:*<br>
+*1. The catchability coefficient, cost, and effort are randomly generated*<br>
+*2. The catchability coefficient are uniformly distributed with min = 0, and max = 0.3*<br>
+*3. The cost are uniformly distributed with min = 3, and max = 15*<br>
+*4. The effort are uniformly distributed with min = 2, and max = 12*<br>
+*5. The cost and effort do not change with respect to the size of the stock*<br>
