@@ -131,34 +131,51 @@ ms_test <- multi_speciesfx(params1, params2)
 
 ### Maxmize Revenue
 
-1. Imagine a *Species-Technology Catchability Coefficient Matrix*, and the cost and effort for each technology are given
-
 ```{r}
-# create a catchability coefficient matrix for species 1-4 and technology 1-10
+# To maxmize the revenue, we need to create a catchability coefficient matrix first. 
 
 # First, set seed to ensure we have the same result 
 set.seed(666)
+
 
 # set the number of species and technologies
 species_num <- 4
 tech_num <- 10
 
-# randomly generate catchability coefficient 
-species_tech_matrix <- data.frame(matrix(runif(species_num*tech_num, max = 0.01, min = 0), nrow = tech_num, ncol = species_num))
-colnames(species_tech_matrix) <- c("species_1",
-                               "species_2",
-                               "species_3",
-                               "species_4")
-row.names(species_tech_matrix)<-c("tech_1",
-                             "tech_2",
-                             "tech_3",
-                             "tech_4",
-                             "tech_5",
-                             "tech_6",
-                             "tech_7",
-                             "tech_8",
-                             "tech_9",
-                             "tech_10")
+
+# set the number of years we want to model the stock dynamic 
+year = 50
+
+
+# set parameters for variables in the "Our Model" section
+X0 = runif(species_num, max = 1, min = 0.1)
+
+r = runif(species_num, max = 0.8, min = 0.1)
+
+K = runif(species_num, max = 5, min = 1)
+
+p = runif(species_num, max = 350, min = 50)
+
+q = runif(species_num*tech_num, max = 0.01, min = 0)
+
+c = runif(tech_num, min = 0.2, max = 8)
+
+E = runif(tech_num, min = 0.1, max = 6)
+
+```
+
+1. Imagine a *Species-Technology Catchability Coefficient Matrix*, and the cost and effort for each technology are given. Here, we create a model for `r species_num` species and `r tech_num` technologies.
+
+```{r}
+# randomly generate q (catchability coefficient) to the matrix
+species_tech_matrix <- data.frame(matrix(q, nrow = tech_num, ncol = species_num))
+
+# assign column and row names to the matrix
+matrix_col_name <-  paste("species_", 1:species_num, sep = "")
+colnames(species_tech_matrix) <- matrix_col_name
+
+matrix_row_name <-  paste("tech_", 1:tech_num, sep = "")
+rownames(species_tech_matrix) <- matrix_row_name
 
 ```
 
@@ -167,11 +184,11 @@ row.names(species_tech_matrix)<-c("tech_1",
 
 
 # randomly generate the cost, then append the cost to our catchability dataframe
-species_tech_matrix$cost <- runif(tech_num, min = 0.2, max = 8)
+species_tech_matrix$cost <- c
 
 
 # randomly generate the effort ,then append the effort to our catchability dataframe
-species_tech_matrix$effort <- runif(tech_num, min = 0.1, max = 6)
+species_tech_matrix$effort <- E
 ```
 
 ```{r}
@@ -183,17 +200,7 @@ matrix_table
 
 <br>
 
-2. Calculate the stock sizes for each of the 4 species for a period of 50 years. 
-```{r}
-# set the number of years we want to model the stock dynamic 
-year = 50
-
-# set the parameters for species 1-4:
-r = c(0.2, 0.1, 0.4,0.18)
-K = c(2, 1, 5, 2.6)
-X0 = c(0.5, 0.3, 0.2, 0.33)
-
-```
+2. Simulate the stock sizes for each of the `r species_num` species and `r tech_num` technologies for a period of `r year` years. Here are the first and last 5 lines of the simulated result. 
 
 ```{r}
 # write a function to calculate the stock dynamic
@@ -201,13 +208,13 @@ stock_dynamic <- function(species_index,
                           year, 
                           r, 
                           K, 
-                          X0, 
-                          catchability){
+                          X0){
   
   stock= NULL
   stock=append(stock, X0)
   
-  for( i in 2:50){
+  for( i in 2:year){
+    
   # apply the first equation in the "Our Model" section
   X = stock[i-1]+r*stock[i-1]*(1-stock[i-1]/K) - sum(species_tech_matrix[species_index]*species_tech_matrix$effort)*stock[i-1] 
   
@@ -224,11 +231,10 @@ simulated_stock_dynamic = NULL
 
 for(i in 1:length(r)){
   stock = stock_dynamic(species_index = i, 
-                        year = 50, 
+                        year = year, 
                         r = r[i], 
                         K = K[i], 
-                        X0 = X0[i], 
-                        catchability = species_tech_matrix)
+                        X0 = X0[i])
   
   simulated_stock_dynamic = cbind(simulated_stock_dynamic, stock)
   
@@ -240,15 +246,119 @@ for(i in 1:length(r)){
 # turn the simulated result into a dataframe
 simulated_stock_dynamic <- data.frame(simulated_stock_dynamic)
 
-# create the column names for the simulated result
+# create the column names and row names for the simulated result
 stock_col_name <-  paste("stock_", 1:length(r), sep = "")
+
+stock_row_name <-  paste("year_", 1:year, sep = "")
+
 colnames(simulated_stock_dynamic) <- stock_col_name
+
+rownames(simulated_stock_dynamic) <- stock_row_name
+```
+
+```{r}
+# print the first and last 5 lines of the stock dynamic dataframe in a nice formet 
+stock_table = kbl(simulated_stock_dynamic[c(1:5, (year-4):year),], caption = "Stock Dynamic") %>% 
+  kable_classic(full_width = F, html_font = "Cambria")
+stock_table
+```
+
+<br>
+
+3. Simulate the harvest for each species 
+```{r}
+#calculate the harvest for the each of the species
+harvest = NULL
+
+for(i in 1:species_num){
+  # apply the second equation in the "Our Model" section
+  X = sum(species_tech_matrix[i]*species_tech_matrix$effort)*simulated_stock_dynamic[i]
+
+  harvest=c(harvest, X)
+
+}
+
+harvest = data.frame(harvest)
 ```
 
 
+```{r}
+# print the first and last 5 lines of the harvest dataframe in a nice formet 
+harvest_table = kbl(harvest[c(1:5, (year-4):year),], caption = "Harvest for each species") %>% 
+  kable_classic(full_width = F, html_font = "Cambria")
+
+harvest_table
+```
+
+<br>
+
+
+4. Simulate the profit generated by each technology
+```{r}
+# calculate the cost for each technology 
+cost_tech <- species_tech_matrix$cost * species_tech_matrix$effort
+```
+
+
+```{r}
+# write a function to calculate the profit for each technology
+profit_tech <- function(tech_index){
+  
+  # apply the third equation in "Our Model" section
+  profit_tech_species = species_tech_matrix[tech_index, 1]*species_tech_matrix$effort[tech_index]*simulated_stock_dynamic[1]*p[1]
+  
+  for(j in 2:species_num){
+    x = species_tech_matrix[tech_index, j]*species_tech_matrix$effort[tech_index]*simulated_stock_dynamic[j]*p[j]
+    profit_tech_species <- append(profit_tech_species,x)
+  }
+  profit_tech_species = data.frame(profit_tech_species)
+  profit_tech = rowSums(profit_tech_species) - cost_tech[tech_index]
+  return(profit_tech)
+}
+
+```
+
+```{r}
+# apply the function above to calculate the profit for all the technologies
+profit = NULL
+
+for(i in 1:tech_num){
+  profit = cbind(profit, profit_tech(i))
+}
+
+profit = data.frame(profit)
+
+
+# create the column names and row names for the profit dataframe
+profit_col_name <-  paste("tech_", 1:tech_num, sep = "")
+
+profit_row_name <-  paste("year_", 1:year, sep = "")
+
+colnames(profit) <- profit_col_name
+
+rownames(profit) <- profit_row_name
+
+# add the total profit for each year 
+total_profit <- rowSums(profit)
+profit$total_profit <- total_profit
+```
+
+```{r}
+# print the first and last 5 lines of the profit dataframe in a nice formet 
+profit_table = kbl(profit[c(1:5, (year-4):year),], caption = "Profit for each technology") %>% 
+  kable_classic(full_width = F, html_font = "Cambria")
+
+profit_table
+```
+
+<br>
+<br>
+<br>
 *Assumptions:*<br>
-*1. The catchability coefficient, cost, and effort are randomly generated*<br>
-*2. The catchability coefficient are uniformly distributed with min = 0, and max = 0.3*<br>
-*3. The cost are uniformly distributed with min = 3, and max = 15*<br>
-*4. The effort are uniformly distributed with min = 2, and max = 12*<br>
-*5. The cost and effort do not change with respect to the size of the stock*<br>
+*1. $X_0$, $r$, $K$, $q$, $E$, $p$, $c$ are randomly generated*<br>
+*2. $X_0$ is uniformly distributed with min = 0.1, and max = 1*<br>
+*3. $r$ is uniformly distributed with min = 0.1, and max = 0.8*<br>
+*4. $K$ is uniformly distributed with min = 1, and max = 5*<br>
+*5. $q$ is uniformly distributed with min = 0, and max = 0.01*<br>
+*6. $c$ is uniformly distributed with min = 0.2, and max = 8*<br>
+*7. $E$ is uniformly distributed with min = 0.1, and max = 6*<br>
