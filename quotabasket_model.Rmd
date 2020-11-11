@@ -10,6 +10,8 @@ knitr::opts_chunk$set(echo = FALSE)
 library(tidyverse)
 library(Matrix)
 library(kableExtra)
+library(lpSolve)
+library(lpSolveAPI)
 ```
 
 
@@ -22,21 +24,26 @@ library(kableExtra)
 
 ### Our Model: Population Growth & Profit 
 <br>
-<center><p>**Stock Dynamic**</p></center>
 
-<center><p><mark>$X_{t+1} = X_t + rX_t\times (1-{X_t\over K}) - H_t$</mark></p></center>
+1. **Stock Dynamic**: biomass of species $j$ at time $t$
 
-<center><p>**Harvest:**</p></center>
+<center><p><mark>$X_{j,t+1} = X_{j,t} + rX_{j,t}\times (1-{X_{j,t}\over K_j}) - H_{j,t}$</mark></p></center>
 
-<center><p><mark>$H_t = qX_tE_t$</mark></p></center>
+2. **Harvest**: Harvest of species $j$ at time $t$ ; Harvest of technology $i$ at time $t$
 
-<center><p>**Profit**</p></center>
+$$
+\begin{cases}
+H_{j,t} = \sum_{i=1}^{techNum} q_{i,j}E_iX_{j,t}\\[2ex]
+H_{i,t} = \sum_{j=1}^{speciesNum} q_{i,j}E_iX_{j,t}
+\end{cases}
+$$
 
-<center><p><mark>$\pi_t = p \times H_t - c$</mark></p></center>
+3. **Profit**: Profit of technology $i$ at time $t$
+<center><p><mark>$\pi_{i,t} = \sum_{j=1}^{speciesNum} p_j \times H_{i,j,t} - c_iE_i$</mark></p></center>
 
-<center><p>**Present Value of Net Benefit (PVNB)**</p></center>
+4. **Present Value of Net Benefit (PVNB)**: sum of the present value of profits of all technologies for the whole study period
 
-<center><p><mark>$\sum_{t=0}^{year}[({1\over 1+\delta})^t \times \pi_t]$</mark></p></center>
+<center><p><mark>$PVNB=\sum_{t=1}^{year}\sum_{i=1}^{techNum} [({1\over 1+\delta})^t \times \pi_{i,t}]$</mark></p></center>
 *where,*<br>
 
 - *$X_0$ = initial population size*<br>
@@ -133,7 +140,7 @@ ms_test <- multi_speciesfx(params1, params2)
 
 <br>
 
-### Maxmize Profit
+### Maxmize Profit for a multi-species and multi-technoligy model 
 
 ```{r}
 # To maxmize profit, we need to create a catchability coefficient matrix first. 
@@ -200,7 +207,7 @@ matrix_table
 
 <br>
 
-2. Simulate the stock sizes for each of the `r species_num` species and `r tech_num` technologies for a period of `r year` years. Here are the first and last 5 lines of the simulated result. 
+2. Simulate the stock sizes for each of the `r species_num` species and `r tech_num` technologies over a period of `r year` years. Here are the first and last 5 lines of the simulated result. 
 
 ```{r}
 # write a function to calculate the stock dynamic
@@ -248,11 +255,9 @@ simulated_stock_dynamic <- data.frame(simulated_stock_dynamic)
 
 # create the column names and row names for the simulated result
 stock_col_name <-  paste("stock_", 1:length(r), sep = "")
-
 stock_row_name <-  paste("year_", 1:year, sep = "")
 
 colnames(simulated_stock_dynamic) <- stock_col_name
-
 rownames(simulated_stock_dynamic) <- stock_row_name
 ```
 
@@ -265,29 +270,73 @@ stock_table
 
 <br>
 
-3. Simulate the harvest for each species 
+3. Simulate the harvest <br>
+
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;3.1 Simulate the harvest for each species
 ```{r}
 #calculate the harvest for the each of the species
-harvest = NULL
+harvest_species = NULL
 
 for(i in 1:species_num){
-  # apply the second equation in the "Our Model" section
+  # apply the 2.1 equation in the "Our Model" section
   X = sum(species_tech_matrix[i]*species_tech_matrix$effort)*simulated_stock_dynamic[i]
 
-  harvest=c(harvest, X)
+  harvest_species=c(harvest_species, X)
 
 }
 
-harvest = data.frame(harvest)
+harvest_species = data.frame(harvest_species)
 ```
 
-
 ```{r}
-# print the first and last 5 lines of the harvest dataframe in a nice formet 
-harvest_table = kbl(harvest[c(1:5, (year-4):year),], caption = "Harvest for each species") %>% 
+# print the first and last 5 lines of the harvest_species dataframe in a nice formet 
+harvest_species_table = kbl(harvest_species[c(1:5, (year-4):year),], caption = "Harvest for each species") %>% 
   kable_classic(full_width = F, html_font = "Cambria")
 
-harvest_table
+harvest_species_table
+```
+<br>
+
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;3.2 Simulate the harvest for each technology
+```{r}
+# write a function to calculate the harvest of one technology
+one_tech_harvest <- function(tech_index){
+  h_spe_tech = NULL
+  # calculate the harvest for 1 species from 1 tech over time period, then sum the harvest for all species of 1 tech
+  for(i in 1:species_num){
+    x = species_tech_matrix[tech_index,i]*species_tech_matrix$effort[tech_index]*simulated_stock_dynamic[i]
+    h_spe_tech = c(h_spe_tech, x)
+  }
+  
+  return(rowSums(data.frame(h_spe_tech)))
+}
+```
+
+```{r}
+# calculate the harvest of all technology
+harvest_tech <- NULL
+
+for(i in 1:tech_num){
+  harvest_tech <- cbind(harvest_tech, one_tech_harvest(i))
+}
+
+
+harvest_tech <- data.frame(harvest_tech)
+
+# assign column and row names 
+harvest_tech_col_name <-  paste("tech_", 1:tech_num, sep = "")
+harvest_tech_row_name <-  paste("year_", 1:year, sep = "")
+
+colnames(harvest_tech) <- harvest_tech_col_name
+rownames(harvest_tech) <- harvest_tech_row_name
+```
+
+```{r}
+# print the first and last 5 lines of the harvest_tech dataframe in a nice formet 
+harvest_tech_table = kbl(harvest_tech[c(1:5, (year-4):year),c(1:3, (tech_num-2):tech_num)], caption = "Harvest for each technology") %>% 
+  kable_classic(full_width = F, html_font = "Cambria")
+
+harvest_tech_table
 ```
 
 <br>
@@ -296,7 +345,7 @@ harvest_table
 4. Simulate the profit generated by each technology and calculate the PVNB
 ```{r}
 # calculate the cost for each technology 
-cost_tech <- species_tech_matrix$cost * species_tech_matrix$effort
+cost_tech <- species_tech_matrix$cost*species_tech_matrix$effort
 ```
 
 
@@ -339,13 +388,13 @@ colnames(profit) <- profit_col_name
 rownames(profit) <- profit_row_name
 
 profit <- data.frame(profit)
-
-# add the total profit for each year 
-total_profit <- rowSums(profit)
-profit$total_profit <- total_profit
 ```
 
 ```{r}
+# add a column of total profit for each year 
+total_profit <- rowSums(profit)
+profit$total_profit <- total_profit
+
 # calculate the present value of the profit generated by each technology each year
 pv = NULL
 
@@ -359,7 +408,7 @@ profit$present_value <- pv
 
 ```{r}
 # print the first and last 5 lines of the profit dataframe in a nice formet 
-profit_table = kbl(profit[c(1:5, (year-4):year),], caption = "Profit for each technology") %>% 
+profit_table = kbl(profit[c(1:5, (year-4):year), c(1:3, (tech_num-2):ncol(profit))], caption = "Profit for each technology") %>% 
   kable_classic(full_width = F, html_font = "Cambria")
 
 profit_table
@@ -367,13 +416,30 @@ profit_table
 
 ```{r}
 # sum up the present values to get the PVNB
-pvnb = sum(pv)
+pvnb <- sum(profit$present_value)
 ```
+
+
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;**The calculated PVNB is `r pvnb`.**
+
 <br>
 
-    The calculated PVNB is `r pvnb`.
-    <br>
 
+5. Use linear programming to maxmize PVNB by changing fishing effort
+```{r, include=FALSE}
+# use linear programming 
+
+# set the number of decision variables 
+lp_model <- make.lp(0, tech_num)
+
+#set the objective function to maximization
+lp.control(lp_model, sense="max")
+```
+
+
+```{r, include=FALSE}
+lp_model
+```
 
 <br>
 <br>

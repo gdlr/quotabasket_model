@@ -650,45 +650,36 @@ This is a multi-species fishery model that allows us to reflect how quota basket
 <p><br></p>
 <div id="our-model-population-growth-profit" class="section level3">
 <h3>Our Model: Population Growth &amp; Profit</h3>
-<br>
+<p><br></p>
+<ol style="list-style-type: decimal">
+<li><strong>Stock Dynamic</strong>: biomass of species <span class="math inline">\(j\)</span> at time <span class="math inline">\(t\)</span></li>
+</ol>
 <center>
 <p>
-<strong>Stock Dynamic</strong>
+<mark><span class="math inline">\(X_{j,t+1} = X_{j,t} + rX_{j,t}\times (1-{X_{j,t}\over K_j}) - H_{j,t}\)</span></mark>
 </p>
 </center>
+<ol start="2" style="list-style-type: decimal">
+<li><strong>Harvest</strong>: Harvest of species <span class="math inline">\(j\)</span> at time <span class="math inline">\(t\)</span> ; Harvest of technology <span class="math inline">\(i\)</span> at time <span class="math inline">\(t\)</span></li>
+</ol>
+<p><span class="math display">\[
+\begin{cases}
+H_{j,t} = \sum_{i=1}^{techNum} q_{i,j}E_iX_{j,t}\\[2ex]
+H_{i,t} = \sum_{j=1}^{speciesNum} q_{i,j}E_iX_{j,t}
+\end{cases}
+\]</span></p>
+<ol start="3" style="list-style-type: decimal">
+<li><strong>Profit</strong>: Profit of technology <span class="math inline">\(i\)</span> at time <span class="math inline">\(t\)</span>
 <center>
 <p>
-<mark><span class="math inline">\(X_{t+1} = X_t + rX_t\times (1-{X_t\over K}) - H_t\)</span></mark>
+<mark><span class="math inline">\(\pi_{i,t} = \sum_{j=1}^{speciesNum} p_j \times H_{i,j,t} - c_iE_i\)</span></mark>
 </p>
-</center>
+</center></li>
+<li><strong>Present Value of Net Benefit (PVNB)</strong>: sum of the present value of profits of all technologies for the whole study period</li>
+</ol>
 <center>
 <p>
-<strong>Harvest:</strong>
-</p>
-</center>
-<center>
-<p>
-<mark><span class="math inline">\(H_t = qX_tE_t\)</span></mark>
-</p>
-</center>
-<center>
-<p>
-<strong>Profit</strong>
-</p>
-</center>
-<center>
-<p>
-<mark><span class="math inline">\(\pi_t = p \times H_t - c\)</span></mark>
-</p>
-</center>
-<center>
-<p>
-<strong>Present Value of Net Benefit (PVNB)</strong>
-</p>
-</center>
-<center>
-<p>
-<mark><span class="math inline">\(\sum_{t=0}^{year}[({1\over 1+\delta})^t \times \pi_t]\)</span></mark>
+<mark><span class="math inline">\(PVNB=\sum_{t=1}^{year}\sum_{i=1}^{techNum} [({1\over 1+\delta})^t \times \pi_{i,t}]\)</span></mark>
 </p>
 </center>
 <p><em>where,</em><br></p>
@@ -715,8 +706,8 @@ This is a multi-species fishery model that allows us to reflect how quota basket
 </ol>
 <p><br></p>
 </div>
-<div id="maxmize-profit" class="section level3">
-<h3>Maxmize Profit</h3>
+<div id="maxmize-profit-for-a-multi-species-and-multi-technoligy-model" class="section level3">
+<h3>Maxmize Profit for a multi-species and multi-technoligy model</h3>
 <ol style="list-style-type: decimal">
 <li>Imagine the <em>Species-Technology Catchability Coefficient Matrix</em>, and the cost and effort for each technology are given. Here, we create a model for 4 species and 10 technologies.</li>
 </ol>
@@ -983,7 +974,7 @@ tech_10
 </table>
 <p><br></p>
 <ol start="2" style="list-style-type: decimal">
-<li>Simulate the stock sizes for each of the 4 species and 10 technologies for a period of 50 years. Here are the first and last 5 lines of the simulated result.</li>
+<li>Simulate the stock sizes for each of the 4 species and 10 technologies over a period of 50 years. Here are the first and last 5 lines of the simulated result.</li>
 </ol>
 <table class=" lightable-classic" style="font-family: Cambria; width: auto !important; margin-left: auto; margin-right: auto;">
 <caption>
@@ -1182,8 +1173,9 @@ year_50
 </table>
 <p><br></p>
 <ol start="3" style="list-style-type: decimal">
-<li>Simulate the harvest for each species</li>
+<li>Simulate the harvest <br></li>
 </ol>
+<p>           3.1 Simulate the harvest for each species</p>
 <table class=" lightable-classic" style="font-family: Cambria; width: auto !important; margin-left: auto; margin-right: auto;">
 <caption>
 Harvest for each species
@@ -1380,6 +1372,269 @@ stock_4
 </tbody>
 </table>
 <p><br></p>
+<p>           3.2 Simulate the harvest for each technology</p>
+<table class=" lightable-classic" style="font-family: Cambria; width: auto !important; margin-left: auto; margin-right: auto;">
+<caption>
+Harvest for each technology
+</caption>
+<thead>
+<tr>
+<th style="text-align:left;">
+</th>
+<th style="text-align:right;">
+tech_1
+</th>
+<th style="text-align:right;">
+tech_2
+</th>
+<th style="text-align:right;">
+tech_3
+</th>
+<th style="text-align:right;">
+tech_8
+</th>
+<th style="text-align:right;">
+tech_9
+</th>
+<th style="text-align:right;">
+tech_10
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+year_1
+</td>
+<td style="text-align:right;">
+0.0070425
+</td>
+<td style="text-align:right;">
+0.1062931
+</td>
+<td style="text-align:right;">
+0.0520189
+</td>
+<td style="text-align:right;">
+0.0751156
+</td>
+<td style="text-align:right;">
+0.0086575
+</td>
+<td style="text-align:right;">
+0.0605541
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+year_2
+</td>
+<td style="text-align:right;">
+0.0089964
+</td>
+<td style="text-align:right;">
+0.1253745
+</td>
+<td style="text-align:right;">
+0.0635249
+</td>
+<td style="text-align:right;">
+0.0972053
+</td>
+<td style="text-align:right;">
+0.0103306
+</td>
+<td style="text-align:right;">
+0.0758476
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+year_3
+</td>
+<td style="text-align:right;">
+0.0111652
+</td>
+<td style="text-align:right;">
+0.1481185
+</td>
+<td style="text-align:right;">
+0.0769020
+</td>
+<td style="text-align:right;">
+0.1220424
+</td>
+<td style="text-align:right;">
+0.0123332
+</td>
+<td style="text-align:right;">
+0.0932791
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+year_4
+</td>
+<td style="text-align:right;">
+0.0132817
+</td>
+<td style="text-align:right;">
+0.1713043
+</td>
+<td style="text-align:right;">
+0.0904150
+</td>
+<td style="text-align:right;">
+0.1466560
+</td>
+<td style="text-align:right;">
+0.0143773
+</td>
+<td style="text-align:right;">
+0.1107355
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+year_5
+</td>
+<td style="text-align:right;">
+0.0150603
+</td>
+<td style="text-align:right;">
+0.1915824
+</td>
+<td style="text-align:right;">
+0.1022113
+</td>
+<td style="text-align:right;">
+0.1677996
+</td>
+<td style="text-align:right;">
+0.0161606
+</td>
+<td style="text-align:right;">
+0.1259259
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+year_46
+</td>
+<td style="text-align:right;">
+0.0186914
+</td>
+<td style="text-align:right;">
+0.2365835
+</td>
+<td style="text-align:right;">
+0.1289310
+</td>
+<td style="text-align:right;">
+0.2140048
+</td>
+<td style="text-align:right;">
+0.0199000
+</td>
+<td style="text-align:right;">
+0.1611365
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+year_47
+</td>
+<td style="text-align:right;">
+0.0186914
+</td>
+<td style="text-align:right;">
+0.2365834
+</td>
+<td style="text-align:right;">
+0.1289310
+</td>
+<td style="text-align:right;">
+0.2140048
+</td>
+<td style="text-align:right;">
+0.0199000
+</td>
+<td style="text-align:right;">
+0.1611364
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+year_48
+</td>
+<td style="text-align:right;">
+0.0186914
+</td>
+<td style="text-align:right;">
+0.2365833
+</td>
+<td style="text-align:right;">
+0.1289309
+</td>
+<td style="text-align:right;">
+0.2140047
+</td>
+<td style="text-align:right;">
+0.0199000
+</td>
+<td style="text-align:right;">
+0.1611364
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+year_49
+</td>
+<td style="text-align:right;">
+0.0186914
+</td>
+<td style="text-align:right;">
+0.2365832
+</td>
+<td style="text-align:right;">
+0.1289309
+</td>
+<td style="text-align:right;">
+0.2140047
+</td>
+<td style="text-align:right;">
+0.0199000
+</td>
+<td style="text-align:right;">
+0.1611364
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+year_50
+</td>
+<td style="text-align:right;">
+0.0186914
+</td>
+<td style="text-align:right;">
+0.2365831
+</td>
+<td style="text-align:right;">
+0.1289309
+</td>
+<td style="text-align:right;">
+0.2140047
+</td>
+<td style="text-align:right;">
+0.0199000
+</td>
+<td style="text-align:right;">
+0.1611364
+</td>
+</tr>
+</tbody>
+</table>
+<p><br></p>
 <ol start="4" style="list-style-type: decimal">
 <li>Simulate the profit generated by each technology and calculate the PVNB</li>
 </ol>
@@ -1399,18 +1654,6 @@ tech_2
 </th>
 <th style="text-align:right;">
 tech_3
-</th>
-<th style="text-align:right;">
-tech_4
-</th>
-<th style="text-align:right;">
-tech_5
-</th>
-<th style="text-align:right;">
-tech_6
-</th>
-<th style="text-align:right;">
-tech_7
 </th>
 <th style="text-align:right;">
 tech_8
@@ -1444,18 +1687,6 @@ year_1
 6.037686
 </td>
 <td style="text-align:right;">
-13.69104
-</td>
-<td style="text-align:right;">
--17.49596
-</td>
-<td style="text-align:right;">
--10.016808
-</td>
-<td style="text-align:right;">
--6.2103819
-</td>
-<td style="text-align:right;">
 -12.3288548
 </td>
 <td style="text-align:right;">
@@ -1483,18 +1714,6 @@ year_2
 </td>
 <td style="text-align:right;">
 8.184284
-</td>
-<td style="text-align:right;">
-16.94695
-</td>
-<td style="text-align:right;">
--16.95173
-</td>
-<td style="text-align:right;">
--9.323767
-</td>
-<td style="text-align:right;">
--5.4625601
 </td>
 <td style="text-align:right;">
 -8.2240019
@@ -1526,18 +1745,6 @@ year_3
 10.604753
 </td>
 <td style="text-align:right;">
-20.58046
-</td>
-<td style="text-align:right;">
--16.22814
-</td>
-<td style="text-align:right;">
--8.512345
-</td>
-<td style="text-align:right;">
--4.6005823
-</td>
-<td style="text-align:right;">
 -3.6911312
 </td>
 <td style="text-align:right;">
@@ -1565,18 +1772,6 @@ year_4
 </td>
 <td style="text-align:right;">
 13.014500
-</td>
-<td style="text-align:right;">
-24.24412
-</td>
-<td style="text-align:right;">
--15.44370
-</td>
-<td style="text-align:right;">
--7.693742
-</td>
-<td style="text-align:right;">
--3.6822975
 </td>
 <td style="text-align:right;">
 0.7667674
@@ -1608,18 +1803,6 @@ year_5
 15.108497
 </td>
 <td style="text-align:right;">
-27.55986
-</td>
-<td style="text-align:right;">
--14.71644
-</td>
-<td style="text-align:right;">
--6.985207
-</td>
-<td style="text-align:right;">
--2.7838690
-</td>
-<td style="text-align:right;">
 4.6041217
 </td>
 <td style="text-align:right;">
@@ -1647,18 +1830,6 @@ year_46
 </td>
 <td style="text-align:right;">
 20.238302
-</td>
-<td style="text-align:right;">
-38.08037
-</td>
-<td style="text-align:right;">
--12.77615
-</td>
-<td style="text-align:right;">
--5.483718
-</td>
-<td style="text-align:right;">
-0.5348694
 </td>
 <td style="text-align:right;">
 13.9661720
@@ -1690,18 +1861,6 @@ year_47
 20.238301
 </td>
 <td style="text-align:right;">
-38.08037
-</td>
-<td style="text-align:right;">
--12.77616
-</td>
-<td style="text-align:right;">
--5.483721
-</td>
-<td style="text-align:right;">
-0.5348700
-</td>
-<td style="text-align:right;">
 13.9661780
 </td>
 <td style="text-align:right;">
@@ -1729,18 +1888,6 @@ year_48
 </td>
 <td style="text-align:right;">
 20.238300
-</td>
-<td style="text-align:right;">
-38.08038
-</td>
-<td style="text-align:right;">
--12.77617
-</td>
-<td style="text-align:right;">
--5.483724
-</td>
-<td style="text-align:right;">
-0.5348705
 </td>
 <td style="text-align:right;">
 13.9661823
@@ -1772,18 +1919,6 @@ year_49
 20.238299
 </td>
 <td style="text-align:right;">
-38.08038
-</td>
-<td style="text-align:right;">
--12.77618
-</td>
-<td style="text-align:right;">
--5.483726
-</td>
-<td style="text-align:right;">
-0.5348708
-</td>
-<td style="text-align:right;">
 13.9661854
 </td>
 <td style="text-align:right;">
@@ -1813,18 +1948,6 @@ year_50
 20.238298
 </td>
 <td style="text-align:right;">
-38.08038
-</td>
-<td style="text-align:right;">
--12.77618
-</td>
-<td style="text-align:right;">
--5.483727
-</td>
-<td style="text-align:right;">
-0.5348710
-</td>
-<td style="text-align:right;">
 13.9661876
 </td>
 <td style="text-align:right;">
@@ -1842,8 +1965,11 @@ year_50
 </tr>
 </tbody>
 </table>
+<p>          <strong>The calculated PVNB is 1038.333454.</strong></p>
 <p><br></p>
-<p>The calculated PVNB is 1038.333454. <br></p>
+<ol start="5" style="list-style-type: decimal">
+<li>Use linear programming to maxmize PVNB by changing fishing effort</li>
+</ol>
 <p><br> <br> <br> <em>Assumptions:</em><br> <em>1. We are interested in 4 species and 10 technologies in a period of 50 years</em><br> <em>2. <span class="math inline">\(X_0\)</span>, <span class="math inline">\(r\)</span>, <span class="math inline">\(K\)</span>, <span class="math inline">\(q\)</span>, <span class="math inline">\(E\)</span>, <span class="math inline">\(p\)</span>, <span class="math inline">\(c\)</span> are randomly generated</em><br> <em>3. <span class="math inline">\(X_0\)</span> is uniformly distributed with min = 0.1, and max = 1</em><br> <em>4. <span class="math inline">\(r\)</span> is uniformly distributed with min = 0.1, and max = 0.8</em><br> <em>5. <span class="math inline">\(K\)</span> is uniformly distributed with min = 1, and max = 5</em><br> <em>6. <span class="math inline">\(q\)</span> is uniformly distributed with min = 0, and max = 0.01</em><br> <em>7. <span class="math inline">\(c\)</span> is uniformly distributed with min = 0.2, and max = 8</em><br> <em>8. <span class="math inline">\(E\)</span> is uniformly distributed with min = 0.1, and max = 6</em><br> <em>9. <span class="math inline">\(p\)</span> is uniformly distributed with min = 50, and max = 600</em><br> <em>9. <span class="math inline">\(\delta\)</span> is 0.05</em><br> <em>11. <span class="math inline">\(r\)</span>,<span class="math inline">\(K\)</span>,<span class="math inline">\(q\)</span>,<span class="math inline">\(E\)</span>,<span class="math inline">\(p\)</span>,<span class="math inline">\(c\)</span>,<span class="math inline">\(\delta\)</span> do not change with respect to time</em><br></p>
 </div>
 
