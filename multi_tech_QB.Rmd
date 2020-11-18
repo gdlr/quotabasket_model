@@ -1,0 +1,118 @@
+---
+title: "Multi_Efforts"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+
+# Packages
+library(tidyverse)
+library(Matrix)
+library(kableExtra)
+library(ggplot2)
+library(plotly)
+library(lpSolve)
+library(lpSolveAPI)
+```
+
+```{r}
+source("stock_dynamic.R")
+source("simulated_stock_dynamic.R")
+source("harvest_species.R")
+source("harvest_tech.R")
+source("one_tech_harvest.R")
+source("profit_tech.R")
+source("profit.R")
+source("pvnb.R")
+```
+
+```{r} 
+# First, set seed to ensure we have the same result 
+set.seed(666)
+
+
+# set the number of species and technologies we want to study
+species_num <- 4
+tech_num <- 4
+
+
+# set the number of years we want to model the stock dynamic 
+year = 5
+
+# set the discount rate
+delta = 0.05
+rho = 1/(1+delta)
+
+
+# set values for variables in the "Our Model" section
+# set parameters
+species <- c(1:species_num)
+parameter <- data.frame(species)
+parameter$r <- c(1,0.5,0.4,0.9)
+parameter$K <- c(1,1.2,2,3)
+parameter$X0 <- c(0.5,0.6,1,1)
+parameter$p <- c(200,200,200,200)
+parameter$c <- c(1,1,1,1)
+parameter$delta <- c(0.05,0.05,0.05,0.05)
+parameter$rho <- 1/(1+parameter$delta)
+
+# set catchability coefficient 
+coefficient <- c(0.05,0.05,0.07,0.07,
+                 0.04,0.05,0.05,0.05,
+                 0,0.011,0.05,0.05,
+                 0,0.01,0.02,0.05)
+
+species_tech_matrix <- data.frame(matrix(coefficient, nrow = tech_num, ncol = species_num))
+
+# set effort for each tech 
+E <- c(0.5,0.5,0.05,0.05)
+
+# set cost for each tech
+C <- c(1,1,2,2)
+```
+
+```{r}
+# generate map data for each combination of E1 E2 E3 and E4
+E_1 <- seq(0,8,1)
+E_2 <- seq(0,8,1)
+E_3 <- seq(0,8,1)
+E_4 <- seq(0,8,1)
+
+E1 <- rep(E_1, length(E_1)^length(E)/length(E_1))
+map_data <- data.frame(E1)
+map_data$E2 <- rep(E_2, length(E_1)^length(E)/(length(E_1)^2), each = length(E_1))
+map_data$E3 <- rep(E_3, length(E_1)^length(E)/(length(E_1)^3), each = (length(E_1)^2))
+map_data$E4 <- rep(E_4, length(E_1)^length(E)/(length(E_1)^4), each = (length(E_1)^3))
+```
+
+```{r}
+pvnb_vec <- NULL
+for(i in 1:length(E_1)){
+  for(j in 1:length(E_2)){
+    for(k in 1:length(E_3)){
+      for(l in 1:length(E_4)){
+        E_new <- c(E_1[i], E_2[j], E_3[k], E_4[l])
+        simul_stock_dynamic <- data.frame(simulated_stock_dynamic(E_new))
+        pro <- data.frame(profit(E_new))
+        total_profit <- rowSums(pro)
+        pro$total_profit <- total_profit
+        PVNB <- pvnb(pro)
+        pvnb_vec <- append(pvnb_vec,PVNB)
+      }
+    }
+  }
+}
+```
+
+```{r}
+map_data$pvnb <- pvnb_vec
+map_data <- map_data %>% 
+  arrange(-pvnb)
+
+PVNB_table = kbl(map_data[c(1:10),], caption = "Top 10 PVNB under 4 types of fishing efforts") %>%
+  kable_classic(full_width = F, html_font = "Cambria")
+
+PVNB_table
+```
+

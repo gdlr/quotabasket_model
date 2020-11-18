@@ -197,8 +197,8 @@ pvnb_1 <- pvnb(pro)
 7. Find the Best Effort
 ```{r}
 # we set the range of effort to be [0,1] apart by 0.1
-E_1 <- seq(0,1,0.1)
-E_2 <- seq(0,1,0.1)
+E_1 <- seq(0,8,0.5)
+E_2 <- seq(0,8,0.5)
 
 # set a matrix of zeros to hold places of PVNBs under each combination of E1 and E2
 pvnb_matrix <- matrix(rep(0, length(E_1)*length(E_2)), length(E_1), length(E_2))
@@ -246,5 +246,9 @@ pvnb_grid <- ggplot()+
               y = E2,
               fill= pvnb))
 pvnb_grid
+```
+
+```{r}
+
 ```
 
