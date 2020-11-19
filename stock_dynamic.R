@@ -1,16 +1,13 @@
-# write a function to calculate the stock dynamic
-stock_dynamic <- function(species_index, E){
+stock_dynamic <- function(E){
   
-  stock= NULL
-  stock=append(stock, parameter$X0[species_index])
-  
-  for( i in 2:year){
-    
-    # apply the first equation in the "Our Model" section
-    X = stock[i-1]+parameter$r[species_index]*stock[i-1]*(1-stock[i-1]/parameter$K[species_index]) - sum(species_tech_matrix[species_index]*E)*stock[i-1]
-    
-    stock=append(stock, X)
-    
+  catch_by_spe <- colSums(q_matrix*E)
+  last_stock <- parameter$X0
+  stock_value <- parameter$X0
+  for(i in 1:year){
+    tmp_stock = last_stock+parameter$r*last_stock*(1-last_stock/parameter$K)-catch_by_spe*last_stock
+    stock_value <- append(stock_value, tmp_stock)
+    last_stock <- tmp_stock
   }
-  return(stock)
+  stock_value <- matrix(stock_value, ncol=species_num, nrow=(year+1), byrow=TRUE)
+  return(stock_value)
 }

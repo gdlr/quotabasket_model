@@ -1,13 +1,10 @@
-# write a function to calculate the harvest for  each of the species
 harvest_species <- function(E){
-  
-  harvest_species = NULL
+  harvest <- NULL
+  catch_by_spe <- colSums(q_matrix*E)
+  stock <- stock_dynamic(E)
   for(i in 1:species_num){
-    # apply the 2.1 equation in the "Our Model" section
-    X = sum(species_tech_matrix[i]*E)*simul_stock_dynamic[i]
-    
-    harvest_species=c(harvest_species, X)
-    
+    harvest <- append(harvest, stock[,i]*catch_by_spe[i])
   }
-  return(harvest_species)
+  return(matrix(harvest,nrow=(year+1), ncol = species_num))
 }
+

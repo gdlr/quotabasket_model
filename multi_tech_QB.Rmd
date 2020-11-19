@@ -18,12 +18,9 @@ library(lpSolveAPI)
 
 ```{r}
 source("stock_dynamic.R")
-source("simulated_stock_dynamic.R")
 source("harvest_species.R")
 source("harvest_tech.R")
-source("one_tech_harvest.R")
 source("profit_tech.R")
-source("profit.R")
 source("pvnb.R")
 ```
 
@@ -63,7 +60,9 @@ coefficient <- c(0.05,0.05,0.07,0.07,
                  0,0.011,0.05,0.05,
                  0,0.01,0.02,0.05)
 
-species_tech_matrix <- data.frame(matrix(coefficient, nrow = tech_num, ncol = species_num))
+q_matrix <- matrix(coefficient, nrow = tech_num, ncol = species_num)
+
+species_tech_matrix <- data.frame(q_matrix, nrow = tech_num, ncol = species_num)
 
 # set effort for each tech 
 E <- c(0.5,0.5,0.05,0.05)
@@ -79,38 +78,43 @@ E_2 <- seq(0,8,1)
 E_3 <- seq(0,8,1)
 E_4 <- seq(0,8,1)
 
-E1 <- rep(E_1, length(E_1)^length(E)/length(E_1))
-map_data <- data.frame(E1)
-map_data$E2 <- rep(E_2, length(E_1)^length(E)/(length(E_1)^2), each = length(E_1))
-map_data$E3 <- rep(E_3, length(E_1)^length(E)/(length(E_1)^3), each = (length(E_1)^2))
-map_data$E4 <- rep(E_4, length(E_1)^length(E)/(length(E_1)^4), each = (length(E_1)^3))
+
 ```
 
 ```{r}
-pvnb_vec <- NULL
+E_new <- NULL
+
+
 for(i in 1:length(E_1)){
   for(j in 1:length(E_2)){
     for(k in 1:length(E_3)){
       for(l in 1:length(E_4)){
-        E_new <- c(E_1[i], E_2[j], E_3[k], E_4[l])
-        simul_stock_dynamic <- data.frame(simulated_stock_dynamic(E_new))
-        pro <- data.frame(profit(E_new))
-        total_profit <- rowSums(pro)
-        pro$total_profit <- total_profit
-        PVNB <- pvnb(pro)
-        pvnb_vec <- append(pvnb_vec,PVNB)
+        E_new <- rbind(E_new, c(E_1[i],E_2[j],E_3[k],E_4[l]))
       }
     }
   }
 }
+
 ```
 
 ```{r}
-map_data$pvnb <- pvnb_vec
-map_data <- map_data %>% 
-  arrange(-pvnb)
+pvnb_vec <- NULL
+for(i in 1:nrow(E_new)){
+   tmp_E <- E_new[i,]
+   tmp_pvnb <- pvnb(tmp_E)
+   pvnb_vec <- append(pvnb_vec,tmp_pvnb)
+}
+E_new <- data.frame(E_new)
+colnames(E_new) <- c("E1", "E2", "E3", "E4")
+E_new$PVNB <- pvnb_vec
+```
 
-PVNB_table = kbl(map_data[c(1:10),], caption = "Top 10 PVNB under 4 types of fishing efforts") %>%
+
+```{r}
+E_new <- E_new %>% 
+  arrange(-PVNB)
+
+PVNB_table = kbl(E_new[c(1:10),], caption = "Top 10 PVNB under 4 types of fishing efforts") %>%
   kable_classic(full_width = F, html_font = "Cambria")
 
 PVNB_table
