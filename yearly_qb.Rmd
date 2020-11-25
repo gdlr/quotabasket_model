@@ -1,0 +1,373 @@
+---
+title: "iterative_year"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+library(tidyverse)
+library(purrr)
+```
+
+This R-markdown iterates our function over a series of years.
+
+For each year, this function will select the effort that maximizes PVNB within a constraint. Based on that effort and harvest, the loop will repeat for any number of years. 
+
+```{r}
+# Write a function that for a given stock size and effort, returns profit
+profit_fx <- function(E, r, K, X, q, p, c){
+
+#(E = 1, r = 0.1, K = 100, X = 50, q = 0.01, p = 1, c = 0.1){
+  ## Stock size ##
+  # Write a stock size equation
+    stock <-  X + (r*X)*(1-X/K) - q*E*X
+  ## Harvest ##
+  #  And write an equation...
+    harvest <-  q*E*X
+  ## Profit
+  # Write an equation...
+    profit <-  p*harvest - c*E
+  return(profit)
+}
+
+
+p_h_s_fx <- function(E, r, K, X, q, p, c){
+
+#(E = 1, r = 0.1, K = 100, X = 50, years = 100, q = 0.01, p = 1, c = 0.1){
+
+    ## Stock size ##
+  # Write a stock size equation
+    stock <-  X + (r*X)*(1-X/K) - q*E*X
+  ## Harvest ##
+  #  And write an equation...
+    harvest <-  q*E*X
+  ## Profit
+  # Write an equation...
+    profit <-  p*harvest - c*E
+  lst <- c(stock, harvest, profit)
+  return(lst)
+}
+
+
+```
+
+```{r}
+# For one species, can we run this function over a range of efforts? 
+E_1 <- seq(0, 15, by = 0.5)
+# Woooo this works
+profits <- sapply(E_1, profit_fx)
+# This returns the max value in this vector
+which.max(profits)
+
+profit_fx(25)
+```
+What about for two species?
+```{r}
+# Create a data frame of species parameters (these are our inputs)
+pr <- data.frame(c(1:2))
+pr$r <- c(1, 1)
+pr$K <- c(10000, 10000)
+pr$X0 <- c(5000, 5000)
+pr$p <- c(200,200)
+pr$c <- c(1,1)
+pr$delta <- c(0.05,0.05)
+pr$rho <- 1/(1+pr$delta)
+pr$q <- c(0.005, 0.005)
+```
+
+```{r}
+# I want to run the profit function for each species
+
+# Generate effort df:
+E_1 <- seq(0,1, 0.01)
+E_2 <- seq(0, 1, 0.01)
+# generate all the E1 and E2 combinations
+effort_m <- data.matrix(expand_grid(E_1, E_2))
+
+
+yearly_iteration_fx <- function(years){
+  
+    yearly_shp <- data.frame(E1 = 0, X1 = pr$X0[1], H1 = 0, P1 = 0,
+                            E2 = 0, X2 = pr$X0[2], H2 = 0, P2 = 0)
+
+    for(y in 2:years){
+
+      prof_lst <- list()
+      x_lst <- c(yearly_shp$X1[y-1], yearly_shp$X2[y-1]) # Set previous values for the starting stock
+      
+      for(i in 1:nrow(pr)){     # i effectively becomes species number
+        
+        p_wrapper <- function(E){   # This basically makes it so the function has the right variables
+          r = pr$r[i]
+          K = pr$r[i]
+          X = x_lst[i]    
+          p = pr$r[i]
+          c = pr$c[i]
+          q <- pr$q[i]
+          
+          stock <-  X + (r*X)*(1-X/K) - q*E*X
+          harvest <-  q*E*X
+          profit <-  p*harvest - c*E
+          return(profit)
+        }
+        
+        tmp <- NULL
+        E_list <- effort_m[,i]             # Select the corresponding column of the effort matrix...
+        tmp <- sapply(E_list, p_wrapper)   # Apply our profit function over all 
+        prof_lst[[i]] <- tmp               # Bind it to a temp list for later use
+      }
+      
+      p_matrix_tmp <- do.call(cbind, prof_lst)
+      tot_prof_tmp <- rowSums(p_matrix_tmp)
+      e_max <- which.max(tot_prof_tmp)
+      
+      e_max_comb <- c(unname(effort_m[e_max, 1]), unname(effort_m[e_max, 2]))  # Pull E values that return the highest profit
+      
+      # I need to write a new for loop here???
+      lst_yr <- c()
+      
+      for(i in 1:nrow(pr)){
+        phs_wrapper <- function(E){ # Same as function above...
+           r = pr$r[i]
+           K = pr$r[i]
+           X = x_lst[i]      # I think we want to write our function so we can input a different X each time
+           p = pr$r[i]
+           c = pr$c[i]
+           q = pr$q[i]
+           stock <-  X + (r*X)*(1-X/K) - q*E*X
+           harvest <-  q*E*X
+           profit <-  p*harvest - c*E
+           lst <- c(stock, harvest, profit)
+           return(lst)
+        }
+              # We can run this for each max effort
+        lst_yr <- unlist(lapply(e_max_comb, phs_wrapper))   # Gives an output vector
+      
+      yearly_shp <- yearly_shp %>% add_row(E1 = e_max_comb[1],
+                                            X1 = lst_yr[1],
+                                            H1 = lst_yr[2],
+                                            P1 = lst_yr[3],
+                                            E2 = e_max_comb[2],
+                                            X2 = lst_yr[4],
+                                            H2 = lst_yr[5],
+                                            P2 = lst_yr[6])
+
+      }
+    }
+  return(yearly_shp)
+}
+```
+
+```{r}
+test <- yearly_iteration_fx(50)
+```
+
+
+
+
+```{r} 
+##--------
+## Input Species Parameters
+##--------
+# set the number of species and technologies we want to study
+species_num <- 2
+tech_num <- 2
+
+# set the discount rate
+delta = 0.05
+rho = 1/(1+delta)
+
+# set values for variables in the "Our Model" section
+# set parameters
+species <- c(1:species_num)
+pr <- data.frame(species)
+pr$r <- c(1,0.5)
+pr$K <- c(1,1.2)
+pr$X0 <- c(0.5,0.6)
+pr$p <- c(200,200)
+pr$c <- c(1,1)
+pr$delta <- c(0.05,0.05)
+pr$rho <- 1/(1+pr$delta)
+
+# set catchability coefficient 
+q <- c(0.05,0.02,
+       0.02, 0.05)
+
+# Select a sequence of effort for each species:
+# This is the effort for each technology
+E_1 <- seq(0,15, 0.5)
+E_2 <- seq(0, 15, 0.5)
+# set cost for each tech
+C <- c(1 ,1)
+
+# Input how many years we want to run this model for
+# years <- 50
+```
+
+```{r}
+##--------
+## Create iterative version of this model
+##--------
+
+# generate all the E1 and E2 combinations
+effort_m <- data.matrix(expand_grid(E_1, E_2))
+
+# generate q-matrix. This is fixed through time
+q_matrix <- matrix(q, nrow = tech_num, ncol = species_num)
+species_tech_matrix <- data.frame(q_matrix)
+
+# assign column and row names to the matrix
+matrix_col_name <-  paste("species", 1:species_num, sep = " ")
+colnames(species_tech_matrix) <- matrix_col_name
+matrix_row_name <-  paste("tech", 1:tech_num, sep = " ")
+rownames(species_tech_matrix) <- matrix_row_name
+
+# Run this for a year:
+
+# The stock dynamic simulates stock growth, so it only needs to be applied once to each stock.
+
+# We're going to apply this over a whole range of E's. These are contained in the effort matrix...
+
+year_fx <- function(years){
+  stock1 <- vector(length = years)
+  stock1[1] <- pr$X0[1]
+  stock2 <- vector(length = years)
+  stock2[1] <- pr$X0[2]
+  stock_m <- matrix(c(stock1, stock2), ncol = 2) # Make an empty stock matrix...
+  
+  for(y in 2:years){
+    prof_m <- matrix(ncol = 2)      # Make a matrix we can fill with profit for each species...
+    
+    for(row in nrow(effort_m)){        # For each effort combo...
+      eff <- as.vector(effort_m[row,]) # make a vector of both efforts
+      prof_temp <- NULL
+      
+        for(s in length(eff)){              # Then for each species...
+          # Calculate species growth ## Confusingly, parameter matrix has stock by row but effort matrix has stock by column
+          tmp_stock <- stock_m[y-1,s] + (pr$r[s]*stock_m[y-1,s])*(1-(stock_m[y-1,s]/pr$K[s])) - q[s]*eff[s]*stock_m[y-1,s]
+          # Calculate harvest
+          harvest <- q[s] * eff[s] * tmp_stock
+          # Calc profit
+          prof <- harvest * pr$p[s]
+          append(prof_temp, prof)   # Paste profit values in a vector by species
+        }
+      rbind(prof_m, prof_temp)      # Paste each set of profit's into the prof matrix
+    }
+    prof_tot <- rowSums(prof_m)      # Calculate the total PVNB for each effort
+    emax <- which.max(prof_tot)     # Return the max row position for that year
+     for(s in 1:ncol(stock_m)){        # Calculate each stock based on the max effort:
+      stock_m[s, y] <- stock_m[s, y-1] + (pr$r[s]*stock_m[s, y-1])*(1-(stock_m[s, y-1]/pr$K[s])) - q[s]*effort_m[emax, s]*stock_m[s, y-1]
+    }
+    # for(s in ncol(stock_m)){         # Calculate harvest for each species
+    #   harvest[,s] <-
+    # }
+  }
+}# Yearly paren
+  
+  
+  
+
+#### WHY DOESNT THIS WORK???
+year_fx(20)
+
+# Create stock dynamic function
+stock_fx <- function(species_index){
+  stock= NULL
+  stock=append(stock, parameter$X0[species_index])
+  # apply the first equation in the "Our Model" section
+  
+  X = stock[i-1]+parameter$r[species_index]*stock[i-1]*(1-stock[i-1]/parameter$K[species_index]) - sum(species_tech_matrix[species_index]*E)*stock[i-1]
+  stock=append(stock, X)
+  return(stock)
+}
+
+# Run stock dynamic function
+simulated_stock_dynamic = NULL
+for(i in 1:species_num){
+  stock = stock_fx(i)
+  simulated_stock_dynamic = cbind(simulated_stock_dynamic, stock)
+}
+# Profit function
+cost_tech <- C*E
+
+profit_fx <- function(E){
+  # apply the third equation in "Our Model" section. Calculate the revenue generated by the 1st species of the chosen technology
+  for(n in ncol(species_tech_matrix)){
+    profit_tech_species = species_tech_matrix[n, 1]*E[n]*simulated_stock_dynamic[1]*parameter$p[1]
+  # use a for-loop to generate the revenue for the rest of the species for that tech 
+    for(j in 2:species_num){
+      x = q_matrix[n, j]*E[n]*simulated_stock_dynamic[j]*parameter$p[j]
+      profit_tech_species <- cbind(profit_tech_species,x)
+    }
+  }
+
+  # sum by rows to get the revenue generated by that technology across species. Subtract cost from revenue to get profit of that technology
+  profit_tech = rowSums(profit_tech_species) - cost_tech[n]
+  return(profit_tech)
+}
+```
+
+```{r}
+# We need to run the profit function for each effort, calculating the per each species per effort.
+# Run this function:
+
+# This runs...maybe wrong. How to add things to this list in an orderly way??
+# Run it for each ROW in effort_m (combo of efforts)
+# Make empty matrix...
+
+
+
+
+
+prof_m <- matrix(ncol = 2)
+for(i in 1:nrow(effort_m)){
+   tmp_E <- as.numeric(effort_m[i,])
+   vec <- NULL
+   for(e in tmp_E){
+     pro <- profit_fx(e)
+     append(vec, pro)
+   }
+   rbind(prof_m, vec
+}
+
+
+effort_m <- data.frame(effort_m)
+colnames(effort_m) <- c("E1", "E2")
+effort_m$prof <- pvnb_vec
+
+
+profit = NULL
+for(i in 1:tech_num){
+  profit = cbind(profit, profit_tech(i))
+}
+
+tech_choice <- which.max(profit)
+
+tmp_profit_df <- data.frame(x = stock, h = harvest_species)
+
+```
+
+
+```{r}
+# Harvest needs to be calculated for each species, for each technology.
+# Create harvest function:
+harvest_fx <- function(E){
+  harvest <- NULL
+  catch_by_spe <- (q_matrix*E)
+  stock <- stock_dynamic(E)
+  for(i in 1:species_num){
+    harvest <- append(harvest, stock[,i]*catch_by_spe[i])
+  }
+  return(matrix(harvest,nrow=(year+1), ncol = species_num))
+}
+
+harvest_species = NULL
+for(i in 1:species_num){
+  # apply the 2.1 equation in the "Our Model" section
+  X = sum(q_matrix[i]*E)*simulated_stock_dynamic[i]
+  harvest_species=c(harvest_species, X)
+}
+```
+
+
