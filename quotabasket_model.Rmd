@@ -26,6 +26,7 @@ library(lpSolveAPI)
 <center><p><mark>$X_{j,t+1} = X_{j,t} + r_jX_{j,t}\times (1-{X_{j,t}\over K_j}) - H_{j,t}$</mark></p></center>
 
 2. **Harvest**: Harvest of species $j$ at time $t$ ; Harvest of technology $i$ at time $t$
+(Kat translation: the first one: how much fish of species j is caught using all different techs, and the second one: how much of all fish species is caught using tech i)
 
 $$
 \begin{cases}
