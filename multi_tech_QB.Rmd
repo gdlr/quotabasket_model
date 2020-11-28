@@ -97,6 +97,10 @@ for(i in 1:length(E_1)){
 
 ```
 
+In E_new, each column pertains to each species, and each row pertains to possible effort combos applied to each species with effort levels ranging from 0 to 8.
+
+The below now appends the PVNB associated w/ these effort levels to this matrix of levels. (tests a bunch of scenarios)
+
 ```{r}
 pvnb_vec <- NULL
 for(i in 1:nrow(E_new)){
@@ -117,6 +121,332 @@ E_new <- E_new %>%
 PVNB_table = kbl(E_new[c(1:10),], caption = "Top 10 PVNB under 4 types of fishing efforts") %>%
   kable_classic(full_width = F, html_font = "Cambria")
 
-PVNB_table
+PVNB_table_E
 ```
 
+Now let's do the same thing, but for all the other parameters as a sensitivity analysis!
+
+- catchability
+
+```{r}
+# generate map data for each combination of q1 q2 q3 and q4
+q_1 <- seq(0,1,0.05)
+q_2 <- seq(0,1,0.05)
+q_3 <- seq(0,1,0.05)
+q_4 <- seq(0,1,0.05)
+
+```
+
+```{r}
+q_new <- NULL
+
+
+for(i in 1:length(q_1)){
+  for(j in 1:length(q_2)){
+    for(k in 1:length(q_3)){
+      for(l in 1:length(q_4)){
+        q_new <- rbind(q_new, c(q_1[i],q_2[j],q_3[k],q_4[l]))
+      }
+    }
+  }
+}
+
+```
+
+In q_new, each column pertains to each species, and each row pertains to possible catchability combos applied to each species with catchability ranging from 0 to 1.
+
+The below now appends the PVNB associated w/ these catchabilities to this matrix of catchabilities (tests a bunch of scenarios)
+
+```{r}
+pvnb_vec <- NULL
+for(i in 1:nrow(q_new)){
+   tmp_q <- q_new[i,]
+   tmp_pvnb <- pvnb(tmp_q)
+   pvnb_vec <- append(pvnb_vec,tmp_pvnb)
+}
+q_new <- data.frame(q_new)
+colnames(q_new) <- c("q1", "q2", "q3", "q4")
+q_new$PVNB <- pvnb_vec
+```
+
+
+```{r}
+q_new <- q_new %>% 
+  arrange(-PVNB)
+
+PVNB_table_q = kbl(q_new[c(1:10),], caption = "Top 10 PVNB under 4 types of catchabilities") %>%
+  kable_classic(full_width = F, html_font = "Cambria")
+
+PVNB_table_q
+```
+
+- r values (growth rate)
+
+```{r}
+# generate map data for each combination of r1 r2 r3 and r4
+r_1 <- seq(0.05,1,0.05)
+r_2 <- seq(0.05,1,0.05)
+r_3 <- seq(0.05,1,0.05)
+r_4 <- seq(0.05,1,0.05)
+
+```
+
+```{r}
+r_new <- NULL
+
+
+for(i in 1:length(r_1)){
+  for(j in 1:length(r_2)){
+    for(k in 1:length(r_3)){
+      for(l in 1:length(r_4)){
+        r_new <- rbind(r_new, c(r_1[i],r_2[j],r_3[k],r_4[l]))
+      }
+    }
+  }
+}
+
+```
+
+In r_new, each column pertains to each species, and each row pertains to possible growth rate combos applied to each species with growth rate ranging from 0.05 to 1.
+
+The below now appends the PVNB associated w/ these growth rates to this matrix of growth rates (tests a bunch of scenarios)
+
+```{r}
+pvnb_vec <- NULL
+for(i in 1:nrow(r_new)){
+   tmp_r <- r_new[i,]
+   tmp_pvnb <- pvnb(tmp_r)
+   pvnb_vec <- append(pvnb_vec,tmp_pvnb)
+}
+r_new <- data.frame(r_new)
+colnames(r_new) <- c("r1", "r2", "r3", "r4")
+r_new$PVNB <- pvnb_vec
+```
+
+
+```{r}
+r_new <- r_new %>% 
+  arrange(-PVNB)
+
+PVNB_table_r = kbl(r_new[c(1:10),], caption = "Top 10 PVNB under 4 types of growth rates") %>%
+  kable_classic(full_width = F, html_font = "Cambria")
+
+PVNB_table_r
+```
+
+- K values (carrying capacity)
+
+```{r}
+# generate map data for each combination of k1 k2 k3 and k4
+k_1 <- seq(0.5,5,0.5)
+k_2 <- seq(0.5,5,0.5)
+k_3 <- seq(0.5,5,0.5)
+k_4 <- seq(0.5,5,0.5)
+
+```
+
+```{r}
+k_new <- NULL
+
+
+for(i in 1:length(k_1)){
+  for(j in 1:length(k_2)){
+    for(k in 1:length(k_3)){
+      for(l in 1:length(k_4)){
+        k_new <- rbind(k_new, c(k_1[i],k_2[j],k_3[k],k_4[l]))
+      }
+    }
+  }
+}
+
+```
+
+In k_new, each column pertains to each species, and each row pertains to possible carrying capacity combos applied to each species with carrying capacity ranging from 0.05 to 1.
+
+The below now appends the PVNB associated w/ these carrying capacities to this matrix of carrying capacities (tests a bunch of scenarios)
+
+```{r}
+pvnb_vec <- NULL
+for(i in 1:nrow(k_new)){
+   tmp_k <- k_new[i,]
+   tmp_pvnb <- pvnb(tmp_k)
+   pvnb_vec <- append(pvnb_vec,tmp_pvnb)
+}
+k_new <- data.frame(k_new)
+colnames(k_new) <- c("k1", "k2", "k3", "k4")
+k_new$PVNB <- pvnb_vec
+```
+
+
+```{r}
+k_new <- k_new %>% 
+  arrange(-PVNB)
+
+PVNB_table_k = kbl(k_new[c(1:10),], caption = "Top 10 PVNB under 4 types of carrying capacities") %>%
+  kable_classic(full_width = F, html_font = "Cambria")
+
+PVNB_table_k
+```
+
+- p (prices)
+
+```{r}
+# generate map data for each combination of p1 p2 p3 and p4
+p_1 <- seq(0,200,20)
+p_2 <- seq(0,200,20)
+p_3 <- seq(0,200,20)
+p_4 <- seq(0,200,20)
+
+```
+
+```{r}
+p_new <- NULL
+
+
+for(i in 1:length(p_1)){
+  for(j in 1:length(p_2)){
+    for(k in 1:length(p_3)){
+      for(l in 1:length(p_4)){
+        p_new <- rbind(p_new, c(p_1[i],p_2[j],p_3[k],p_4[l]))
+      }
+    }
+  }
+}
+
+```
+
+In p_new, each column pertains to each species, and each row pertains to possible price combos applied to each species with price ranging from 0 to 200.
+
+The below now appends the PVNB associated w/ these prices to this matrix of prices (tests a bunch of scenarios)
+
+```{r}
+pvnb_vec <- NULL
+for(i in 1:nrow(p_new)){
+   tmp_p <- p_new[i,]
+   tmp_pvnb <- pvnb(tmp_p)
+   pvnb_vec <- append(pvnb_vec,tmp_pvnb)
+}
+p_new <- data.frame(p_new)
+colnames(p_new) <- c("p1", "p2", "p3", "p4")
+p_new$PVNB <- pvnb_vec
+```
+
+
+```{r}
+p_new <- p_new %>% 
+  arrange(-PVNB)
+
+PVNB_table_p = kbl(p_new[c(1:10),], caption = "Top 10 PVNB under 4 different prices") %>%
+  kable_classic(full_width = F, html_font = "Cambria")
+
+PVNB_table_p
+```
+
+- c (costs)
+
+```{r}
+# generate map data for each combination of C1 C2 C3 and C4
+C_1 <- seq(1,10,1)
+C_2 <- seq(1,10,1)
+C_3 <- seq(1,10,1)
+C_4 <- seq(1,10,1)
+
+```
+
+```{r}
+C_new <- NULL
+
+
+for(i in 1:length(C_1)){
+  for(j in 1:length(C_2)){
+    for(k in 1:length(C_3)){
+      for(l in 1:length(C_4)){
+        C_new <- rbind(C_new, c(C_1[i],C_2[j],C_3[k],C_4[l]))
+      }
+    }
+  }
+}
+
+```
+
+In C_new, each column pertains to each technology, and each row pertains to possible cost combos applied to each tech with cost ranging from 1 to 10.
+
+The below now appends the PVNB associated w/ these costs to this matrix of costs (tests a bunch of scenarios)
+
+```{r}
+pvnb_vec <- NULL
+for(i in 1:nrow(C_new)){
+   tmC_C <- C_new[i,]
+   tmC_Cvnb <- pvnb(tmC_C)
+   pvnb_vec <- append(pvnb_vec,tmC_Cvnb)
+}
+C_new <- data.frame(C_new)
+colnames(C_new) <- c("C1", "C2", "C3", "C4")
+C_new$PVNB <- pvnb_vec
+```
+
+
+```{r}
+C_new <- C_new %>% 
+  arrange(-PVNB)
+
+PVNB_table_C = kbl(C_new[c(1:10),], caption = "Top 10 PVNB under 4 different costs") %>%
+  kable_classic(full_width = F, html_font = "Cambria")
+
+PVNB_table_C
+```
+
+- X0 (initial stock size)
+
+
+```{r}
+# generate map data for each combination of x01 x02 x03 and x04
+x0_1 <- seq(1,10,1)
+x0_2 <- seq(1,10,1)
+x0_3 <- seq(1,10,1)
+x0_4 <- seq(1,10,1)
+
+```
+
+```{r}
+x0_new <- NULL
+
+
+for(i in 1:length(x0_1)){
+  for(j in 1:length(x0_2)){
+    for(k in 1:length(x0_3)){
+      for(l in 1:length(x0_4)){
+        x0_new <- rbind(x0_new, c(x0_1[i],x0_2[j],x0_3[k],x0_4[l]))
+      }
+    }
+  }
+}
+
+```
+
+In x0_new, each column pertains to each species, and each row pertains to possible initial stock combos applied to each species with initial stock ranging from 1 to 10.
+
+The below now appends the PVNB associated w/ these initial stocks to this matrix of initial stocks (tests a bunch of scenarios)
+
+```{r}
+pvnb_vec <- NULL
+for(i in 1:nrow(x0_new)){
+   tmx0_x0 <- x0_new[i,]
+   tmx0_x0vnb <- pvnb(tmx0_x0)
+   pvnb_vec <- append(pvnb_vec,tmx0_x0vnb)
+}
+x0_new <- data.frame(x0_new)
+colnames(x0_new) <- c("x01", "x02", "x03", "x04")
+x0_new$PVNB <- pvnb_vec
+```
+
+
+```{r}
+x0_new <- x0_new %>% 
+  arrange(-PVNB)
+
+PVNB_table_x0 = kbl(x0_new[c(1:10),], caption = "Top 10 PVNB under 4 different initial stocks") %>%
+  kable_classic(full_width = F, html_font = "Cambria")
+
+PVNB_table_x0
+```
