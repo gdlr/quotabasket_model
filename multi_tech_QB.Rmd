@@ -110,7 +110,7 @@ The below now appends the PVNB associated w/ these effort levels to this matrix 
 pvnb_vec <- NULL
 for(i in 1:nrow(E_new)){
    tmp_E <- E_new[i,]
-   tmp_pvnb <- pvnb(tmp_E)
+   tmp_pvnb <- pvnb(K = parameter$K, X0 = parameter$X0, p = parameter$p, c = parameter$c, C = C, r = parameter$r, q_matrix = q_matrix, E = tmp_E)
    pvnb_vec <- append(pvnb_vec,tmp_pvnb)
 }
 E_new <- data.frame(E_new)
@@ -166,7 +166,7 @@ The below now appends the PVNB associated w/ these catchabilities to this matrix
 pvnb_vec <- NULL
 for(i in 1:nrow(q_new)){
    tmp_q <- q_new[i,]
-   tmp_pvnb <- pvnb(tmp_q)
+   tmp_pvnb <- pvnb(K = parameter$K, X0 = parameter$X0, p = parameter$p, c = parameter$c, C = C, E = E, r = parameter$r, q_matrix = q_new)
    pvnb_vec <- append(pvnb_vec,tmp_pvnb)
 }
 q_new <- data.frame(q_new)
@@ -220,7 +220,7 @@ The below now appends the PVNB associated w/ these growth rates to this matrix o
 pvnb_vec <- NULL
 for(i in 1:nrow(r_new)){
    tmp_r <- r_new[i,]
-   tmp_pvnb <- pvnb(tmp_r)
+   tmp_pvnb <- pvnb(K = parameter$K, X0 = parameter$X0, p = parameter$p, c = parameter$c, C = C, E = E, r = tmp_r, q_matrix = q_matrix)
    pvnb_vec <- append(pvnb_vec,tmp_pvnb)
 }
 r_new <- data.frame(r_new)
@@ -274,7 +274,7 @@ The below now appends the PVNB associated w/ these carrying capacities to this m
 pvnb_vec <- NULL
 for(i in 1:nrow(k_new)){
    tmp_k <- k_new[i,]
-   tmp_pvnb <- pvnb(tmp_k)
+   tmp_pvnb <- pvnb(X0 = parameter$X0, p = parameter$p, c = parameter$c, C = C, E = E, q_matrix = q_matrix, r = parameter$r, K = tmp_k)
    pvnb_vec <- append(pvnb_vec,tmp_pvnb)
 }
 k_new <- data.frame(k_new)
@@ -328,7 +328,7 @@ The below now appends the PVNB associated w/ these prices to this matrix of pric
 pvnb_vec <- NULL
 for(i in 1:nrow(p_new)){
    tmp_p <- p_new[i,]
-   tmp_pvnb <- pvnb(tmp_p)
+   tmp_pvnb <- pvnb(K = parameter$K, X0 = parameter$X0, r = parameter$r, c = parameter$c, C = C, E = E, q_matrix = q_matrix, p = tmp_p)
    pvnb_vec <- append(pvnb_vec,tmp_pvnb)
 }
 p_new <- data.frame(p_new)
@@ -382,7 +382,7 @@ The below now appends the PVNB associated w/ these costs to this matrix of costs
 pvnb_vec <- NULL
 for(i in 1:nrow(C_new)){
    tmC_C <- C_new[i,]
-   tmC_Cvnb <- pvnb(tmC_C)
+   tmC_Cvnb <- pvnb(K = parameter$K, X0 = parameter$X0, p = parameter$p, c = parameter$c, r = parameter$r, E = E, q_matrix = q_matrix, C = tmC_C)
    pvnb_vec <- append(pvnb_vec,tmC_Cvnb)
 }
 C_new <- data.frame(C_new)
@@ -437,7 +437,7 @@ The below now appends the PVNB associated w/ these initial stocks to this matrix
 pvnb_vec <- NULL
 for(i in 1:nrow(x0_new)){
    tmx0_x0 <- x0_new[i,]
-   tmx0_x0vnb <- pvnb(tmx0_x0)
+   tmx0_x0vnb <- pvnb(K = parameter$K, r = parameter$r, p = parameter$p, c = parameter$c, C = C, E = E, q_matrix = q_matrix, X0 = tmx0_x0)
    pvnb_vec <- append(pvnb_vec,tmx0_x0vnb)
 }
 x0_new <- data.frame(x0_new)
@@ -496,12 +496,12 @@ What if we had fish prices defined by 2 characteristics, not just 1?
   att_1 <- seq(0,1,0.2)
   att_2 <- 1-att_1
   
-  spec_1_rat <- c(att_1,att_2) 
-  spec_2_rat <- c(att_1,att_2)
-  spec_3_rat <- c(att_1,att_2)
-  spec_4_rat <- c(att_1,att_2)
+  spec_1_rat <- data.frame(a1 = att_1,a2 = att_2) 
+  spec_2_rat <- data.frame(a1 = att_1,a2 = att_2)
+  spec_3_rat <- data.frame(a1 = att_1,a2 = att_2)
+  spec_4_rat <- data.frame(a1 = att_1,a2 = att_2)
   
-  attribute_2_to_species_ratios <- as.data.frame(rbind(spec_1_rat, spec_2_rat, spec_3_rat, spec_4_rat))
+  attribute_2_to_species_ratios <- as.data.frame(cbind(spec_1_rat, spec_2_rat, spec_3_rat, spec_4_rat))
 ```
 
 ```{r}
@@ -524,7 +524,7 @@ for(i in 1:length(spec_1_rat)){
 pvnb_vec <- NULL
 for(i in 1:nrow(rat_new)){
    tmp_rat <- rat_new[i,]
-   tmp_pvnb <- pvnb(tmp_rat)
+   tmp_pvnb <- pvnb(K = parameter$K, X0 = parameter$X0, p = parameter$p, c = parameter$c, C = C, E = E, r = parameter$r, q_matrix = q_matrix, tmp_rat)
    pvnb_vec <- append(pvnb_vec,tmp_pvnb)
 }
 rat_new <- data.frame(rat_new)
