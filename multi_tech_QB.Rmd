@@ -42,23 +42,28 @@ delta = 0.05
 rho = 1/(1+delta)
 
 
-# set values for variables in the "Our Model" section
+# set default values for variables in the "Our Model" section
 # set parameters
 species <- c(1:species_num)
 parameter <- data.frame(species)
-parameter$r <- c(1,0.5,0.4,0.9)
-parameter$K <- c(1,1.2,2,3)
-parameter$X0 <- c(0.5,0.6,1,1)
-parameter$p <- c(200,200,200,200)
-parameter$c <- c(1,1,1,1)
+parameter$r <- c(0.5,0.5,0.5,0.5) #parameter$r <- c(1,0.5,0.4,0.9)
+parameter$K <- c(1.2,1.2,1.2,1.2) #parameter$K <- c(1,1.2,2,3)
+parameter$X0 <- c(1,1,1,1) #parameter$X0 <- c(0.5,0.6,1,1)
+parameter$p <- c(100,100,100,100) #parameter$p <- c(200,200,200,200)
+parameter$c <- c(1,1,1,1) #parameter$c <- c(1,1,1,1) isn't this redundant (see below)
 parameter$delta <- c(0.05,0.05,0.05,0.05)
 parameter$rho <- 1/(1+parameter$delta)
 
 # set catchability coefficient 
-coefficient <- c(0.05,0.05,0.07,0.07,
-                 0.04,0.05,0.05,0.05,
-                 0,0.011,0.05,0.05,
-                 0,0.01,0.02,0.05)
+coefficient <- c(0.05,0.05,0.05,0.05,
+                 0.05,0.05,0.05,0.05,
+                 0,0.05,0.05,0.05,
+                 0,0.05,0.05,0.05)
+
+#coefficient <- c(0.05,0.05,0.07,0.07,
+ #                0.04,0.05,0.05,0.05,
+  #               0,0.011,0.05,0.05,
+   #              0,0.01,0.02,0.05)
 
 q_matrix <- matrix(coefficient, nrow = tech_num, ncol = species_num)
 
@@ -68,7 +73,7 @@ species_tech_matrix <- data.frame(q_matrix, nrow = tech_num, ncol = species_num)
 E <- c(0.5,0.5,0.05,0.05)
 
 # set cost for each tech
-C <- c(1,1,2,2)
+C <- c(1,1,1,1)
 ```
 
 ```{r}
@@ -118,7 +123,7 @@ E_new$PVNB <- pvnb_vec
 E_new <- E_new %>% 
   arrange(-PVNB)
 
-PVNB_table = kbl(E_new[c(1:10),], caption = "Top 10 PVNB under 4 types of fishing efforts") %>%
+PVNB_table_E = kbl(E_new[c(1:10),], caption = "Top 10 PVNB under 4 types of fishing efforts") %>%
   kable_classic(full_width = F, html_font = "Cambria")
 
 PVNB_table_E
@@ -171,7 +176,7 @@ q_new$PVNB <- pvnb_vec
 
 
 ```{r}
-q_new <- q_new %>% 
+q_new <- as.data.frame(q_new) %>% 
   arrange(-PVNB)
 
 PVNB_table_q = kbl(q_new[c(1:10),], caption = "Top 10 PVNB under 4 types of catchabilities") %>%
@@ -450,3 +455,127 @@ PVNB_table_x0 = kbl(x0_new[c(1:10),], caption = "Top 10 PVNB under 4 different i
 
 PVNB_table_x0
 ```
+
+Compare tables side-by-side:
+
+```{r}
+
+
+PVNB_table_r
+
+PVNB_table_k
+
+PVNB_table_x0
+
+PVNB_table_q
+
+PVNB_table_E
+
+PVNB_table_C
+
+PVNB_table_p
+```
+
+IGNORE THIS STUFF!!! Kat's still working on this!!!
+
+What if we had fish prices defined by 2 characteristics, not just 1?
+
+```{r}
+
+#defaults
+  spec_1_rat <- c(0.5, 0.5)
+  spec_2_rat <- c(0.5, 0.5)
+  spec_3_rat <- c(0.5, 0.5)
+  spec_4_rat <- c(0.5, 0.5)
+  
+  attribute_2_to_species_ratios <- as.data.frame(rbind(spec_1_rat, spec_2_rat, spec_3_rat, spec_4_rat))
+```  
+
+```{r}
+#sensitivity ranges
+  att_1 <- seq(0,1,0.2)
+  att_2 <- 1-att_1
+  
+  spec_1_rat <- c(att_1,att_2) 
+  spec_2_rat <- c(att_1,att_2)
+  spec_3_rat <- c(att_1,att_2)
+  spec_4_rat <- c(att_1,att_2)
+  
+  attribute_2_to_species_ratios <- as.data.frame(rbind(spec_1_rat, spec_2_rat, spec_3_rat, spec_4_rat))
+```
+
+```{r}
+rat_new <- NULL
+
+
+for(i in 1:length(spec_1_rat)){
+  for(j in 1:length(spec_2_rat)){
+    for(k in 1:length(spec_3_rat)){
+      for(l in 1:length(spec_4_rat)){
+        rat_new <- rbind(rat_new, c(spec_1_rat[i],spec_2_rat[j],spec_3_rat[k],spec_4_rat[l]))
+      }
+    }
+  }
+}
+
+```
+  
+```{r}
+pvnb_vec <- NULL
+for(i in 1:nrow(rat_new)){
+   tmp_rat <- rat_new[i,]
+   tmp_pvnb <- pvnb(tmp_rat)
+   pvnb_vec <- append(pvnb_vec,tmp_pvnb)
+}
+rat_new <- data.frame(rat_new)
+colnames(rat_new) <- c("rat1", "rat2", "rat3", "rat4")
+rat_new$PVNB <- pvnb_vec
+
+
+```
+
+
+  
+p_11 <- seq(0,200,20)
+p_21 <- seq(0,200,20)
+p_31 <- seq(0,200,20)
+p_41 <- seq(0,200,20)
+p_12 <- seq(0,200,20)
+p_22 <- seq(0,200,20)
+p_32 <- seq(0,200,20)
+p_42 <- seq(0,200,20)
+
+```
+
+```{r}
+p_new <- NULL
+
+
+for(i in 1:length(p_11)){
+  for(j in 1:length(p_21)){
+    for(k in 1:length(p_31)){
+      for(l in 1:length(p_41)){
+        for(m in 1:length(p_12)){
+          for(n in 1:length(p_22)){
+            for(o in 1:length(p_32)){
+              for(p in 1:length(p_42)){
+        p_new <- rbind(p_new, c(p_11[i],p_21[j],p_31[k],p_41[l],p_12[m],p_22[n],p_32[o],p_42[p]))
+                }      
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+
+```
+
+apply prices to fish...
+
+```{r}
+
+
+
+```
+
