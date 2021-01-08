@@ -483,69 +483,75 @@ What if we had fish prices defined by 2 characteristics, not just 1?
 ```{r}
 
 #defaults
+  attrib_num <- 2
+
   spec_1_rat <- c(0.5, 0.5)
   spec_2_rat <- c(0.5, 0.5)
   spec_3_rat <- c(0.5, 0.5)
   spec_4_rat <- c(0.5, 0.5)
   
-  attribute_2_to_species_ratios <- as.data.frame(rbind(spec_1_rat, spec_2_rat, spec_3_rat, spec_4_rat))
+  rats <- as.data.frame(rbind(spec_1_rat, spec_2_rat, spec_3_rat, spec_4_rat))
+  
+  price_att1 = c(1,1,1,1)
+  price_att2 = c(2,2,2,2)
+    
+  prices <- as.data.frame(rbind(price_att1, price_att2))
+  
 ```  
+run just varying possible ratios...
 
 ```{r}
 #sensitivity ranges
   att_1 <- seq(0,1,0.2)
   att_2 <- 1-att_1
   
-  spec_1_rat <- data.frame(a1 = att_1,a2 = att_2) 
-  spec_2_rat <- data.frame(a1 = att_1,a2 = att_2)
-  spec_3_rat <- data.frame(a1 = att_1,a2 = att_2)
-  spec_4_rat <- data.frame(a1 = att_1,a2 = att_2)
+  spec_1_rat <- data.frame(spec = "spec_1", a1 = att_1, a2 = att_2) 
+  spec_2_rat <- data.frame(spec = "spec_2", a1 = att_1,a2 = att_2)
+  spec_3_rat <- data.frame(spec = "spec_3", a1 = att_1,a2 = att_2)
+  spec_4_rat <- data.frame(spec = "spec_4", a1 = att_1,a2 = att_2)
   
-  attribute_2_to_species_ratios <- as.data.frame(cbind(spec_1_rat, spec_2_rat, spec_3_rat, spec_4_rat))
+
 ```
 
 ```{r}
-rat_new <- NULL
+ratio_new <- NULL
 
 
-for(i in 1:length(spec_1_rat)){
-  for(j in 1:length(spec_2_rat)){
-    for(k in 1:length(spec_3_rat)){
-      for(l in 1:length(spec_4_rat)){
-        rat_new <- rbind(rat_new, c(spec_1_rat[i],spec_2_rat[j],spec_3_rat[k],spec_4_rat[l]))
+for(i in 1:nrow(spec_1_rat)){
+  for(j in 1:nrow(spec_2_rat)){
+    for(k in 1:nrow(spec_3_rat)){
+      for(l in 1:nrow(spec_4_rat)){
+        ratio_new <- rbind(ratio_new, c(spec_1_rat$a1[i],spec_1_rat$a2[i],spec_2_rat$a1[j],spec_2_rat$a2[j], spec_3_rat$a1[k],spec_3_rat$a2[k],spec_4_rat$a1[l],spec_4_rat$a2[l]))
       }
     }
   }
 }
 
+ratio_new <- as.data.frame(ratio_new)
+
+names(ratio_new) <- c("Sp1A1", "Sp1A2", "Sp2A1", "Sp2A2", "Sp3A1", "Sp3A2", "Sp4A1", "Sp4A2")
+
 ```
-  
+
 ```{r}
-pvnb_vec <- NULL
-for(i in 1:nrow(rat_new)){
-   tmp_rat <- rat_new[i,]
-   tmp_pvnb <- pvnb(K = parameter$K, X0 = parameter$X0, p = parameter$p, c = parameter$c, C = C, E = E, r = parameter$r, q_matrix = q_matrix, tmp_rat)
-   pvnb_vec <- append(pvnb_vec,tmp_pvnb)
-}
-rat_new <- data.frame(rat_new)
-colnames(rat_new) <- c("rat1", "rat2", "rat3", "rat4")
-rat_new$PVNB <- pvnb_vec
-
 
 ```
 
 
-  
-p_11 <- seq(0,200,20)
-p_21 <- seq(0,200,20)
-p_31 <- seq(0,200,20)
-p_41 <- seq(0,200,20)
-p_12 <- seq(0,200,20)
-p_22 <- seq(0,200,20)
-p_32 <- seq(0,200,20)
-p_42 <- seq(0,200,20)
+Prices
+
+```{r}
+p_11 <- seq(0,200,40)
+p_21 <- seq(0,200,40)
+p_31 <- seq(0,200,40)
+p_41 <- seq(0,200,40)
+p_12 <- seq(0,200,40)
+p_22 <- seq(0,200,40)
+p_32 <- seq(0,200,40)
+p_42 <- seq(0,200,40)
 
 ```
+
 
 ```{r}
 p_new <- NULL
@@ -569,12 +575,35 @@ for(i in 1:length(p_11)){
     }
   }
 
+p_new <- as.data.frame(p_new)
+
+names(p_new) <- c("Sp1A1", "Sp1A2", "Sp2A1", "Sp2A2", "Sp3A1", "Sp3A2", "Sp4A1", "Sp4A2")
+
+for(i in p_new[i,]){
+  for(j in ratio_new[j,]){
+    p_new[i,]*ratio_new[j,] #2 billion times! eek!
+  }
+}
+
+
+
+
 ```
 
 apply prices to fish...
 
 ```{r}
+test <- NULL
 
+p_new_t <- t(p_new)
+
+p_new_t <- matrix(c(seq(1,16000,1)),
+                    nrow=2000,
+                    ncol=8)
+
+for(i in 1:nrow(p_new_t)){
+  test <- ratio_new*p_new_t[i,]
+}
 
 
 ```

@@ -1,14 +1,22 @@
-# Analytical E
+#### Analytical E
 
-Optim_E <- function(r, k, q, p, X0, Xt, B, c){
-  log_E <- (1/B)*(log10(-B*( -p*q*X0*r - c*r + (2*r*p*q*(X0^2)/k) + (2*r*X0*c/k) ) / ( B*( (q^2)*p*X0 + q*c ) - p*(q^2)*X0 ) ) )
-  
-  Eopt <- 10^(log_E)
+## linear costs
+
+Opt_E1 <- function(Q, c, q1, q2, p1, p2, X1, X2){
+  Eopt <- (c*Q + p1*q2*Q*X2 - p2*q2*Q*X2) / (p1*q1*q2*X1*X2 - p2*q1*q2*X1*X2)
   
   return(Eopt)
   }
 
-# test <- Optim_E(.2,1,.5,200,200,300,.2,100)
-# print(test)
-# 104,330,389.74457
-# it works! (I think... I mean it produces a number)
+Opt_E2 <- function(Q, c, q1, q2, p1, p2, X1, X2){
+  Eopt <- (c*Q + p2*q1*Q*X1 - p1*q1*Q*X1) / (p2*q2*q1*X2*X1 - p1*q2*q1*X1*X2)
+  
+  return(Eopt)
+}
+
+#test
+
+Opt_E1(Q = 500, c = 10, q1 = 0.5, q2 = 0.5, p1 = 90, p2 = 100, X1 = 1000, X2 = 1000)
+
+## increasing costs
+
