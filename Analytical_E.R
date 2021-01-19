@@ -18,5 +18,5 @@ Opt_E2 <- function(Q, c, q1, q2, p1, p2, X1, X2){
 
 Opt_E1(Q = 500, c = 10, q1 = 0.5, q2 = 0.5, p1 = 90, p2 = 100, X1 = 1000, X2 = 1000)
 
-## increasing costs
+## quadratic costs
 
