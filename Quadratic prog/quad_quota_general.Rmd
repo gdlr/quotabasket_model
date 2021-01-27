@@ -25,21 +25,22 @@ library(quadprog)
 
 ```{r}
 # read files
-# We read the file
+# We read the files. data used in data2 folder is: 2 quotabaskets (m = 2), 3 techs (n = 3), and 3 species (s = 3)
+
 q_coefficient <- read_csv(here::here("Quadratic prog", "data2",
-                                    "q_tech.csv")) # n tech s species
+                                    "q_tech.csv")) # for n tech and s species, catchabilities per tech-species pair
 
 species_data <- read_csv(here::here("Quadratic prog", "data2",
-                                    "species_data.csv")) # s species
+                                    "species_data.csv")) # for s species, initial stock levels and per species prices
 
 species_group <- read_csv(here::here("Quadratic prog", "data2",
-                                    "species_group.csv")) # m qb
+                                    "species_group.csv")) # for m quotabaskets and s species, which species are in each quotabasket
 
 effort_cost <- read_csv(here::here("Quadratic prog", "data2",
-                                    "effort_costs.csv")) # n efforts
+                                    "effort_costs.csv")) # for n tech, the per effort cost associated with each
 
 quota_cap <- read_csv(here::here("Quadratic prog", "data2",
-                                    "quota_cap.csv")) # m qb
+                                    "quota_cap.csv")) # for m quotabaskets, the maximum harvest allowed for each
 ```
 
 ```{r}
@@ -112,7 +113,7 @@ coefficient_qb <- data.matrix(species_group)
 
 W <- matrix(coefficient_qb, nrow=m,ncol=s) # CORRECTION it was name D in the document, and D is defined as cost. I renamed it as W.
 
-#A(mxs)(sxn)(sxs)=(mxs)
+#A(mxs)(sxs)(sxn)=(mxn)
 A <- -1*W%*%B%*%Z
 t_A <- t(A)
 ```
@@ -147,6 +148,6 @@ quad_run
 ```{r}
 
 # CLEAR ENVIRONMENT
-rm(list = ls())
+#rm(list = ls())
 ```
 
