@@ -88,7 +88,7 @@ t_A <- t(A)
 
 ```{r}
 #quota basket caps (mx1)
-b_0 <- c(10,10)
+b_0 <- c(200,200)
 b <- -1*b_0
 
 ```
@@ -105,10 +105,22 @@ b <- -1*b_0
 
 # (1xn).(nxn)(nx1)-(1xn)(nx1) subject to :(mxn)(nx1) = (mx1) ≥ (mx1)
  
-quad_run <- solve.QP(D,d,t_A,b, meq=0)
+quad_run <- solve.QP(D,d,t_A,b, meq=2)
 quad_solution <- quad_run$solution
 
 quad_run
 
+```
+
+```{r}
+# revenue
+
+# d*E
+A_rev <- t_d%*%quad_solution
+
+#cost
+A_cos <- t(quad_solution)%*%D%*%quad_solution
+
+A_profit <- A_rev - A_cos
 ```
 

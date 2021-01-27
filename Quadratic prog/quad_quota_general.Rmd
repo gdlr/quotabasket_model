@@ -25,22 +25,21 @@ library(quadprog)
 
 ```{r}
 # read files
-# We read the files. data used in data2 folder is: 2 quotabaskets (m = 2), 3 techs (n = 3), and 3 species (s = 3)
+# We read the file
+q_coefficient <- read_csv(here::here("Quadratic prog", "data",
+                                    "q_tech.csv")) # n tech s species
 
-q_coefficient <- read_csv(here::here("Quadratic prog", "data2",
-                                    "q_tech.csv")) # for n tech and s species, catchabilities per tech-species pair
+species_data <- read_csv(here::here("Quadratic prog", "data",
+                                    "species_data.csv")) # s species
 
-species_data <- read_csv(here::here("Quadratic prog", "data2",
-                                    "species_data.csv")) # for s species, initial stock levels and per species prices
+species_group <- read_csv(here::here("Quadratic prog", "data",
+                                    "species_group.csv")) # m qb
 
-species_group <- read_csv(here::here("Quadratic prog", "data2",
-                                    "species_group.csv")) # for m quotabaskets and s species, which species are in each quotabasket
+effort_cost <- read_csv(here::here("Quadratic prog", "data",
+                                    "effort_costs.csv")) # n efforts
 
-effort_cost <- read_csv(here::here("Quadratic prog", "data2",
-                                    "effort_costs.csv")) # for n tech, the per effort cost associated with each
-
-quota_cap <- read_csv(here::here("Quadratic prog", "data2",
-                                    "quota_cap.csv")) # for m quotabaskets, the maximum harvest allowed for each
+quota_cap <- read_csv(here::here("Quadratic prog", "data",
+                                    "quota_cap.csv")) # m qb
 ```
 
 ```{r}
@@ -113,7 +112,7 @@ coefficient_qb <- data.matrix(species_group)
 
 W <- matrix(coefficient_qb, nrow=m,ncol=s) # CORRECTION it was name D in the document, and D is defined as cost. I renamed it as W.
 
-#A(mxs)(sxs)(sxn)=(mxn)
+#A(mxs)(sxs)(sxn)=(mxs)
 A <- -1*W%*%B%*%Z
 t_A <- t(A)
 ```
@@ -122,7 +121,7 @@ t_A <- t(A)
 #quota basket caps (mx1)
 b_0 <- quota_cap[['cap']]
 
-# b_0 <- c(10)
+#b_0 <- c(10)
 b <- -1*b_0
 
 ```
@@ -145,9 +144,23 @@ quad_solution <- quad_run$solution
 quad_run
 ```
 
+
+```{r}
+# revenue
+
+# d*E
+A_rev <- t_d%*%quad_solution
+
+#cost
+A_cos <- (1/2)*t(quad_solution)%*%D%*%quad_solution
+
+A_profit <- A_rev - A_cos
+
+```
+
 ```{r}
 
 # CLEAR ENVIRONMENT
-#rm(list = ls())
+rm(list = ls())
 ```
 
