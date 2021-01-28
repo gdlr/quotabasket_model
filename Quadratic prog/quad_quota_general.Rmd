@@ -159,8 +159,41 @@ A_profit <- A_rev - A_cos
 ```
 
 ```{r}
+# stock levels
+
+
+
+timez <- 5 # number of years (iterations)
+
+for(i in 1:(timez)-1)
+
+E <- as.vector(quad_solution)  
+
+#      (sxs)(sxn)(nx1)
+Hvst <- B%*%Z%*%E
+
+# stock in period t+1
+Xt1 <- X_0 - Hvst
+
+# stock matrix in period t+1 (sxs)
+Bt1 <- matrix(0, nrow=s,ncol=s)
+diag(Bt1) <- Xt1
+
+t_d <- t(p)%*%Bt1%*%Z
+  d <- t(t_d)
+  
+  solve.QP(D,d,t_A,b, meq=0)
+
+
+
+
+
+```
+
+
+```{r}
 
 # CLEAR ENVIRONMENT
-rm(list = ls())
+# rm(list = ls())
 ```
 
