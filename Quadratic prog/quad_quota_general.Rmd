@@ -21,24 +21,26 @@ library(ggplot2)
 #library(lpSolveAPI)
 library(here)
 library(quadprog)
+
+source(here::here("Quadratic prog","harvest_stock_fxn.R"))
 ```
 
 ```{r}
 # read files
 # We read the file
-q_coefficient <- read_csv(here::here("Quadratic prog", "data",
+q_coefficient <- read_csv(here::here("Quadratic prog", "data4",
                                     "q_tech.csv")) # n tech s species
 
-species_data <- read_csv(here::here("Quadratic prog", "data",
+species_data <- read_csv(here::here("Quadratic prog", "data4",
                                     "species_data.csv")) # s species
 
-species_group <- read_csv(here::here("Quadratic prog", "data",
+species_group <- read_csv(here::here("Quadratic prog", "data4",
                                     "species_group.csv")) # m qb
 
-effort_cost <- read_csv(here::here("Quadratic prog", "data",
+effort_cost <- read_csv(here::here("Quadratic prog", "data4",
                                     "effort_costs.csv")) # n efforts
 
-quota_cap <- read_csv(here::here("Quadratic prog", "data",
+quota_cap <- read_csv(here::here("Quadratic prog", "data4",
                                     "quota_cap.csv")) # m qb
 ```
 
@@ -141,6 +143,8 @@ b <- -1*b_0
 quad_run <- solve.QP(D,d,t_A,b, meq=0)
 quad_solution <- quad_run$solution
 
+E <- quad_solution
+
 quad_run
 ```
 
@@ -159,34 +163,46 @@ A_profit <- A_rev - A_cos
 ```
 
 ```{r}
-# stock levels
+# iteration
 
+E_initial <- as.vector(solve.QP(D,d,t_A,b, meq=0)$solution)
 
+# future stocks n Es
 
 timez <- 5 # number of years (iterations)
 
-for(i in 1:(timez)-1)
+# list of Es over time
 
-E <- as.vector(quad_solution)  
-
-#      (sxs)(sxn)(nx1)
-Hvst <- B%*%Z%*%E
-
-# stock in period t+1
-Xt1 <- X_0 - Hvst
-
-# stock matrix in period t+1 (sxs)
-Bt1 <- matrix(0, nrow=s,ncol=s)
-diag(Bt1) <- Xt1
-
-t_d <- t(p)%*%Bt1%*%Z
-  d <- t(t_d)
+list_Es <- function(E_initial, B, Z, X_0, timez){
+  last_stock <- X_0 #vector
+  stock_value <- X_0 #vector
+    
+  last_E <- E_initial #vector
+  E_value <- E_initial #vector
   
-  solve.QP(D,d,t_A,b, meq=0)
+  for(i in 1:timez){
+    Xt1 = stocks(E_value, B, Z, last_stock) #vector
+    stock_value <- append(stock_value, Xt1) #vector
+    last_stock <- Xt1 #vector
 
+    Bt1 <- matrix(0, nrow=s,ncol=s) #matrix
+    diag(Bt1) <- Xt1 #matrix
+    t_dt1 = t(p)%*%Bt1%*%Z #matrix
+    dt1 = t(t_dt1) #matrix
+    quad_run = solve.QP(D,dt1,t_A,b, meq=0) #vector
+    E_value <- append(E_value, quad_run$solution) #vector
+    last_E <- quad_run$solution #vector
+  }
+  return(E_value)
+}
 
+E_values <- (list_Es(E_initial, B, Z, X_0, timez))
 
+# organize Es by year
 
+Es_per_year <- matrix(E_values, nrow = timez, ncol = n, byrow = TRUE)
+
+  
 
 ```
 
