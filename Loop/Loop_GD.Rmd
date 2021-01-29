@@ -136,9 +136,10 @@ qb_stock <- function(species, tech, cost, baskets, mortality, years){
     t_A <- t(A)
     # We need to calculate the basket caps based on the initial BASKET size(not stock size!):
     viz_stock <- rowSums(tail(stock_df,1)) ### And here...
+    #b <- -10
     b <- -viz_stock * mortality
     # Find optimal efforts
-    E <- solve.QP(D,d,t_A,b, meq=1)$solution # Vector where the position is the effort per tech.
+    E <- solve.QP(D,d,t_A,b, meq=0)$solution # Vector where the position is the effort per tech.
     
     ### ------
     ### Calculate harvest for each species for the year
