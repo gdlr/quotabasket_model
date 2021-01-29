@@ -95,6 +95,7 @@ qb_stock <- function(species, tech, cost, baskets, mortality, years){
   h_df <- data.frame(matrix(ncol = nspecies))
   e_df <- data.frame(matrix(ncol = ntech))
   pft_df <- data.frame(matrix(ncol = ntech))
+  pft_sp_df <- data.frame(matrix(ncol = nspecies))
   
   #WWWW
   # We still probably want to calculate harvest per species AND technology...
@@ -164,16 +165,26 @@ qb_stock <- function(species, tech, cost, baskets, mortality, years){
     pft <- as.data.frame(Rev - Costz)
     names(pft) <- names(pft_df)
     
+    ### Profit per species
+    ### -----
+
+    # (1xtech)*(techxspecies) = (1xspecies)
+    # profit per tech x catchability
+
+    pft_sp <- pft*Z
+    names(pft_sp) <- names(pft_sp_df)
+    
     h_df <- rbind(h_df, h)
     e_df <- rbind(e_df, E)
     pft_df <- rbind(pft_df, pft)
+    pft_sp_df <- rbind(pft_sp_df, pft_sp)
 
   }
   
   ?rbind()
   rownames(stock_df) <- NULL
   colnames(stock_df) <- sp_df$s
-  return(list(stock = stock_df, harvest = h_df, effort = e_df, profit = pft_df))
+  return(list(stock = stock_df, harvest = h_df, effort = e_df, profit = pft_df, profit_species = pft_sp_df))
 }
 
 test <- qb_stock(species, tech, cost, baskets, mortality, years)
@@ -185,6 +196,8 @@ test$harvest
 test$stock
 
 test$profit
+
+test$profit_species
 
 
 ```
