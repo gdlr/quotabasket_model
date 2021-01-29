@@ -94,6 +94,7 @@ qb_stock <- function(species, tech, cost, baskets, mortality, years){
   # Make a few full data frames we can fill later
   h_df <- data.frame(matrix(ncol = nspecies))
   e_df <- data.frame(matrix(ncol = ntech))
+  pft_df <- data.frame(matrix(ncol = ntech))
   
   #WWWW
   # We still probably want to calculate harvest per species AND technology...
@@ -129,7 +130,8 @@ qb_stock <- function(species, tech, cost, baskets, mortality, years){
     # B, where the diagonal corresponds to stock sizes (X) for each species
     B <- matrix(0, nrow = nspecies, ncol = nspecies)
     diag(B) <- as.numeric(tail(stock_df,1)) ### Stock goes here...
-    # d combines the P,B,and Z vectors
+    # d combines the P,B,and Z matrices yeilding the per tech revenue (1xtech)
+    # (1xspecies)x(speciesxspecies)x(speciesxtech)
     d <- t(t(P)%*%B%*%Z)
     # A is the transpose matrix that defines which basket each species is in:
     A <- -1*M%*%B%*%Z
@@ -149,20 +151,41 @@ qb_stock <- function(species, tech, cost, baskets, mortality, years){
     stock_next <- tail(stock_df,1) + sp_df$r*tail(stock_df,1)*(1-tail(stock_df,1)/sp_df$K) - h
     stock_df <- rbind(stock_df, stock_next)
     
+    ### Calculate profit for each technology for the year
+    ### -----
+    
+    # (1xtech)*(techx1)
+    Rev <- as.data.frame(t(d)*E)
+    
+    # .5 * (1xtech) * (techxtech) x (techx1)
+    Costz <- as.data.frame((1/2)*t(E)%*%D*E)
+    
+    pft <- as.data.frame(Rev - Costz)
+    names(pft) <- names(pft_df)
+    
     h_df <- rbind(h_df, h)
     e_df <- rbind(e_df, E)
+    pft_df <- rbind(pft_df, pft)
+
   }
   
+  ?rbind()
   rownames(stock_df) <- NULL
   colnames(stock_df) <- sp_df$s
-  return(list(stock = stock_df, harvest = h_df, effort = e_df))
+  return(list(stock = stock_df, harvest = h_df, effort = e_df, profit = pft_df))
 }
 
 test <- qb_stock(species, tech, cost, baskets, mortality, years)
 
 test$effort
+
 test$harvest
+
 test$stock
+
+test$profit
+
+
 ```
 
 
