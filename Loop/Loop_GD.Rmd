@@ -64,7 +64,7 @@ b1 <- c(s1 = 1, s2 = 1)
 mortality = 0.1
 
 # Years
-years = 100
+years = 2
 ```
 
 # Step 2: make a list of the inputs
@@ -125,16 +125,17 @@ qb_stock <- function(species, tech, cost, baskets, mortality, years){
     ### ------
     ### Calculate effort per year
     ### ------
+    E <- NULL
     # B, where the diagonal corresponds to stock sizes (X) for each species
     B <- matrix(0, nrow = nspecies, ncol = nspecies)
-    diag(B) <- as.numeric(stock_df[i,])
+    diag(B) <- as.numeric(tail(stock_df,1)) ### Stock goes here...
     # d combines the P,B,and Z vectors
     d <- t(t(P)%*%B%*%Z)
     # A is the transpose matrix that defines which basket each species is in:
     A <- -1*M%*%B%*%Z
     t_A <- t(A)
     # We need to calculate the basket caps based on the initial BASKET size(not stock size!):
-    viz_stock <- rowSums(stock_df[i,])
+    viz_stock <- rowSums(tail(stock_df,1)) ### And here...
     b <- -viz_stock * mortality
     # Find optimal efforts
     E <- solve.QP(D,d,t_A,b, meq=1)$solution # Vector where the position is the effort per tech.
@@ -145,7 +146,7 @@ qb_stock <- function(species, tech, cost, baskets, mortality, years){
     # Repeat E for each species, so we have effort per tech per species:
     h <- c(B%*%Z%*%E) # Position corresponds to the species:
     # Calculate stock growth with X(t+1) = Xt + Xt*r*(1-Xt/K) - h
-    stock_next <- stock_df[i,] + sp_df$r*stock_df[i,]*(1-stock_df[i,]/sp_df$K) - h
+    stock_next <- tail(stock_df,1) + sp_df$r*tail(stock_df,1)*(1-tail(stock_df,1)/sp_df$K) - h
     stock_df <- rbind(stock_df, stock_next)
     
     h_df <- rbind(h_df, h)
