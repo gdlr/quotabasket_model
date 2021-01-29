@@ -159,9 +159,9 @@ qb_stock <- function(species, tech, cost, baskets, mortality, years){
 
 test <- qb_stock(species, tech, cost, baskets, mortality, years)
 
-test$effort 
+test$effort
 test$harvest
-
+test$stock
 ```
 
 
