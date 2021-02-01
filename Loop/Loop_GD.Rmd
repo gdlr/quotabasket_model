@@ -10,6 +10,7 @@ knitr::opts_chunk$set(echo = TRUE)
 
 library(tidyverse)
 library(quadprog)
+
 ```
 
 
@@ -61,10 +62,10 @@ b1 <- c(s1 = 1, s2 = 1)
 # Quotas: position = basket, number is the harvest limit.
 # We want this to be 0.1 of the preceeding stock under constant mortality, so this will have to change to just input constant m.
 
-mortality = 0.1
+mortality = 0.6
 
 # Years
-years = 2
+years = 30
 ```
 
 # Step 2: make a list of the inputs
@@ -202,6 +203,13 @@ test$profit_species
 
 ```
 
+```{r}
+# we put results into a dataframe
+results <- as.data.frame(test) %>% 
+  mutate(stock_total=stock.1+stock.2,
+         profit_total=profit.X1+profit.X2)
+
+```
 
 
 
