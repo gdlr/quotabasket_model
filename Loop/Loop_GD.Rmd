@@ -46,8 +46,10 @@ For each technology we need:
 
 # Overexploited s=1, r=0.5, K=100, X=0.5, p=200
 # Healthy, r=0.5, K=100, X=80, p=200
-# mixed previous 2  overxploited for species 2 and healthy species 1
-s1 <- c(s=1, r=0.5, K=100, X=80, p=200) 
+# mixed previous 2  overxploited for species 2 (X0=0.5) 
+# and healthy species 1 (X0=80)
+# We repeat the mixed case but P_1=150 P_2=200
+s1 <- c(s=1, r=0.5, K=100, X=0.5, p=200) 
 s2 <- c(s=2, r=0.5, K=100, X=0.5, p=200) 
 
 
