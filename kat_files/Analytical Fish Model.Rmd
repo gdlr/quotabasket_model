@@ -1,0 +1,84 @@
+---
+title: "Analytical Fish Model"
+author: "Kat Leigh"
+date: "12/4/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+
+# Packages
+library(tidyverse)
+library(Matrix)
+library(kableExtra)
+library(ggplot2)
+library(plotly)
+library(lpSolve)
+library(lpSolveAPI)
+```
+
+```{r}
+source("stock_dynamic.R")
+source("harvest_species.R")
+source("harvest_tech.R")
+source("profit_tech.R")
+source("pvnb.R")
+```
+
+```{r} 
+# First, set seed to ensure we have the same result 
+set.seed(666)
+
+
+# set the number of species and technologies we want to study
+species_num <- 4
+tech_num <- 4
+
+
+# set the number of years we want to model the stock dynamic 
+year = 5
+
+# set the discount rate
+delta = 0.05
+rho = 1/(1+delta)
+
+
+# set default values for variables in the "Our Model" section
+# set parameters
+species <- c(1:species_num)
+parameter <- data.frame(species)
+parameter$r <- c(0.5,0.5,0.5,0.5) #parameter$r <- c(1,0.5,0.4,0.9)
+parameter$K <- c(1.2,1.2,1.2,1.2) #parameter$K <- c(1,1.2,2,3)
+parameter$X0 <- c(1,1,1,1) #parameter$X0 <- c(0.5,0.6,1,1)
+parameter$p <- c(100,100,100,100) #parameter$p <- c(200,200,200,200)
+parameter$c <- c(1,1,1,1) #parameter$c <- c(1,1,1,1) isn't this redundant (see below)
+parameter$delta <- c(0.05,0.05,0.05,0.05)
+parameter$rho <- 1/(1+parameter$delta)
+
+# set catchability coefficient 
+coefficient <- c(0.05,0.05,0.05,0.05,
+                 0.05,0.05,0.05,0.05,
+                 0,0.05,0.05,0.05,
+                 0,0.05,0.05,0.05)
+
+#coefficient <- c(0.05,0.05,0.07,0.07,
+ #                0.04,0.05,0.05,0.05,
+  #               0,0.011,0.05,0.05,
+   #              0,0.01,0.02,0.05)
+
+q_matrix <- matrix(coefficient, nrow = tech_num, ncol = species_num)
+
+species_tech_matrix <- data.frame(q_matrix, nrow = tech_num, ncol = species_num)
+
+# set cost for each tech
+C <- c(1,1,1,1)
+````
+
+Now let's code pull the Optimal E into this...
+
+```{r}
+
+
+```
+
