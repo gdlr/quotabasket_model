@@ -49,8 +49,8 @@ For each technology we need:
 # mixed previous 2  overxploited for species 2 (X0=0.5) 
 # and healthy species 1 (X0=80)
 # We repeat the mixed case but P_1=150 P_2=200
-s1 <- c(s=1, r=0.5, K=100, X=0.5, p=200) 
-s2 <- c(s=2, r=0.5, K=100, X=0.5, p=200) 
+s1 <- c(s=1, r=0.5, K=100, X=50, p=200) 
+s2 <- c(s=2, r=0.5, K=100, X=50, p=200) 
 
 
 # t = tech, q1 = catchability species 1, q2 = catchability species 2...
@@ -116,7 +116,7 @@ qb_stock <- function(species, tech, cost, baskets, mortality, years){
   
   # D is the cost matrix, where the diagonal values are the cost of each tech:
   D <- matrix(0, nrow = ntech, ncol = ntech)
-  diag(D) <- 2*cost_df$cost
+    diag(D) <- 2*cost_df$cost
   
   # Z is the the tech matrix
   Z <- as.matrix(tech_df[,-1])
@@ -126,6 +126,10 @@ qb_stock <- function(species, tech, cost, baskets, mortality, years){
   
   # M is whether a species is contained in a basket:
   M <- as.matrix(baskets_df)
+  
+  # We build a diagonal matrix (nxn) for the second constraint
+  N <- matrix(0, nrow=ntech,ncol=ntech)
+    diag(N) <- 1
     
   ### --------
   ### Changing Parameters
@@ -138,17 +142,24 @@ qb_stock <- function(species, tech, cost, baskets, mortality, years){
     E <- NULL
     # B, where the diagonal corresponds to stock sizes (X) for each species
     B <- matrix(0, nrow = nspecies, ncol = nspecies)
-    diag(B) <- as.numeric(tail(stock_df,1)) ### Stock goes here...
+      diag(B) <- as.numeric(tail(stock_df,1)) ### Stock goes here...
     # d combines the P,B,and Z matrices yeilding the per tech revenue (1xtech)
     # (1xspecies)x(speciesxspecies)x(speciesxtech)
     d <- t(t(P)%*%B%*%Z)
     # A is the transpose matrix that defines which basket each species is in:
     A <- -1*M%*%B%*%Z
-    t_A <- t(A)
+      # Add the second constraint N:
+      A <- rbind(A, N)
+      # Take the transpose for solve.QP:
+      t_A <- t(A)
     # We need to calculate the basket caps based on the initial BASKET size(not stock size!):
     viz_stock <- rowSums(tail(stock_df,1)) ### And here...
-    #b <- -10
+    # Make the first constraint based on mortality:
     b <- -viz_stock * mortality
+      # Make a second constraint so they're all greater than zero:
+      b2 <- matrix(0, nrow=ntech, ncol=1)
+      # Bind them together
+      b <- rbind(b, b2)
     # Find optimal efforts
     E <- solve.QP(D,d,t_A,b, meq=0)$solution # Vector where the position is the effort per tech.
     
@@ -189,24 +200,20 @@ qb_stock <- function(species, tech, cost, baskets, mortality, years){
 
   }
   
-  ?rbind()
   rownames(stock_df) <- NULL
   colnames(stock_df) <- sp_df$s
   return(list(stock = stock_df, harvest = h_df, effort = e_df, profit = pft_df, profit_species = pft_sp_df,years=horizon))
 }
 
-test <- qb_stock(species, tech, cost, baskets, mortality, years)
+test <- qb_stock(species, tech, cost, baskets, 0.9, years)
 
 test$effort
-
 test$harvest
-
 test$stock
-
 test$profit
-
 test$profit_species
 
+test <- qb_stock(species, tech, cost, baskets, mortality, years)
 
 ```
 
