@@ -1,0 +1,166 @@
+---
+title: "Array problem"
+author: "Mauricio Collado"
+date: "1/23/2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+
+# Packages
+library(tidyverse)
+library(Matrix)
+library(kableExtra)
+library(ggplot2)
+#library(plotly)
+#library(lpSolve)
+#library(lpSolveAPI)
+library(here)
+library(quadprog)
+```
+
+```{r}
+# read files
+# We read the file
+q_coefficient <- read_csv(here::here("Quadratic prog E", "data",
+                                    "q_tech.csv")) # n tech s species
+
+species_data <- read_csv(here::here("Quadratic prog E", "data",
+                                    "species_data.csv")) # s species
+
+species_group <- read_csv(here::here("Quadratic prog E", "data",
+                                    "species_group.csv")) # m qb
+
+effort_cost <- read_csv(here::here("Quadratic prog E", "data",
+                                    "effort_costs.csv")) # n efforts
+
+quota_cap <- read_csv(here::here("Quadratic prog E", "data",
+                                    "quota_cap.csv")) # m qb
+```
+
+```{r}
+# First, set seed to ensure we have the same result 
+set.seed(666)
+
+
+# set the number of species and technologies we want to study
+s <- as.numeric(nrow(species_data)) #species
+n <- as.numeric(nrow(effort_cost)) #tecnologies
+m <- as.numeric(nrow(quota_cap)) #quota baskets
+
+```
+
+
+```{r}
+# D (costs)
+
+# set cost for each tech
+Cost <- effort_cost[['Cost']]
+
+#Cost <- c(1,1)
+
+Cost2 <- 2*Cost
+
+# nxn 
+D <- matrix(0, nrow=n,ncol=n)
+diag(D) <- Cost2
+
+```
+
+```{r}
+# d
+
+#prices (sx1)
+p <- species_data[['price_x']]
+
+#p <- c(200,200)
+
+# stock in period 0
+X_0 <- species_data[['stock_x']]
+
+# X_0 <- c(0.5,0.5)
+
+# stock matrix (sxs)
+B <- matrix(0, nrow=s,ncol=s)
+diag(B) <- X_0
+
+# catchability matrix (sxn)
+coefficient <- data.matrix(q_coefficient)
+  
+#c(0.05,0.04,
+# 0.04,0.05)
+
+Z <- matrix(coefficient, nrow=s,ncol=n)
+
+#d t(sx1)(sxs)(sxn)=(1xn)
+t_d <- t(p)%*%B%*%Z
+
+#nx1
+d <- t(t_d)
+
+```
+
+```{r}
+# quota basket matrix (mxs)
+coefficient_qb <- data.matrix(species_group)
+
+# coefficient_qb <- c(1,1)
+
+W <- matrix(coefficient_qb, nrow=m,ncol=s) # CORRECTION it was name D in the document, and D is defined as cost. I renamed it as W.
+
+#A(mxs)(sxs)(sxn)=(mx)
+A <- -1*W%*%Z
+t_A <- t(A)
+```
+
+```{r}
+#quota basket caps (mx1)
+b_0 <- quota_cap[['cap']]
+
+#b_0 <- c(10)
+b <- -1*b_0
+
+```
+
+```{r}
+# quadprog
+
+# solve.QP(Dmat, dvec, Amat, bvec, meq=0, factorized=FALSE)
+# (1xn).(nxn)(nx1)-(1xn)(nx1) subject to :(mxn)(nx1) = (mx1) ≥ (mx1)
+# D: symmetric matrix with the quadratic component (Dmat)
+# d: linear term (dvec)
+# A: matrix with linear constraints (Amat)
+# b: constraints (bvec)
+
+# (1xn).(nxn)(nx1)-(1xn)(nx1) subject to :(mxn)(nx1) = (mx1) ≥ (mx1)
+ 
+quad_run <- solve.QP(D,d,t_A,b, meq=0)
+quad_solution <- quad_run$solution
+
+quad_run
+```
+
+
+```{r}
+# revenue
+
+# d*E
+A_rev <- t_d%*%quad_solution
+
+#cost
+A_cos <- (1/2)*t(quad_solution)%*%D%*%quad_solution
+
+A_profit <- A_rev - A_cos
+
+```
+
+```{r}
+
+# CLEAR ENVIRONMENT
+rm(list = ls())
+```
+
