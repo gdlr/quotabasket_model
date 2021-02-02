@@ -1,0 +1,147 @@
+---
+title: "example_model_run"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+library(tidyverse)
+library(ggplot2)
+library(here)
+library(quadprog)
+library(cowplot)
+```
+
+
+# DO NOT ALTER THIS DOCUMENT!!!
+
+### Preparing the inputs and outputs for `qb_stock.r`:
+
+For each species, we need:
+
+* r - growth rate
+* K - carrying capacity
+* X - starting stock
+* p - price
+
+For each technology we need:
+
+* Catchability per species
+* Cost per unit effort
+
+# Inputs
+
+## Step 1: Input parameters
+```{r}
+# Species:
+# s = species, r, K, X, p
+
+s1 <- c(s=1, r=0.5, K=100, X=80, p=150) 
+s2 <- c(s=2, r=0.5, K=100, X=20, p=200) 
+
+# t = tech, q1 = catchability species 1, q2 = catchability species 2...
+
+t1 <- c(t=1, q1=0.05, q2=0.04)
+t2 <- c(t=2, q1=0.04, q2=0.05)
+
+# Tech cost: t = tech, cost = cost per unit effort
+c1 <- c(t=1, cost=20)
+c2 <- c(t=2, cost=20)
+
+# Baskets: binary matrix of # species x # baskets, where 1 means that species is in that basket
+
+b1 <- c(s1 = 1, s2 = 1)
+b2 <- c(s1 = 0, s2 = 0)
+
+# Quotas: position = basket, number is the harvest limit.
+# We want this to be 0.1 of the preceeding stock under constant mortality, so this will have to change to just input constant m.
+
+mortality = 0.1
+
+# Years
+years = 30
+```
+
+# Step 2: make a list of the inputs
+```{r}
+species = list(s1, s2)
+tech = list(t1, t2)
+cost = list(c1, c2)
+baskets = list(b1)
+```
+
+# Step 3: Run the function
+
+```{r}
+source(here("working_model", "qb_stock.R"))
+
+output <- qb_stock(species, tech, cost, baskets, mortality, years)
+
+# we put results into a dataframe
+results <- as.data.frame(output) %>% 
+  mutate(stock_total=stock.1+stock.2, # we sum stocks...
+         profit_total=profit.X1+profit.X2) #we sum profits...
+
+```
+
+```{r}
+# graphs of effort and harvest
+effort_x1 <- ggplot(results)+
+  geom_line(aes(x=years,y=effort.X1), color="red")+
+  labs(title="Effort for tech 1")
+
+effort_x2 <- ggplot(results)+
+  geom_line(aes(x=years,y=effort.X2), color="blue")+
+  labs(title="Effort for tech 2")
+
+harvest_x1 <- ggplot(results)+
+  geom_line(aes(x=years,y=harvest.X1), color="red")+
+  labs(title="Harvest of species 1")
+
+harvest_x2 <- ggplot(results)+
+  geom_line(aes(x=years,y=harvest.X2), color="purple")+
+  labs(title="Harvest of species 2")
+
+# graphs of biomass
+biomass_x1 <- ggplot(results)+
+  geom_line(aes(x=years,y=stock.1), color="red")+
+  labs(title="Stock species 1")
+
+biomass_x2 <- ggplot(results)+
+  geom_line(aes(x=years,y=stock.2), color="blue")+
+  labs(title="Stock species 2")
+
+biomass_x <- ggplot(results)+
+  geom_line(aes(x=years,y=stock_total), color="darkgreen")+
+  labs(title="Stock species total")
+
+# graphs for profits
+
+profits_e1 <- ggplot(results)+
+  geom_line(aes(x=years,y=profit.X1), color="red")+
+  labs(title="Profits from tech 1")
+
+profits_e2 <- ggplot(results)+
+  geom_line(aes(x=years,y=profit.X2), color="blue")+
+  labs(title="Profits from tech 2")
+
+profits_total <- ggplot(results)+
+  geom_line(aes(x=years,y=profit_total), color="darkgreen")+
+  labs(title="Profits total")
+
+graph1 <- plot_grid(effort_x1, effort_x2, 
+          harvest_x1, harvest_x2,
+          labels = c("A1", "A2",
+                     "B1", "B2"),
+          ncol = 2, nrow = 2)
+
+graph2 <-plot_grid(biomass_x1, biomass_x2,
+          profits_e1, profits_e2,
+          labels = c("C1", "C2",
+                     "D1", "D2"),
+          ncol = 2, nrow = 2)
+graph1
+graph2
+```
+
