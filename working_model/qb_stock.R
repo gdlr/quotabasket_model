@@ -19,7 +19,7 @@ qb_stock <- function(species, tech, cost, baskets, mortality, years){
   
   ## Profits:
   pft_df <- data.frame(matrix(ncol = ntech))
-  pft_sp_df <- data.frame(matrix(ncol = nspecies))
+  rev_sp_df <- data.frame(matrix(ncol = nspecies))
   
   #WWWW
   # We still probably want to calculate harvest per species AND technology...
@@ -91,33 +91,45 @@ qb_stock <- function(species, tech, cost, baskets, mortality, years){
     ### Calculate profit for each technology for the year
     ### -----
     
+    # Rev per tech = revenue per unit effort of that tech x effort applied
     # (1xtech)*(techx1)
-    Rev <- as.data.frame(t(d)*E)
+    rev_t <- t(d)*E
     
-    # .5 * (1xtech) * (techxtech) x (techx1)
-    Costz <- as.data.frame((1/2)*t(E)%*%D*E)
+    # Cost per technology = cost per unit of effort for that tech * effort applied to that tech
+    # Costs are available in the cost_df
+    cpue <- cost_df$cost
+    cost_t <- cpue*E
     
-    pft <- as.data.frame(Rev - Costz)
+    # Profit per tech is the revenue - cost
+    pft <- as.data.frame(rev_t-cost_t)
     names(pft) <- names(pft_df)
     
     ### Profit per species
     ### -----
     
-    # (1xtech)*(techxspecies) = (1xspecies)
-    # profit per tech x catchability
+    # Rev per species:
+    rev_sp <- as.data.frame(h*t(P))
+    names(rev_sp) <- rev(names(rev_sp_df))
     
-    # pft_sp <- pft*Z
-    
+    # Add them to the corresponding data frames:
     h_df <- rbind(h_df, h)
     e_df <- rbind(e_df, E)
     pft_df <- rbind(pft_df, pft)
-    # pft_sp_df <- rbind(pft_sp_df, pft_sp)
+    rev_sp_df <- rbind(rev_sp_df, rev_sp)
     
   }
   
   rownames(stock_df) <- NULL
   colnames(stock_df) <- sp_df$s
-  return(list(stock = stock_df, harvest = h_df, effort = e_df, profit = pft_df))
-  
-  # profit_species = pft_sp_df))
+  return(list(stock = stock_df, harvest = h_df, effort = e_df, profit_per_t = pft_df, rev_per_sp= rev_sp_df))
 }
+
+test <- qb_stock(species, tech, cost, baskets, mortality, years)
+
+test$effort
+test$harvest
+test$stock
+test$profit
+test$rev_per_sp
+
+test <- qb_stock(species, tech, cost, baskets, mortality, years)
