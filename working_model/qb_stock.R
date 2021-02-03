@@ -86,7 +86,6 @@ qb_stock <- function(species, tech, cost, baskets, mortality, years){
     h <- c(B%*%Z%*%E) # Position corresponds to the species:
     # Calculate stock growth with X(t+1) = Xt + Xt*r*(1-Xt/K) - h
     stock_next <- tail(stock_df,1) + sp_df$r*tail(stock_df,1)*(1-tail(stock_df,1)/sp_df$K) - h
-    stock_df <- rbind(stock_df, stock_next)
     
     ### Calculate profit for each technology for the year
     ### -----
@@ -112,6 +111,7 @@ qb_stock <- function(species, tech, cost, baskets, mortality, years){
     names(rev_sp) <- rev(names(rev_sp_df))
     
     # Add them to the corresponding data frames:
+    stock_df <- rbind(stock_df, stock_next)
     h_df <- rbind(h_df, h)
     e_df <- rbind(e_df, E)
     pft_df <- rbind(pft_df, pft)
@@ -119,17 +119,19 @@ qb_stock <- function(species, tech, cost, baskets, mortality, years){
     
   }
   
-  rownames(stock_df) <- NULL
-  colnames(stock_df) <- sp_df$s
+  # Make the output column names nice
+  sp_names <- paste("s", sp_df$s, sep = "_")
+  tech_names <- paste("t", tech_df$t, sep = "_")
+  # Make yr vector:
+  year <- seq(0, years, by = 1)
+  # Add stock/tech names & years
+  colnames(stock_df) <- sp_names
+  colnames(h_df) <- sp_names
+  colnames(rev_sp_df) <- sp_names
+  
+  colnames(e_df) <- tech_names
+  colnames(pft_df) <- tech_names
+  
+  # Return output
   return(list(stock = stock_df, harvest = h_df, effort = e_df, profit_per_t = pft_df, rev_per_sp= rev_sp_df))
 }
-
-test <- qb_stock(species, tech, cost, baskets, mortality, years)
-
-test$effort
-test$harvest
-test$stock
-test$profit
-test$rev_per_sp
-
-test <- qb_stock(species, tech, cost, baskets, mortality, years)

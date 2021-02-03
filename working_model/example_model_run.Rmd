@@ -64,6 +64,7 @@ years = 30
 
 # Step 2: make a list of the inputs
 ```{r}
+# Change these to reflect the number of species and technologies above:
 species = list(s1, s2)
 tech = list(t1, t2)
 cost = list(c1, c2)
