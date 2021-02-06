@@ -36,8 +36,8 @@ For each technology we need:
 # Species:
 # s = species, r, K, X, p
 
-s1 <- c(s=1, r=0.5, K=100, X=50, p=200) 
-s2 <- c(s=2, r=0.5, K=100, X=50, p=200) 
+s1 <- c(s=1, r=0.5, K=100, X=50, p=10) 
+s2 <- c(s=2, r=0.5, K=100, X=50, p=10) 
 
 # t = tech, q1 = catchability species 1, q2 = catchability species 2...
 
