@@ -1,0 +1,168 @@
+---
+title: "Results_global_limit"
+author: "Kat Leigh"
+date: "2/7/2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE, message = FALSE, warning = FALSE)
+
+library(tidyverse)
+library(ggplot2)
+library(here)
+library(quadprog)
+library(scales)
+```
+
+```{r}
+
+# read in data
+
+output_0 <- read_csv("C:/Users/kll86/OneDrive/Documents/UCSB/quotabasket_model/working_model/scratchoutput_0.csv")
+NPV_30_0 <- read_csv("C:/Users/kll86/OneDrive/Documents/UCSB/quotabasket_model/working_model/scratchNPV_30_0.csv")
+
+output_1 <- read_csv("C:/Users/kll86/OneDrive/Documents/UCSB/quotabasket_model/working_model/scratchoutput_1.csv")
+NPV_30_1 <- read_csv("C:/Users/kll86/OneDrive/Documents/UCSB/quotabasket_model/working_model/scratchNPV_30_1.csv")
+
+output_2 <- read_csv("C:/Users/kll86/OneDrive/Documents/UCSB/quotabasket_model/working_model/scratchoutput_2.csv")
+NPV_30_2 <- read_csv("C:/Users/kll86/OneDrive/Documents/UCSB/quotabasket_model/working_model/scratchNPV_30_2.csv")
+
+output_3 <- read_csv("C:/Users/kll86/OneDrive/Documents/UCSB/quotabasket_model/working_model/scratchoutput_3.csv")
+NPV_30_3 <- read_csv("C:/Users/kll86/OneDrive/Documents/UCSB/quotabasket_model/working_model/scratchNPV_30_3.csv")
+
+output_4 <- read_csv("C:/Users/kll86/OneDrive/Documents/UCSB/quotabasket_model/working_model/scratchoutput_4.csv")
+NPV_30_4 <- read_csv("C:/Users/kll86/OneDrive/Documents/UCSB/quotabasket_model/working_model/scratchNPV_30_4.csv")
+
+output_5 <- read_csv("C:/Users/kll86/OneDrive/Documents/UCSB/quotabasket_model/working_model/scratchoutput_5.csv")
+NPV_30_5 <- read_csv("C:/Users/kll86/OneDrive/Documents/UCSB/quotabasket_model/working_model/scratchNPV_30_5.csv")
+
+output_6 <- read_csv("C:/Users/kll86/OneDrive/Documents/UCSB/quotabasket_model/working_model/scratchoutput_6.csv")
+NPV_30_6 <- read_csv("C:/Users/kll86/OneDrive/Documents/UCSB/quotabasket_model/working_model/scratchNPV_30_6.csv")
+
+output_7 <- read_csv("C:/Users/kll86/OneDrive/Documents/UCSB/quotabasket_model/working_model/scratchoutput_7.csv")
+NPV_30_7 <- read_csv("C:/Users/kll86/OneDrive/Documents/UCSB/quotabasket_model/working_model/scratchNPV_30_7.csv")
+
+output_8 <- read_csv("C:/Users/kll86/OneDrive/Documents/UCSB/quotabasket_model/working_model/scratchoutput_8.csv")
+NPV_30_8 <- read_csv("C:/Users/kll86/OneDrive/Documents/UCSB/quotabasket_model/working_model/scratchNPV_30_8.csv")
+
+output_9 <- read_csv("C:/Users/kll86/OneDrive/Documents/UCSB/quotabasket_model/working_model/scratchoutput_9.csv")
+NPV_30_9 <- read_csv("C:/Users/kll86/OneDrive/Documents/UCSB/quotabasket_model/working_model/scratchNPV_30_9.csv")
+
+output_100 <- read_csv("C:/Users/kll86/OneDrive/Documents/UCSB/quotabasket_model/working_model/scratchoutput_100.csv")
+NPV_30_100 <- read_csv("C:/Users/kll86/OneDrive/Documents/UCSB/quotabasket_model/working_model/scratchNPV_30_100.csv")
+
+```
+# Step 4: Visualize Results
+
+```{r}
+# profits
+
+pfts_1 <- output_1 %>% 
+  select(profit_per_t.t_1:profit_per_t.t_5) %>% 
+  mutate(run = "0.1")
+
+pfts_2 <- output_2%>% 
+  select(profit_per_t.t_1:profit_per_t.t_5) %>% 
+  mutate(run = "0.2")
+
+pfts_3 <- output_3%>%    select(profit_per_t.t_1:profit_per_t.t_5) %>% 
+  mutate(run = "0.3")
+
+pfts_4 <- output_4%>%    select(profit_per_t.t_1:profit_per_t.t_5) %>% 
+  mutate(run = "0.4")
+
+pfts_5 <- output_5%>%    select(profit_per_t.t_1:profit_per_t.t_5) %>% 
+  mutate(run = "0.5")
+
+pfts_6 <- output_6%>%    select(profit_per_t.t_1:profit_per_t.t_5) %>% 
+  mutate(run = "0.6")
+
+pfts_7 <- output_7%>%    select(profit_per_t.t_1:profit_per_t.t_5) %>% 
+  mutate(run = "0.7")
+
+pfts_8 <- output_8%>%    select(profit_per_t.t_1:profit_per_t.t_5) %>% 
+  mutate(run = "0.8")
+
+pfts_9 <- output_9%>%    select(profit_per_t.t_1:profit_per_t.t_5) %>% 
+  mutate(run = "0.9")
+
+pfts_100 <- output_100%>%    select(profit_per_t.t_1:profit_per_t.t_5) %>% 
+  mutate(run = "1.0")
+
+combo_pfts <- rbind(pfts_1, pfts_2, pfts_3, pfts_4, pfts_5, pfts_6, pfts_7, pfts_8, pfts_9, pfts_100)
+
+tots <- combo_pfts$profit_per_t.t_1 + combo_pfts$profit_per_t.t_2 + combo_pfts$profit_per_t.t_3 + combo_pfts$profit_per_t.t_4 + combo_pfts$profit_per_t.t_5
+
+combo_pfts_f <- cbind(combo_pfts, tots)
+
+```
+
+```{r}
+ggplot()+
+  geom_smooth(data = combo_pfts_f, aes(y=tots/1000, x=rep(0:30,10), color = as.factor(run)), se = FALSE)+ theme_minimal()+
+  labs(title= str_wrap("Predicted annual profits for a multi-species fishery managed by a range of annual global harvest limits", 80),
+       caption= str_wrap("Results of a global harvest limit model for 5 species and 5 technologies parameterized such that species only differ in their respective intrinsic growth rate 'r' (initial stock sizes, costs, catchabilities, prices, and carrying capacities are identical). Model was run for 10 different mortality coefficients ranging from 0.1 to 1. Mortality coefficients define the total combined biomass that can be extracted per year as a proportion of the total available biomass for that year.", 100),
+         x= "Number of Years",
+         y= "Fishery-wide Annual Profits (thousands)",
+       color= "Mortality Coefficient")+
+  scale_y_continuous(labels=dollar_format(prefix="$"))+
+  theme(plot.caption = element_text(hjust = 0))
+
+```
+```{r}
+# stock
+
+stock_0 <- output_0 %>% 
+  select(stock.s_1:stock.s_5) %>% 
+  mutate(run = "0.0")
+
+stock_1 <- output_1 %>%    select(stock.s_1:stock.s_5) %>% 
+  mutate(run = "0.1")
+
+stock_2 <- output_2 %>%    select(stock.s_1:stock.s_5) %>% 
+  mutate(run = "0.2")
+
+stock_3 <- output_3 %>%    select(stock.s_1:stock.s_5) %>% 
+  mutate(run = "0.3")
+
+stock_4 <- output_4 %>%    select(stock.s_1:stock.s_5) %>% 
+  mutate(run = "0.4")
+
+stock_5 <- output_5 %>%    select(stock.s_1:stock.s_5) %>% 
+  mutate(run = "0.5")
+
+stock_6 <- output_6 %>%    select(stock.s_1:stock.s_5) %>% 
+  mutate(run = "0.6")
+
+stock_7 <- output_7 %>%    select(stock.s_1:stock.s_5) %>% 
+  mutate(run = "0.7")
+
+stock_8 <- output_8 %>%    select(stock.s_1:stock.s_5) %>% 
+  mutate(run = "0.8")
+
+stock_9 <- output_9 %>%    select(stock.s_1:stock.s_5) %>% 
+  mutate(run = "0.9")
+
+stock_100 <- output_100 %>%    select(stock.s_1:stock.s_5) %>% 
+  mutate(run = "1.0")
+
+combo_stock <- rbind(stock_0, stock_1, stock_2, stock_3, stock_4, stock_5, stock_6, stock_7, stock_8, stock_9, stock_100)
+
+tots <- combo_stock$stock.s_1 + combo_stock$stock.s_2 + combo_stock$stock.s_3 + combo_stock$stock.s_4 + combo_stock$stock.s_5
+
+combo_stock_f <- cbind(combo_stock, tots)
+
+```
+
+```{r}
+ggplot()+
+  geom_smooth(data = combo_stock_f, aes(y=tots, x=rep(0:30,11), color = as.factor(run)), se = FALSE)+ theme_minimal()+
+  labs(title= str_wrap("Predicted annual stocks for a multi-species fishery managed by a range of annual global harvest limits", 80),
+       caption= str_wrap("Results of a global harvest limit model for 5 species and 5 technologies parameterized such that species only differ in their respective intrinsic growth rate 'r' (initial stock sizes, costs, catchabilities, prices, and carrying capacities are identical). Model was run for 11 different mortality coefficients ranging from 0 to 1. Mortality coefficients define the total combined biomass that can be extracted per year as a proportion of the total available biomass for that year. Thus, a mortality coefficient of zero is equivalent to an open-access fishery", 100),
+         x= "Number of Years",
+         y= "Fishery-wide Annual Stock Level (tons)",
+       color= "Mortality Coefficient")+
+  theme(plot.caption = element_text(hjust = 0))
+
+```
