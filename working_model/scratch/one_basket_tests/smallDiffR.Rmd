@@ -1,0 +1,187 @@
+---
+title: "Small r Difference"
+output: html_document
+---
+
+## Same parameters
+
+Everything the same but r are 1 different
+
+The slower growing species hits a lower steady state.
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE, message = FALSE, warning = FALSE)
+
+library(tidyverse)
+library(ggplot2)
+library(here)
+library(quadprog)
+library(kableExtra)
+library(patchwork)
+```
+
+```{r}
+### Preparing the inputs and outputs for `qb_stock.r`:
+
+# For each species, we need:
+# 
+# * r - growth rate
+# * K - carrying capacity
+# * X - starting stock
+# * p - price
+# 
+# For each technology we need:
+# 
+# * Catchability per species
+# * Cost per unit effort
+
+# Inputs
+
+## Step 1: Input parameters
+```
+
+```{r}
+# Species:
+# s = species, r, K, X, p
+
+s1 <- c(s=1, r=0.4, K=100, X=50, p=10) 
+s2 <- c(s=2, r=0.5, K=100, X=50, p=10)
+
+
+# t = tech, q1 = catchability species 1, q2 = catchability species 2...
+
+t1 <- c(t=1, q1=0.05, q2=0.01)
+t2 <- c(t=2, q1=0.01,    q2=0.05)
+
+
+# Tech cost: t = tech, cost = cost per unit effort
+c1 <- c(t=1, cost=1)
+c2 <- c(t=2, cost=1)
+
+# Baskets: binary matrix of # species x # baskets, where 1 means that species is in that basket
+
+b1 <- c(s1 = 1, s2 = 1)
+
+# Quotas: position = basket, number is the harvest limit.
+# We want this to be 0.1 of the preceding stock under constant mortality, so this will have to change to just input constant m.
+
+# mortality = 0.1
+
+# Years
+years = 30
+```
+
+
+```{r}
+# Step 2: make a list of the inputs
+# Change these to reflect the number of species and technologies above:
+species = list(s1, s2)
+tech = list(t1, t2)
+cost = list(c1, c2)
+baskets = list(b1)
+```
+
+
+
+```{r}
+# Step 3: Run the function
+source(here("working_model", "qb_stock.R"))
+
+# Calc mort that leads to max profit:
+
+qb_max_p <- function(species, tech, cost, baskets, mortality, years, discount = 0.05){
+  mort <- seq(0.1, 1, by = 0.01)
+  p_out <- data_frame(m = 0, prof = 0)
+  for(i in mort){
+    out <- qb_stock(species, tech, cost, baskets, mortality = i, years)
+    total_prof <- sum(colSums(out$profit_per_t, na.rm = TRUE))
+    p_out <- rbind(p_out, c(i, total_prof))
+  }
+  return(p_out)
+}
+
+# Save this as a mortality
+maximum_df <- qb_max_p(species, tech, cost, baskets, mortality, years)
+row_number <- which.max(maximum_df$prof)
+max_mort <- maximum_df$m[row_number]
+
+
+output <- qb_stock(species, tech, cost, baskets, mortality = max_mort, years)
+```
+
+
+```{r}
+# Make a nice table for our inputs:
+# Make df's
+sp_df <- as.data.frame(do.call(rbind, species))
+tech_df <- as.data.frame(do.call(rbind, tech))
+cost_df <- as.data.frame(do.call(rbind, cost))
+baskets_df <- as.data.frame(do.call(rbind, baskets))
+
+# Join em in a nice way
+tech_tbl_df <- tech_df %>% 
+  inner_join(cost_df, by = "t")
+
+# Still need to display baskets
+
+# Make tables
+species_table <- kable(sp_df, col.names = c("Species", "r", "K", "Starting stock (X)", "price")) %>% 
+  kable_classic(full_width = F)
+
+tech_table <- kable(tech_tbl_df, col.names = c("Tech", "q1", "q2", "cost")) %>% 
+  kable_classic(full_width = F)
+
+```
+
+
+```{r}
+# Make a plot of these
+# This will only work for these fisheries...
+plot_qb  <- function(output = output){
+  years = seq(1, nrow(output$stock), by = 1)
+  w_yr <- lapply(output, cbind, years)
+  
+  stock_plot <- ggplot() +
+    geom_line(data = w_yr$stock, aes(x = years, y = s_1, color = "species 1", linetype = "stock")) +
+    geom_line(data = w_yr$stock, aes(x = years, y = s_2, color = "species 2", linetype = "stock")) +
+    geom_line(data = w_yr$harvest, aes(x = years, y = s_1, color = "species 1", linetype = "harvest")) +
+    geom_line(data = w_yr$harvest, aes(x = years, y = s_2, color = "species 2", linetype = "harvest")) +
+    scale_y_continuous(limits = c(0, 100), expand = c(0,0)) +
+    theme_bw() +
+    labs(x = "Years", y = "Stock", color = "Species", title = "Stock & Harvest") +
+    scale_color_manual(name = "Species", values = c("species 1" = "red", "species 2" = "blue")) +
+    scale_linetype_manual(name = "", values = c("stock" = "solid", "harvest" = "dashed"))
+  
+  
+  profit_plot <- ggplot() +
+    geom_line(data = w_yr$profit_per_t, aes(x = years, y = t_1, col = "tech 1")) +
+    geom_line(data = w_yr$profit_per_t, aes(x = years, y = t_2, col = "tech 2")) +
+    theme_bw() +
+    scale_y_continuous(limits = c(-1, 500), expand = c(0,0)) +
+    labs(x = "Years", y = "Profits", color = "Tech", title = "Profits") +
+    scale_color_manual(name = "Tech", values = c("tech 1" = "purple", "tech 2" = "green")) 
+  
+  effort_plot <- ggplot() +
+    geom_line(data = w_yr$effort, aes(x = years, y = t_1, col = "tech 1")) +
+    geom_line(data = w_yr$effort, aes(x = years, y = t_2, col = "tech 2")) +
+    theme_bw() +
+    scale_y_continuous(limits = c(-1, 10), expand = c(0,0)) +
+    labs(x = "Years", y = "Effort", color = "Tech", title = "Effort") +
+    scale_color_manual(name = "Tech", values = c("tech 1" = "purple", "tech 2" = "green")) 
+  
+return(list(stock_plot = stock_plot, profit_plot = profit_plot, effort_plot = effort_plot)) 
+}
+plots <- plot_qb(output)
+
+```
+
+
+### The mortality that returns the highest profit is `r max_mort`
+
+```{r}
+# Return useful stuff
+species_table
+tech_table
+(plots$stock_plot + plots$profit_plot)/(plots$effort_plot + plot_spacer())
+```
+
