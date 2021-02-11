@@ -1,0 +1,246 @@
+---
+title: "5s_3t_2b"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+library(tidyverse)
+library(ggplot2)
+library(here)
+library(quadprog)
+library(future)
+```
+### This is okay but it kinda sucks...
+
+
+
+### Preparing the inputs and outputs for `qb_stock.r`:
+
+For each species, we need:
+
+* r - growth rate
+* K - carrying capacity
+* X - starting stock
+* p - price
+
+For each technology we need:
+
+* Catchability per species
+* Cost per unit effort
+
+# Inputs
+
+## Step 1: Input parameters
+```{r}
+# Species:
+# s = species, r, K, X, p
+
+s1 <- c(s=1, r=0.1, K=100, X=50, p=10) 
+s2 <- c(s=2, r=0.2, K=100, X=50, p=20)
+s3 <- c(s=3, r=0.2, K=100, X=50, p=8)
+s4 <- c(s=4, r=0.3, K=100, X=50, p=10)
+s5 <- c(s=5, r=0.4, K=100, X=50, p=12)
+
+# t = tech, q1 = catchability species 1, q2 = catchability species 2...
+
+t1 <- c(t=1, q1=0.05, q2=0.03, q3=0.03, q4=0,    q5 = 0)
+t2 <- c(t=2, q1=0,    q2=0,    q3=0.03, q4=0.03, q5 = 0.05)
+
+
+# Tech cost: t = tech, cost = cost per unit effort
+c1 <- c(t=1, cost=1)
+c2 <- c(t=2, cost=1)
+
+# Baskets: bimary matrix of # species x # baskets, where 1 means that species is in that basket
+
+b1 <- c(s1 = 0, s2 = 0, s3 = 0, s4 = 1, s5 = 1)
+b2 <- c(s1 = 1, s2 = 1, s3 = 1, s4 = 0, s5 = 0)
+
+# Quotas: position = basket, number is the harvest limit.
+# We want this to be 0.1 of the preceding stock under constant mortality, so this will have to change to just input constant m.
+
+mortality = 0.21
+
+# Years
+years = 50
+```
+
+# Step 2: make a list of the inputs
+```{r}
+# Change these to reflect the number of species and technologies above:
+species = list(s1, s2, s3, s4, s5)
+tech = list(t1, t2)
+cost = list(c1, c2)
+baskets = list(b1, b2)
+```
+
+# Step 3: Run the function
+
+```{r}
+qb_max_p <- function(baskets, species, tech, cost, years){
+  mort <- seq(0.1, 0.5, by = 0.01)
+  p_out <- data_frame(m = 0, prof = 0)
+  for(i in mort){
+    out <- qb_stock(species, tech, cost, baskets, mortality = i, years)
+    total_prof <- sum(colSums(out$profit_per_t, na.rm = TRUE))
+    p_out <- rbind(p_out, c(i, total_prof))
+  }
+  
+  row_number <- which.max(p_out$prof)
+  max_mort <- p_out$m[row_number]
+  return(max_mort)
+}
+
+source(here("working_model", "qb_stock.R"))
+
+
+max_p <- qb_max_p(baskets, species, tech, cost, years)
+
+output <- qb_stock(species, tech, cost, baskets, mortality = max_p, years)
+
+output$stock ### WOOT
+```
+What I want this to do:
+
+Input normal inputs EXCEPT baskets
+Calculate every possible basket matrix for a matrix of those dims
+Calculate the maximum mortality for each and every basket matrix
+Run QB solve with the optimal mortality
+Return the stock values, species, and the run number as a df.
+
+
+
+```{r}
+
+# Matrix combination code I shamelessly stole from online:
+
+matrixCombn <- function(nrow, ncol) {
+    # All possible column combinations for a matrix of dimension dim
+    # Here we assume two different values c(1, 0)
+    require(gtools);
+    columns <- t(permutations(n = 2, r = nrow, v = c(1, 0), repeats.allowed = TRUE));
+    columns <- columns[, colSums(columns) == 1];
+
+    # Construct all possible combinations of dim column vectors and
+    # impose constraint that row and column sum >= 1
+    ret <- lapply(as.data.frame(t(permutations(ncol(columns), ncol, repeats.allowed = TRUE))), function(x) {
+        m.cand <- columns[, x];
+        if (all(rowSums(m.cand) > 0) & all(colSums(m.cand) > 0)) m.cand else NULL;
+    })
+    ret <- Filter(Negate(is.null), ret);
+    return(ret);
+}
+
+
+
+qb_max_p <- function(baskets, species, tech, cost, years)
+```
+
+```{r}
+# Baskets and mortality needa be calculated
+
+qb_allbaskets <- function(nBaskets, species, tech, cost, years){
+  # Number of species
+  n_sp <- length(species)
+  
+  # Empty df:
+  stock_df <- data.frame(stock = 0, run = 0)
+  
+  # Run matrix comb for the baskets (rows) x species (columns)
+  bmtx <- matrixCombn(nBaskets, n_sp)
+  
+  b_list <- list()
+  ### YUCK  ### THIS NEEDS TO BE UPDATED EACH AND EVERY TIME
+  for(i in 1:length(bmtx)){
+    mx <- matrix(unlist(bmtx[i]), ncol = n_sp, nrow = nBaskets)
+    
+    b1 <- mx[1,]
+    b2 <- mx[2,]
+    b3 <- mx[3,]
+    b4 <- mx[4,]
+    b5 <- mx[5,]
+    baskets <- list(b1, b2, b3, b4, b5)
+    b_list <- append(b_list, list(baskets))
+  }
+  
+  # Start up future:
+  plan(multiprocess, workers = 5)
+  
+  # This returns all the same result...of course it does.
+  mort_list <- future.apply::future_lapply(b_list, qb_max_p, species = species, tech = tech, cost = cost,years = years)
+  # Parallel process these
+  # This is just one mortality for the whole quota
+  
+  run <- 0
+  # Run QB stock for every matrix with max mortality
+  for(i in 1:length(mort_list)){
+    mx <- NULL
+    vec <- NULL
+    b_lst <- unlist(b_list[i], recursive = FALSE)
+    b_1 <- unlist(b_lst[1])
+    b_2 <- unlist(b_lst[2])
+    b_3 <- unlist(b_lst[3])
+    b_4 <- unlist(b_lst[4])
+    b_5 <- unlist(b_lst[5])
+    new_bs <- list(b_1, 
+                   b_2, 
+                   b_3, 
+                   b_4,
+                   b_5
+                   )
+    mort <- unlist(mort_list[i])
+    
+    out <- qb_stock(species = species, tech = tech, cost = cost, baskets = new_bs, mortality = mort, years = years)
+    
+    # Get the ending biomasses
+    last_bio <- tail(out$stock, 1)
+    # Get run number
+    run <- run+1
+    
+    vec <- rep(run, n_sp)
+    mx <- as.data.frame(matrix(last_bio))
+    mx <- cbind(mx, vec)
+      
+    colnames(mx) <- c("stock", "run")
+    
+    stock_df <- rbind(stock_df,mx)
+  }
+  
+  stock_df$stock <- unlist(stock_df[,1])
+  return(stock_df)
+}
+
+plot(stock_df)
+
+qb_global <- 
+qb_2 <- test_all
+qb_3 <- qb_allbaskets(3, species, tech, cost, years)
+qb_4 <- qb_allbaskets(4, species, tech, cost, years)
+qb_5 <- qb_allbaskets(5, species, tech, cost, years)
+  
+
+qb_2 <- qb_2 %>% 
+  mutate(baskets = 2)
+
+qb_3 <- qb_3 %>% 
+  mutate(baskets = 3)
+
+qb_4 <- qb_4 %>% 
+  mutate(baskets = 4)
+
+qb_5 <- qb_5 %>% 
+  mutate(baskets = 5)
+
+full_df <- rbind(qb_2, qb_3, qb_4, qb_5)
+
+
+ggplot(full_df) +
+  geom_jitter(aes(x = baskets, y = stock))
+```
+
+
+
+
+
