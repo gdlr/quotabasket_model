@@ -52,6 +52,8 @@ NPV_30_9 <- read_csv("C:/Users/kll86/OneDrive/Documents/UCSB/quotabasket_model/w
 output_100 <- read_csv("C:/Users/kll86/OneDrive/Documents/UCSB/quotabasket_model/working_model/scratchoutput_100.csv")
 NPV_30_100 <- read_csv("C:/Users/kll86/OneDrive/Documents/UCSB/quotabasket_model/working_model/scratchNPV_30_100.csv")
 
+NPVs <- rbind(NPV_30_0, NPV_30_1, NPV_30_2, NPV_30_3, NPV_30_4, NPV_30_5, NPV_30_6, NPV_30_7, NPV_30_8, NPV_30_9, NPV_30_100)
+
 ```
 # Step 4: Visualize Results
 
@@ -166,3 +168,20 @@ ggplot()+
   theme(plot.caption = element_text(hjust = 0))
 
 ```
+```{r}
+# analyze a bit...
+
+compare_pft_morts <- combo_pfts_f %>% 
+  group_by(as.factor(run)) %>% 
+  summarise(sum = sum(tots, na.rm = TRUE),
+            average = mean(tots, na.rm = TRUE))
+
+compare_stock_morts <- combo_stock_f %>% 
+  group_by(as.factor(run)) %>% 
+  summarise(sum = sum(tots, na.rm = TRUE),
+            average = mean(tots, na.rm = TRUE))
+
+level_30 <- stock_2$stock.s_1[31] + stock_2$stock.s_2[31] + stock_2$stock.s_3[31] + stock_2$stock.s_4[31] + stock_2$stock.s_5[31]
+
+```
+
