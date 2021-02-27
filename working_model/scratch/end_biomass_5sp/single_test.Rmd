@@ -1,0 +1,236 @@
+---
+title: "5s_3t_2b"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+library(tidyverse)
+library(ggplot2)
+library(here)
+library(quadprog)
+library(future)
+```
+### This is okay but it kinda sucks...
+
+
+
+### Preparing the inputs and outputs for `qb_stock.r`:
+
+For each species, we need:
+
+* r - growth rate
+* K - carrying capacity
+* X - starting stock
+* p - price
+
+For each technology we need:
+
+* Catchability per species
+* Cost per unit effort
+
+# Inputs
+
+## Step 1: Input parameters
+```{r}
+# Species:
+# s = species, r, K, X, p
+
+s1 <- c(s=1, r=0.15, K=100, X=50, p=8) 
+s2 <- c(s=2, r=0.2, K=100, X=50, p=12)
+s3 <- c(s=3, r=0.2, K=100, X=50, p=8)
+s4 <- c(s=4, r=0.3, K=100, X=50, p=10)
+s5 <- c(s=5, r=0.4, K=100, X=50, p=12)
+
+
+# t = tech, q1 = catchability species 1, q2 = catchability species 2...
+
+t1 <- c(t=1, q1=0.04, q2=0.01, q3=0.01, q4=0.01, q5 = 0.1)
+t2 <- c(t=2, q1=0.01, q2=0.04, q3=0.01, q4=0.01, q5 = 0.01)
+t3 <- c(t=2, q1=0.01, q2=0.01, q3=0.04, q4=0.01, q5 = 0.01)
+t4 <- c(t=2, q1=0.01, q2=0.01, q3=0.01, q4=0.04, q5 = 0.01)
+t5 <- c(t=2, q1=0.01, q2=0.01, q3=0.01, q4=0.01, q5 = 0.04)
+
+
+# Tech cost: t = tech, cost = cost per unit effort
+c1 <- c(t=1, cost=1)
+c2 <- c(t=2, cost=1)
+c3 <- c(t=3, cost=1)
+c4 <- c(t=4, cost=1)
+c5 <- c(t=5, cost=1)
+
+# Baskets: bimary matrix of # species x # baskets, where 1 means that species is in that basket
+
+b1 <- c(s1 = 1, s2 = 0, s3 = 0, s4 = 0, s5 = 0)
+b2 <- c(s2 = 0, s2 = 1, s3 = 0, s4 = 0, s5 = 0)
+b3 <- c(s3 = 0, s2 = 0, s3 = 1, s4 = 0, s5 = 0)
+b4 <- c(s4 = 0, s2 = 0, s3 = 0, s4 = 1, s5 = 0)
+b5 <- c(s5 = 0, s2 = 0, s3 = 0, s4 = 0, s5 = 1)
+
+
+# Quotas: position = basket, number is the harvest limit.
+# We want this to be 0.1 of the preceding stock under constant mortality, so this will have to change to just input constant m.
+
+mortality = c(0.1, 0.2, 0.2, 0.3, 0.4)
+
+# Years
+years = 30
+```
+
+# Step 2: make a list of the inputs
+```{r}
+# Change these to reflect the number of species and technologies above:
+species = list(s1, s2, s3, s4, s5)
+tech = list(t1, t2, t3, t4, t5)
+cost = list(c1, c2, c3, c4, c5)
+baskets = list(b1, b2, b3, b4, b5)
+
+```
+
+# Step 3: Run the function
+
+```{r}
+qb_max_p <- function(baskets, species, tech, cost, years){
+  mort <- seq(0.1, 0.9, by = 0.1)
+  mort_full = expand.grid(replicate(length(baskets),mort, F))
+  p_out <- data_frame(m1 = 0, m2 = 0, m3 = 0, m4 = 0, m5 = 0, prof = 0)
+  for(i in 1:nrow(mort_full)){
+    tmp_m <- t(mort_full[i,])
+    out <- qb_stock(species, tech, cost, baskets, tmp_m, years)
+    total_prof <- sum(colSums(out$profit_per_t, na.rm = TRUE))
+    vec <- tibble(mort_full[i,], total_prof)
+    colnames(vec) <- colnames(p_out)
+    p_out <- rbind(vec, p_out)
+  }
+  
+  row_number <- which.max(p_out$prof)
+  max_mort <- p_out[row_number,]
+  return(max_mort[,1:5])
+}
+
+source(here("working_model", "qb_stock_m.R"))
+
+
+max_p <- qb_max_p(baskets, species, tech, cost, years)
+```
+
+
+
+
+This function should converge at r/2
+
+
+```{r GS function}
+
+# This finds the optimal steady state harvest point for each individual species, YAAR?
+
+FishOpt_GS<-function(bvec,K,g,p,cost,beta,disc,tol=.1, t_end = 300){
+  delta=1/(1+disc)
+  #Optim objective function
+  Objective<-function(f,b,bvec,K,gar,p,cost,beta,delta,V){
+    r<-gar
+    bnext = max(min(bvec), b + r*b*(1-b/K) - f)
+    bnext = min(max(bvec), bnext) #Make sure we don't go below the minimum biomass
+    profit=p*f-cost*f^beta
+    Vnext = spline(x=bvec,y=V,xout=bnext)
+    negout = -(profit + delta*Vnext$y)
+    return(negout) # Negative profits
+  }
+  #Set up storage vectors and initial loop parameters
+  tolcheck=10*tol
+  t=0
+  Vstar=rep(0,length.out=length(bvec))
+  f=rep(1,length.out=length(bvec))
+  #While iterate until convergence
+  while(t<4|tolcheck>tol){
+  t=t+1
+  V=Vstar
+  pastf=f
+  #Loop over states
+  for(i in 1:length(bvec)){
+  b=bvec[i]
+  if(i==1){
+  guess=0
+  }else{
+  guess=f[i-1]
+  }
+  low=0.00001 ## If you get error in optim finite fn convergence issues, changes this to something positive but REALLY small 0.00001
+  high=(b + g*b*(1-b/K)) #Max possible harvest is the available fish plus the growth
+  Opt=optim(par=guess,fn=Objective,lower=low,upper=high,method = "L-BFGS-B",b=b,bvec=bvec,gar=g,cost=cost,K=K,p=p,V=V,beta=beta,delta=delta)
+  f[i]=Opt$par
+  Vstar[i]=-Opt$value
+  }
+  #Check tolerance in each time period, this is policy function convergence, no check for value function convergence
+  tolcheck=sum(abs(f-pastf))
+  if(t>t_end){
+    print("Exceed Maximum time steps with tolerance remaining:")
+    print(tolcheck)
+    break
+  }
+  converge=c(t,tolcheck)
+  }
+  return(list(Policy=f,Value=Vstar,converge=converge))
+}
+```
+
+
+# Step 3: make nice inputs
+
+```{r}
+sp_df <- as.data.frame(do.call(rbind, species))
+tech_df <- as.data.frame(do.call(rbind, tech))
+cost_df <- as.data.frame(do.call(rbind, cost))
+baskets_df <- as.data.frame(do.call(rbind, baskets))
+```
+
+
+```{r}
+bveclist=list(seq(0.1,sp_df$K[1],length.out=50), seq(0.1,sp_df$K[2],length.out=50), seq(0.1, sp_df$K[3], length.out = 50), seq(0.1,sp_df$K[4],length.out=50), seq(0.1,sp_df$K[5],length.out=50))
+
+Klist=as.list(sp_df$K)
+rlist=as.list(sp_df$r)
+plist=as.list(sp_df$p)
+costlist=list(1, 1, 1, 1, 1)  
+betalist=list(2, 2, 2, 2, 2)
+disclist=list(0,0,0,0,0)
+
+optimal_output=pmap(list(bveclist,Klist,rlist,plist,costlist,betalist,disclist),FishOpt_GS)
+
+optimal_output
+
+## Pull the steady state harvest from this run:
+
+s1h <- 4/50
+s2h <- 6/50
+s3h <- 4/50
+s4h <- 5/50
+s5h <- 6/50
+
+mortality <- c(s1h, s2h, s3h, s4h, s5h)
+```
+
+```{r}
+source(here("working_model", "qb_stock_m.R"))
+
+output <- qb_stock(species, tech, cost, baskets, mortality = mortality, years)
+
+output$stock
+
+total_p <- colSums(output$profit_per_t, na.rm = TRUE)
+
+profit_5n <- sum(total_p)
+
+
+output$stock
+
+last_stock <- tail(output$stock, 1)
+qb1 <- as.data.frame(matrix(last_stock)) %>% 
+  mutate(V1 = as.numeric(V1)) %>% 
+  mutate(baskets = 1)
+
+write_csv(qb1, here("working_model", "scratch", "end_biomass_5sp", "5_basket.csv"))
+```
+
+
+

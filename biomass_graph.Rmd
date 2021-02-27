@@ -1,0 +1,56 @@
+---
+title: "graphs"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+library(ggbeeswarm)
+```
+
+
+```{r}
+
+
+b_1 <- read_csv(here("working_model", "scratch", "end_biomass_5sp", "1_basket.csv"))
+b_2 <- read_csv(here("working_model", "scratch", "end_biomass_5sp", "2_baskets.csv"))
+b_5 <- read_csv(here("working_model", "scratch", "end_biomass_5sp", "5_basket.csv"))
+
+
+colnames(b_1) <- c("stock", "baskets")
+colnames(b_2) <- c("stock", "run", "baskets")
+colnames(b_5) <- c("stock", "baskets")
+
+b_2 <- b_2 %>% 
+  select(stock, baskets)
+
+b_1 <- b_1 %>% 
+  mutate(basket = 1)
+b_2 <- b_2 %>% 
+  mutate(basket = 2)
+b_5 <- b_5 %>% 
+  mutate(basket = 5)
+
+full_df <- rbind(b_1, b_2, b_5)
+
+
+partial_df <- full_df %>% 
+  filter(basket %in% c(1, 5))
+```
+
+```{r}
+
+biomass_plot <- ggplot() +
+  geom_beeswarm(data = full_df, aes(x = as.factor(basket), y = stock, color = as.character(basket)), cex = 0.7, size = 0.5, priority = "density", dodge.width = 0.1) +
+  geom_point(data = partial_df, aes(x = as.factor(basket), y = stock), size = 3) +
+  theme_bw(base_size = 16) +
+  labs(x = "Number of Baskets", y = "Stock Biomass in Year 30", title = "Possible stock levels in year 30 for 1, 2, 5 baskets") + 
+  scale_y_continuous(limits = c(0, 80), expand = c(0,0)) +
+  theme(legend.position = "none")
+
+
+ggsave(plot = biomass_plot, here("working_model", "scratch", "end_biomass_5sp", "biomass_plot.png"))
+```
+
+

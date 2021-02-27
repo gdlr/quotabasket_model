@@ -1,0 +1,51 @@
+---
+title: "profit_graph"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+```{r}
+
+p1 <- c(profit = profit_1, baskets = 1)
+
+p_2 <- c(profit = profit_2, baskets = 2)
+
+p_2[2] <- 2
+
+# Profit from a previous run...
+p_5 <- c(profit = 11076.8, baskets = 5)
+
+df <- as.data.frame(rbind(p1, p_2, p_5))
+
+write_csv(df, here("working_model", "scratch", "end_biomass_5sp", "profit_df.csv"))
+```
+
+
+
+```{r}
+profit_df <- read_csv(here("working_model", "scratch", "end_biomass_5sp", "profit_df.csv")) 
+
+profit_select <- profit_df %>% 
+  filter(baskets == c(1,2)) %>% 
+  rbind(p_5)
+
+prof_plot <- ggplot(profit_select) +
+  geom_col(aes(x = as.character(baskets), y = profit, fill = as.character(baskets)), width = 0.3) +
+  scale_y_continuous(limits = c(0, 12000), expand = c(0,0)) +
+  theme_bw(base_size = 16) +
+  labs(x = "Number of Baskets", y = "Profit", title = "5 species profits with 1, 2, or 5 baskets") +
+  theme(legend.position = "none")
+
+prof_plot
+
+ggsave(plot = prof_plot, filename = here("working_model", "scratch", "end_biomass_5sp", "profit_graph.png"))
+
+```
+
+
+
+

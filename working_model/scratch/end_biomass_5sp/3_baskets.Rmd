@@ -229,7 +229,9 @@ qb_3 <- qb_allbaskets(3, species, tech, cost, years)
 plot(qb_3)
 
 
-qb_4 <- qb_allbaskets(4, species, tech, cost, years)
+# qb_4 <- qb_allbaskets(4, species, tech, cost, years)
+
+
 qb_5 <- qb_allbaskets(5, species, tech, cost, years)
   
 

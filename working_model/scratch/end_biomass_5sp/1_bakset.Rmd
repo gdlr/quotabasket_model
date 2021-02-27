@@ -1,0 +1,176 @@
+---
+title: "5s_3t_2b"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+library(tidyverse)
+library(ggplot2)
+library(here)
+library(quadprog)
+library(future)
+```
+
+### Preparing the inputs and outputs for `qb_stock.r`:
+
+For each species, we need:
+
+* r - growth rate
+* K - carrying capacity
+* X - starting stock
+* p - price
+
+For each technology we need:
+
+* Catchability per species
+* Cost per unit effort
+
+# Inputs
+
+## Step 1: Input parameters
+```{r}
+# Species:
+# s = species, r, K, X, p
+
+s1 <- c(s=1, r=0.15, K=100, X=50, p=10) 
+s2 <- c(s=2, r=0.2, K=100, X=50, p=20)
+s3 <- c(s=3, r=0.2, K=100, X=50, p=8)
+s4 <- c(s=4, r=0.3, K=100, X=50, p=10)
+s5 <- c(s=5, r=0.4, K=100, X=50, p=12)
+
+# t = tech, q1 = catchability species 1, q2 = catchability species 2...
+
+t1 <- c(t=1, q1=0.04, q2=0.01, q3=0.01, q4=0.01, q5 = 0.1)
+t2 <- c(t=2, q1=0.01, q2=0.04, q3=0.01, q4=0.01, q5 = 0.01)
+t3 <- c(t=3, q1=0.01, q2=0.01, q3=0.04, q4=0.01, q5 = 0.01)
+t4 <- c(t=4, q1=0.01, q2=0.01, q3=0.01, q4=0.04, q5 = 0.01)
+t5 <- c(t=5, q1=0.01, q2=0.01, q3=0.01, q4=0.01, q5 = 0.04)
+
+# Tech cost: t = tech, cost = cost per unit effort
+c1 <- c(t=1, cost=1)
+c2 <- c(t=2, cost=1)
+c3 <- c(t=3, cost=1)
+c4 <- c(t=4, cost=1)
+c5 <- c(t=5, cost=1)
+
+# Baskets: bimary matrix of # species x # baskets, where 1 means that species is in that basket
+
+b1 <- c(s1 = 1, s2 = 1, s3 = 1, s4 = 1, s5 = 1)
+
+
+
+# Quotas: position = basket, number is the harvest limit.
+# We want this to be 0.1 of the preceding stock under constant mortality, so this will have to change to just input constant m.
+
+mortality = c(0.06, 0.76)
+
+# Years
+years = 30
+```
+
+# Step 2: make a list of the inputs
+```{r}
+# Change these to reflect the number of species and technologies above:
+species = list(s1, s2, s3, s4, s5)
+tech = list(t1, t2, t3, t4, t5)
+cost = list(c1, c2, c3, c4, c5)
+baskets = list(b1)
+```
+
+# Step 3: Run the function
+
+```{r}
+qb_max_p <- function(baskets, species, tech, cost, years){
+  mort <- seq(0.1, 0.6, by = 0.01)
+  mort_full = expand.grid(replicate(length(baskets),mort, F))
+  p_out <- data_frame(m1 = 0, prof = 0)
+  for(i in 1:nrow(mort_full)){
+    tmp_m <- t(mort_full[i,])
+    out <- qb_stock(species, tech, cost, baskets, tmp_m, years)
+    total_prof <- sum(colSums(out$profit_per_t, na.rm = TRUE))
+    vec <- tibble(mort_full[i,], total_prof)
+    colnames(vec) <- colnames(p_out)
+    p_out <- rbind(vec, p_out)
+  }
+  
+  row_number <- which.max(p_out$prof)
+  max_mort <- p_out[row_number,]
+  return(max_mort[,1])
+}
+
+source(here("working_model", "qb_stock_m.R"))
+
+
+max_p <- qb_max_p(baskets, species, tech, cost, years)
+
+
+max_p[,1:2]
+
+output <- qb_stock(species, tech, cost, baskets, mortality = 0.12, years)
+
+
+
+
+
+
+
+total_p <- colSums(output$profit_per_t, na.rm = TRUE)
+
+
+profit_1 <- sum(total_p)
+
+
+
+
+last_stock <- tail(output$stock, 1)
+qb1 <- as.data.frame(matrix(last_stock)) %>% 
+  mutate(V1 = as.numeric(V1)) %>% 
+  mutate(baskets = 1)
+
+write_csv(qb1, here("working_model", "scratch", "end_biomass_5sp", "1_basket.csv"))
+
+
+
+```
+
+
+```{r}
+plot_qb  <- function(output = output){
+  years = seq(1, nrow(output$stock), by = 1)
+  w_yr <- lapply(output, cbind, years)
+  
+  stock_plot <- ggplot() +
+    geom_line(data = w_yr$stock, aes(x = years, y = s_1), col = "red") +
+    geom_line(data = w_yr$stock, aes(x = years, y = s_2), col = "blue") +
+    geom_line(data = w_yr$stock, aes(x = years, y = s_3), col = "green") +
+    geom_line(data = w_yr$stock, aes(x = years, y = s_4), col = "orange") +
+    geom_line(data = w_yr$stock, aes(x = years, y = s_5), col = "purple") +
+    geom_line(data = w_yr$harvest, aes(x = years, y = s_1), col = "red", linetype = "dashed") +
+    geom_line(data = w_yr$harvest, aes(x = years, y = s_2), col = "blue", linetype = "dashed") +
+    geom_line(data = w_yr$harvest, aes(x = years, y = s_1), col = "green", linetype = "dashed") +
+    geom_line(data = w_yr$harvest, aes(x = years, y = s_2), col = "orange", linetype = "dashed") +
+    geom_line(data = w_yr$harvest, aes(x = years, y = s_1), col = "purple", linetype = "dashed") +
+    scale_y_continuous(limits = c(0, 100), expand = c(0,0)) +
+    theme_bw() +
+    labs(x = "Years", y = "Stock", color = "Species", title = "Stock & Harvest") +
+    scale_color_discrete(name = "Species", labels = c("1","2"))
+  
+  profit_plot <- ggplot() +
+    geom_line(data = w_yr$profit_per_t, aes(x = years, y = t_1), col = "green") +
+    geom_line(data = w_yr$profit_per_t, aes(x = years, y = t_2), col = "purple") +
+    theme_bw() +
+    scale_y_continuous(limits = c(0, 500), expand = c(0,0)) +
+    labs(x = "Years", y = "Profits", color = "Tech", title = "Profits")
+  
+return(stock_plot)
+}
+
+gl_plot <- plot_qb(output)
+
+gl_plot
+
+ggsave(plot = gl_plot, filename = here("working_model", "scratch", "end_biomass_5sp", "global_plot.png"))
+```
+  

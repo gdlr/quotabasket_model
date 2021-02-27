@@ -13,9 +13,6 @@ library(quadprog)
 library(future)
 ```
 
-
-# DO NOT ALTER THIS DOCUMENT!!!
-
 ### Preparing the inputs and outputs for `qb_stock.r`:
 
 For each species, we need:
@@ -70,8 +67,6 @@ b5 <- c(s1 = 0, s2 = 0, s3 = 0, s4 = 0, s5 = 1)
 # Quotas: position = basket, number is the harvest limit.
 # We want this to be 0.1 of the preceding stock under constant mortality, so this will have to change to just input constant m.
 
-
-# This is a guess of optimal mortality for each bakset. A good starting point is r/2.
 mort_guess = c(0.2, 0.2)
 
 # Years
@@ -93,5 +88,45 @@ baskets = list(b1, b2, b3, b4, b5)
 source(here("working_model", "functions", "optimal_baskets.R"))
 
 output <- optimal_baskets(species, tech, cost, baskets, mort_guess, years)
+```
+
+
+```{r}
+# Plotting function for the output:
+ plot_qb  <- function(output = output){
+  years = seq(1, nrow(output$stock), by = 1)
+  w_yr <- lapply(output, cbind, years)
+  
+  stock_plot <- ggplot() +
+    geom_line(data = w_yr$stock, aes(x = years, y = s_1), col = "red") +
+    geom_line(data = w_yr$stock, aes(x = years, y = s_2), col = "blue") +
+    geom_line(data = w_yr$stock, aes(x = years, y = s_3), col = "green") +
+    geom_line(data = w_yr$stock, aes(x = years, y = s_4), col = "orange") +
+    geom_line(data = w_yr$stock, aes(x = years, y = s_5), col = "purple") +
+    geom_line(data = w_yr$harvest, aes(x = years, y = s_1), col = "red", linetype = "dashed") +
+    geom_line(data = w_yr$harvest, aes(x = years, y = s_2), col = "blue", linetype = "dashed") +
+    geom_line(data = w_yr$harvest, aes(x = years, y = s_1), col = "green", linetype = "dashed") +
+    geom_line(data = w_yr$harvest, aes(x = years, y = s_2), col = "orange", linetype = "dashed") +
+    geom_line(data = w_yr$harvest, aes(x = years, y = s_1), col = "purple", linetype = "dashed") +
+    scale_y_continuous(limits = c(0, 100), expand = c(0,0)) +
+    theme_bw() +
+    labs(x = "Years", y = "Stock", color = "Species", title = "Stock & Harvest") +
+    scale_color_discrete(name = "Species", labels = c("1","2"))
+  
+  profit_plot <- ggplot() +
+    geom_line(data = w_yr$profit_per_t, aes(x = years, y = t_1), col = "green") +
+    geom_line(data = w_yr$profit_per_t, aes(x = years, y = t_2), col = "purple") +
+    theme_bw() +
+    scale_y_continuous(limits = c(0, 500), expand = c(0,0)) +
+    labs(x = "Years", y = "Profits", color = "Tech", title = "Profits")
+  
+return(stock_plot)
+}
+
+five_b_plot <- plot_qb(output)
+
+five_b_plot
+
+ggsave(plot = five_b_plot, filename = here("working_model", "scratch", "end_biomass_5sp", "five_b_plot.png"))
 ```
 
