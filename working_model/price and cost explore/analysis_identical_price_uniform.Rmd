@@ -1,0 +1,240 @@
+---
+title: "Results_all_constant_but_price"
+author: "Kat Leigh"
+date: "2/26/2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE, message = FALSE, warning = FALSE)
+
+library(tidyverse)
+library(ggplot2)
+library(here)
+library(quadprog)
+library(scales)
+```
+
+```{r}
+
+# read in data
+
+output_20 <- read_csv("C:/Users/kll86/OneDrive/Documents/UCSB/quotabasket_model/working_model/price and cost explore/model run result files/price and cost exploreoutput_all_c.csv")
+NPV_20 <- read_csv("C:/Users/kll86/OneDrive/Documents/UCSB/quotabasket_model/working_model/price and cost explore/model run result files/price and cost exploreNPV_all_c.csv")
+
+output_1 <- read_csv("C:/Users/kll86/OneDrive/Documents/UCSB/quotabasket_model/working_model/price and cost explore/model run result files/price and cost exploreoutput_p1.csv")
+NPV_1 <- read_csv("C:/Users/kll86/OneDrive/Documents/UCSB/quotabasket_model/working_model/price and cost explore/model run result files/price and cost exploreNPV_p1.csv")
+
+output_10 <- read_csv("C:/Users/kll86/OneDrive/Documents/UCSB/quotabasket_model/working_model/price and cost explore/model run result files/price and cost exploreoutput_p10.csv")
+NPV_10 <- read_csv("C:/Users/kll86/OneDrive/Documents/UCSB/quotabasket_model/working_model/price and cost explore/model run result files/price and cost exploreNPV_p10.csv")
+
+output_30 <- read_csv("C:/Users/kll86/OneDrive/Documents/UCSB/quotabasket_model/working_model/price and cost explore/model run result files/price and cost exploreoutput_p30.csv")
+NPV_30 <- read_csv("C:/Users/kll86/OneDrive/Documents/UCSB/quotabasket_model/working_model/price and cost explore/model run result files/price and cost exploreNPV_p30.csv")
+
+output_40 <- read_csv("C:/Users/kll86/OneDrive/Documents/UCSB/quotabasket_model/working_model/price and cost explore/model run result files/price and cost exploreoutput_p40.csv")
+NPV_40 <- read_csv("C:/Users/kll86/OneDrive/Documents/UCSB/quotabasket_model/working_model/price and cost explore/model run result files/price and cost exploreNPV_p40.csv")
+
+output_50 <- read_csv("C:/Users/kll86/OneDrive/Documents/UCSB/quotabasket_model/working_model/price and cost explore/model run result files/price and cost exploreoutput_p50.csv")
+NPV_50 <- read_csv("C:/Users/kll86/OneDrive/Documents/UCSB/quotabasket_model/working_model/price and cost explore/model run result files/price and cost exploreNPV_p50.csv")
+
+output_60 <- read_csv("C:/Users/kll86/OneDrive/Documents/UCSB/quotabasket_model/working_model/price and cost explore/model run result files/price and cost exploreoutput_p60.csv")
+NPV_60 <- read_csv("C:/Users/kll86/OneDrive/Documents/UCSB/quotabasket_model/working_model/price and cost explore/model run result files/price and cost exploreNPV_p60.csv")
+
+output_70 <- read_csv("C:/Users/kll86/OneDrive/Documents/UCSB/quotabasket_model/working_model/price and cost explore/model run result files/price and cost exploreoutput_p70.csv")
+NPV_70 <- read_csv("C:/Users/kll86/OneDrive/Documents/UCSB/quotabasket_model/working_model/price and cost explore/model run result files/price and cost exploreNPV_p70.csv")
+
+output_80 <- read_csv("C:/Users/kll86/OneDrive/Documents/UCSB/quotabasket_model/working_model/price and cost explore/model run result files/price and cost exploreoutput_p80.csv")
+NPV_80 <- read_csv("C:/Users/kll86/OneDrive/Documents/UCSB/quotabasket_model/working_model/price and cost explore/model run result files/price and cost exploreNPV_p80.csv")
+
+output_90 <- read_csv("C:/Users/kll86/OneDrive/Documents/UCSB/quotabasket_model/working_model/price and cost explore/model run result files/price and cost exploreoutput_p90.csv")
+NPV_90 <- read_csv("C:/Users/kll86/OneDrive/Documents/UCSB/quotabasket_model/working_model/price and cost explore/model run result files/price and cost exploreNPV_p90.csv")
+
+output_100 <- read_csv("C:/Users/kll86/OneDrive/Documents/UCSB/quotabasket_model/working_model/price and cost explore/model run result files/price and cost exploreoutput_p100.csv")
+NPV_100 <- read_csv("C:/Users/kll86/OneDrive/Documents/UCSB/quotabasket_model/working_model/price and cost explore/model run result files/price and cost exploreNPV_p100.csv")
+
+NPVs <- rbind(NPV_1, NPV_10, NPV_20, NPV_30, NPV_40, NPV_50, NPV_60, NPV_70, NPV_80, NPV_90, NPV_100)
+
+```
+# Visualize Results
+
+```{r}
+# profits
+
+pfts_1 <- output_1 %>% 
+  select(profit_per_t.t_1:profit_per_t.t_5) %>% 
+  mutate(run = "1")
+
+pfts_10 <- output_10 %>% 
+  select(profit_per_t.t_1:profit_per_t.t_5) %>% 
+  mutate(run = "10")
+
+pfts_20 <- output_20%>% 
+  select(profit_per_t.t_1:profit_per_t.t_5) %>% 
+  mutate(run = "20")
+
+pfts_30 <- output_30%>%    select(profit_per_t.t_1:profit_per_t.t_5) %>% 
+  mutate(run = "30")
+
+pfts_40 <- output_40%>%    select(profit_per_t.t_1:profit_per_t.t_5) %>% 
+  mutate(run = "40")
+
+pfts_50 <- output_50%>%    select(profit_per_t.t_1:profit_per_t.t_5) %>% 
+  mutate(run = "50")
+
+pfts_60 <- output_60%>%    select(profit_per_t.t_1:profit_per_t.t_5) %>% 
+  mutate(run = "60")
+
+pfts_70 <- output_70%>%    select(profit_per_t.t_1:profit_per_t.t_5) %>% 
+  mutate(run = "70")
+
+pfts_80 <- output_80%>%    select(profit_per_t.t_1:profit_per_t.t_5) %>% 
+  mutate(run = "80")
+
+pfts_90 <- output_90%>%    select(profit_per_t.t_1:profit_per_t.t_5) %>% 
+  mutate(run = "90")
+
+pfts_100 <- output_100%>%    select(profit_per_t.t_1:profit_per_t.t_5) %>% 
+  mutate(run = "100")
+
+combo_pfts <- rbind(pfts_1, pfts_10, pfts_20, pfts_30, pfts_40, pfts_50, pfts_60, pfts_70, pfts_80, pfts_90, pfts_100)
+
+tots <- combo_pfts$profit_per_t.t_1 + combo_pfts$profit_per_t.t_2 + combo_pfts$profit_per_t.t_3 + combo_pfts$profit_per_t.t_4 + combo_pfts$profit_per_t.t_5
+
+combo_pfts_f <- cbind(combo_pfts, tots)
+
+```
+
+```{r}
+pft_g <- ggplot()+
+  geom_smooth(data = combo_pfts_f, aes(y=tots/1000, x=rep(0:30,11), color = as.factor(run)), se = FALSE)+ theme_minimal()+
+  labs(title= str_wrap("Predicted annual profits for a multi-species fishery under 2 quota baskets", 80),
+       caption= str_wrap("Results of a 2 quota basket model for 5 species and 5 technologies parameterized such that species only differ in their respective intrinsic growth rate 'r' (initial stock sizes, costs, catchabilities, prices, and carrying capacities are identical). Model was run for 10 different mortality coefficients ranging from 0.1 to 1. Mortality coefficients define the total combined biomass that can be extracted per year as a proportion of the total available biomass for that year.", 100),
+         x= "Number of Years",
+         y= "Fishery-wide Annual Profits (thousands)",
+       color= "Price")+
+  scale_y_continuous(labels=dollar_format(prefix="$"))+
+  theme(plot.caption = element_text(hjust = 0))
+
+```
+```{r}
+# stock
+
+stock_1 <- output_1 %>% 
+  select(stock.s_1:stock.s_5) %>% 
+  mutate(run = "1")
+
+stock_10 <- output_10 %>%    select(stock.s_1:stock.s_5) %>% 
+  mutate(run = "10")
+
+stock_20 <- output_20 %>%    select(stock.s_1:stock.s_5) %>% 
+  mutate(run = "20")
+
+stock_30 <- output_30 %>%    select(stock.s_1:stock.s_5) %>% 
+  mutate(run = "30")
+
+stock_40 <- output_40 %>%    select(stock.s_1:stock.s_5) %>% 
+  mutate(run = "40")
+
+stock_50 <- output_50 %>%    select(stock.s_1:stock.s_5) %>% 
+  mutate(run = "50")
+
+stock_60 <- output_60 %>%    select(stock.s_1:stock.s_5) %>% 
+  mutate(run = "60")
+
+stock_70 <- output_70 %>%    select(stock.s_1:stock.s_5) %>% 
+  mutate(run = "70")
+
+stock_80 <- output_80 %>%    select(stock.s_1:stock.s_5) %>% 
+  mutate(run = "80")
+
+stock_90 <- output_90 %>%    select(stock.s_1:stock.s_5) %>% 
+  mutate(run = "90")
+
+stock_100 <- output_100 %>%    select(stock.s_1:stock.s_5) %>% 
+  mutate(run = "100")
+
+combo_stock <- rbind(stock_1, stock_10, stock_20, stock_30, stock_40, stock_50, stock_60, stock_70, stock_80, stock_90, stock_100)
+
+tots <- combo_stock$stock.s_1 + combo_stock$stock.s_2 + combo_stock$stock.s_3 + combo_stock$stock.s_4 + combo_stock$stock.s_5
+
+combo_stock_f <- cbind(combo_stock, tots)
+
+```
+
+```{r}
+stock_g <- ggplot()+
+  geom_smooth(data = combo_stock_f, aes(y=tots, x=rep(0:30,11), color = as.factor(run)), se = FALSE)+ theme_minimal()+
+  labs(title= str_wrap("Predicted annual stocks for a multi-species fishery under 2 quota baskets", 80),
+       caption= str_wrap("Results of a 2 quota basket model for 5 species and 5 technologies parameterized such that species only differ in their respective intrinsic growth rate 'r' (initial stock sizes, costs, catchabilities, prices, and carrying capacities are identical). Model was run for 11 different mortality coefficients ranging from 0 to 1. Mortality coefficients define the total combined biomass that can be extracted per year as a proportion of the total available biomass for that year. Thus, a mortality coefficient of zero is equivalent to an open-access fishery", 100),
+         x= "Number of Years",
+         y= "Fishery-wide Annual Stock Level (tons)",
+       color= "Price")+
+  theme(plot.caption = element_text(hjust = 0))
+
+```
+
+```{r}
+# analyze a bit...
+
+compare_pft_prices <- combo_pfts_f %>% 
+  group_by(as.factor(run)) %>% 
+  summarise(sum = sum(tots, na.rm = TRUE),
+            average = mean(tots, na.rm = TRUE)) %>% 
+  arrange(-average)
+
+compare_stock_prices <- combo_stock_f %>% 
+  group_by(as.factor(run)) %>% 
+  summarise(sum = sum(tots, na.rm = TRUE),
+            average = mean(tots, na.rm = TRUE)) %>% 
+  arrange(-average)
+
+level_30 <- stock_20$stock.s_1[31] + stock_20$stock.s_2[31] + stock_20$stock.s_3[31] + stock_20$stock.s_4[31] + stock_20$stock.s_5[31]
+
+```
+
+Export results
+
+```{r}
+# data
+
+# pft
+
+path_store <- "C:/Users/kll86/OneDrive/Documents/UCSB/quotabasket_model/working_model/price and cost explore/analysis data files/"
+  csvname <- "pft_data_p_uniform_constant.csv"
+  csvfile <- paste(path_store, csvname, sep="")
+  write.table(na.omit(combo_pfts_f),csvfile, row.names=FALSE, sep=",")
+  
+  csvname <- "pft_comparison_p_uniform_constant.csv"
+  csvfile <- paste(path_store, csvname, sep="")
+  write.table(na.omit(compare_pft_prices),csvfile, row.names=FALSE, sep=",")
+
+# stock
+
+  csvname <- "stock_data_p_uniform_constant.csv"
+  csvfile <- paste(path_store, csvname, sep="")
+  write.table(na.omit(combo_stock_f),csvfile, row.names=FALSE, sep=",")
+
+  csvname <- "stock_comparison_p_uniform_constant.csv"
+  csvfile <- paste(path_store, csvname, sep="")
+  write.table(na.omit(compare_stock_prices),csvfile, row.names=FALSE, sep=",")
+  
+  csvname <- "stock_level30_p_uniform_constant.csv"
+  csvfile <- paste(path_store, csvname, sep="")
+  write.table(na.omit(level_30),csvfile, row.names=FALSE, sep=",")
+  
+# graphs
+
+# pft
+ggsave(
+  filename = 'pft_data_p_uniform_constant.jpg',
+  plot = pft_g,
+  path = "C:/Users/kll86/OneDrive/Documents/UCSB/quotabasket_model/working_model/price and cost explore/analysis graphs/")
+
+# stock
+ggsave(
+  filename = 'stock_data_p_uniform_constant.jpg',
+  plot = stock_g,
+  path = "C:/Users/kll86/OneDrive/Documents/UCSB/quotabasket_model/working_model/price and cost explore/analysis graphs/")
+
+```
+
