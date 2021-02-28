@@ -1,0 +1,142 @@
+---
+title: "Health status results"
+author: "mauricio"
+date: "2/27/2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+library(tidyverse)
+library(here)
+library(scales)
+library(gridExtra)
+library(grid)
+library(kableExtra)
+```
+
+```{r}
+# Read files results
+
+# general output files
+output_sc1 <- read_csv(here("working_model","health status explore","model run results files","output_b_overfish1.csv")) %>% 
+  mutate(run = "Scenario 1",
+         year = seq(0,30))
+output_sc2 <- read_csv(here("working_model","health status explore","model run results files","output_b_overfish2.csv"))%>% 
+  mutate(run = "Scenario 2",
+         year = seq(0,30))
+output_sc3 <- read_csv(here("working_model","health status explore","model run results files","output_b_overfish3.csv"))%>% 
+  mutate(run = "Scenario 3",
+         year = seq(0,30))
+
+# sum of profits
+
+npv_sc1 <- read_csv(here("working_model","health status explore","model run results files","NPV_b_overfish1.csv")) %>% 
+  mutate(run = "Scenario 1")
+npv_sc2 <- read_csv(here("working_model","health status explore","model run results files","NPV_b_overfish2.csv")) %>% 
+  mutate(run = "Scenario 2")
+npv_sc3 <- read_csv(here("working_model","health status explore","model run results files","NPV_b_overfish3.csv")) %>% 
+  mutate(run = "Scenario 3")
+
+#Group them
+all_outputs <- rbind(output_sc1, output_sc2, output_sc3) %>% 
+  mutate(tot_profits = profit_per_t.t_1+profit_per_t.t_2+profit_per_t.t_3+profit_per_t.t_4+profit_per_t.t_5,
+         tot_stock=stock.s_1+stock.s_2+stock.s_3+stock.s_4+stock.s_5)
+
+NPVs <- rbind(npv_sc1, npv_sc2, npv_sc3) %>% 
+  rename(total_profit=x)
+
+```
+
+# 1. Scenarios
+
+In this section, we test how grouping stocks by their initial stock affect the profits, biomass and effort allocation. We are considering 3 species/fish have a healthy stock (X_0 = 50), and 2 species/fish are overfished (X_0 = 15) at time zero. 
+
+We considered 3 arrangement for the quota baskets:
+- *Species with similar health status:* we have a QB of healthy stocks and a group of overfished stocks.
+- *The healthy species predominates in a basket:* we have a QB were the healthy species predominates (2 healthy stocks and 1 overexploited stock), and the other basket has the remaining species (1 healthy stock and 1 overexploited stock).
+- *The overfished species predominates in a basket:*we have a QB were the overfished species predominates (1 healthy stock and 2 overexploited stocks), and the other basket has the remaining species (2 healthy stocks).
+
+We are going to compare these arrangements in terms of biomass, efforts, ant total profits.  
+
+# 2. Biomass
+
+## 2.1 Biomass per species
+
+```{r}
+# Graph
+ggplot(data = all_outputs)+
+  geom_line(aes(y=stock.s_1, x=year), color="blue")+ 
+  geom_line(aes(y=stock.s_2, x=year), color="royalblue")+ 
+  geom_line(aes(y=stock.s_3, x=year), color="lightblue")+ 
+  geom_line(aes(y=stock.s_4, x=year), color="red")+ 
+  geom_line(aes(y=stock.s_5, x=year), color="orange")+ 
+  theme_minimal()+
+  labs(x= "Years",
+         y= "Stock Level (tons)")+
+  facet_wrap(~ run, nrow=2)
+
+```
+
+## 2.2 Total biomass in the ocean
+
+```{r}
+# Graph
+ggplot(data = all_outputs, aes(y=tot_stock, x=year, group=run, color=run))+
+  geom_line()+
+  theme_minimal()+
+  labs(x= "Years",
+         y= "Stock (tons)")
+  
+```
+
+# 3. Effort
+
+```{r}
+# Graph
+ggplot(data = all_outputs)+
+  geom_line(aes(y=effort.t_1, x=year), color="blue")+ 
+  geom_line(aes(y=effort.t_2, x=year), color="royalblue")+ 
+  geom_line(aes(y=effort.t_3, x=year), color="lightblue")+ 
+  geom_line(aes(y=effort.t_4, x=year), color="red")+ 
+  geom_line(aes(y=effort.t_5, x=year), color="orange")+ 
+  theme_minimal()+
+  labs(x= "Years",
+         y= "Effort (units)")+
+  facet_wrap(~ run, nrow=2)
+
+```
+
+# 4. Profit
+
+# 4.1 Profit per technology
+```{r}
+# Graph
+ggplot(data = all_outputs)+
+  geom_line(aes(y=profit_per_t.t_1, x=year), color="blue")+ 
+  geom_line(aes(y=profit_per_t.t_2, x=year), color="royalblue")+ 
+  geom_line(aes(y=profit_per_t.t_3, x=year), color="lightblue")+ 
+  geom_line(aes(y=profit_per_t.t_4, x=year), color="red")+ 
+  geom_line(aes(y=profit_per_t.t_5, x=year), color="orange")+ 
+  theme_minimal()+
+  labs(x= "Years",
+         y= "Profit (dollars)")+
+  facet_wrap(~ run, nrow=2)
+
+```
+
+# 4.2 Total profit per scenario
+
+```{r}
+# Graph
+ggplot(data = all_outputs, aes(y=tot_profits, x=year, group=run, color=run))+
+  geom_line()+
+  theme_minimal()+
+  labs(x= "Years",
+         y= "Profit (dollars)")
+
+```
+
+
+

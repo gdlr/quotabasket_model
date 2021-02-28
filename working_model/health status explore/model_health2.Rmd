@@ -1,6 +1,6 @@
 ---
 title: "2 overfished and 1 stables"
-author: "Mauricio"
+author: "Mauricio Collado"
 date: "2/27/2021"
 output: html_document
 ---
@@ -43,16 +43,16 @@ For each technology we need:
 s1 <- c(s=1, r=0.2, K=100, X=50, p=20) #Stable
 s2 <- c(s=2, r=0.2, K=100, X=50, p=20) #Stable
 s3 <- c(s=3, r=0.2, K=100, X=50, p=20) #Stable
-s4 <- c(s=4, r=0.2, K=100, X=20, p=20) #overexploited
-s5 <- c(s=5, r=0.2, K=100, X=20, p=20) #overexploited
+s4 <- c(s=4, r=0.2, K=100, X=15, p=20) #overexploited
+s5 <- c(s=5, r=0.2, K=100, X=15, p=20) #overexploited
 
 # t = tech, q1 = catchability species 1, q2 = catchability species 2...
 
 t1 <- c(t=1, q1=0.04, q2=0.01, q3=0.01, q4=0.01, q5 = 0.01)
 t2 <- c(t=2, q1=0.01, q2=0.04, q3=0.01, q4=0.01, q5 = 0.01)
-t3 <- c(t=2, q1=0.01, q2=0.01, q3=0.04, q4=0.01, q5 = 0.01)
-t4 <- c(t=2, q1=0.01, q2=0.01, q3=0.01, q4=0.04, q5 = 0.01)
-t5 <- c(t=2, q1=0.01, q2=0.01, q3=0.01, q4=0.01, q5 = 0.04)
+t3 <- c(t=3, q1=0.01, q2=0.01, q3=0.04, q4=0.01, q5 = 0.01)
+t4 <- c(t=4, q1=0.01, q2=0.01, q3=0.01, q4=0.04, q5 = 0.01)
+t5 <- c(t=5, q1=0.01, q2=0.01, q3=0.01, q4=0.01, q5 = 0.04)
 
 # Tech cost: t = tech, cost = cost per unit effort
 c1 <- c(t=1, cost=1)
@@ -85,7 +85,7 @@ years = 30
 ```{r}
 # Change these to reflect the number of species and technologies above:
 species = list(s1, s2, s3, s4, s5)
-tech = list(t1, t2, c3, c4, c5)
+tech = list(t1, t2, t3, t4, t5)
 cost = list(c1, c2, c3, c4, c5)
 baskets = list(b1, b2) #, b3, b4, b5)
 ```
@@ -110,7 +110,7 @@ NPV <- sum(drop_na(output$profit_per_t))
   csvfile <- paste(csvname, sep="")
   write.table(na.omit(output),csvfile, row.names=FALSE, sep=",")
   
-path_store <- here("health status explore") 
+#path_store <- here("health status explore") 
   csvname <- "NPV_b_overfish2.csv"
   #csvfile <- paste(path_store, csvname, sep="")
   csvfile <- paste(csvname, sep="")
