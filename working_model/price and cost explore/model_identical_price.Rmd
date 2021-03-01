@@ -36,11 +36,11 @@ For each technology we need:
 # Species:
 # s = species, r, K, X, p
 
-s1 <- c(s=1, r=0.2, K=100, X=50, p=1) 
-s2 <- c(s=2, r=0.2, K=100, X=50, p=1)
-s3 <- c(s=3, r=0.2, K=100, X=50, p=1)
-s4 <- c(s=4, r=0.2, K=100, X=50, p=1)
-s5 <- c(s=5, r=0.2, K=100, X=50, p=1)
+s1 <- c(s=1, r=0.2, K=100, X=50, p=10) 
+s2 <- c(s=2, r=0.2, K=100, X=50, p=20)
+s3 <- c(s=3, r=0.2, K=100, X=50, p=50)
+s4 <- c(s=4, r=0.2, K=100, X=50, p=100)
+s5 <- c(s=5, r=0.2, K=100, X=50, p=200)
 
 # t = tech, q1 = catchability species 1, q2 = catchability species 2...
 
@@ -81,7 +81,7 @@ years = 30
 ```{r}
 # Change these to reflect the number of species and technologies above:
 species = list(s1, s2, s3, s4, s5)
-tech = list(t1, t2, c3, c4, c5)
+tech = list(t1, t2, t3, t4, t5)
 cost = list(c1, c2, c3, c4, c5)
 baskets = list(b1, b2) #, b3, b4, b5)
 ```
@@ -101,12 +101,12 @@ output <- optimal_baskets(species, tech, cost, baskets, mort_guess, years)
 NPV <- sum(drop_na(output$profit_per_t))
 
 path_store <- "C:/Users/kll86/OneDrive/Documents/UCSB/quotabasket_model/working_model/price and cost explore"
-  csvname <- "output_p1.csv"
+  csvname <- "output_p10.20.50.100.200.csv"
   csvfile <- paste(path_store, csvname, sep="")
   write.table(na.omit(output),csvfile, row.names=FALSE, sep=",")
   
 path_store <- "C:/Users/kll86/OneDrive/Documents/UCSB/quotabasket_model/working_model/price and cost explore"
-  csvname <- "NPV_p1.csv"
+  csvname <- "NPV_p10.20.50.100.200.csv"
   csvfile <- paste(path_store, csvname, sep="")
   write.table(na.omit(NPV),csvfile, row.names=FALSE, sep=",")
 

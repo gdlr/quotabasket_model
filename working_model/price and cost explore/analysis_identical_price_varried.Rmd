@@ -21,16 +21,16 @@ library(grid)
 
 # read in data
 
-output_ex <- read_csv("C:/Users/kll86/OneDrive/Documents/UCSB/quotabasket_model/working_model/price and cost exploreoutput_b_p10.20.50.100.200.csv")
-NPV_ex <- read_csv("C:/Users/kll86/OneDrive/Documents/UCSB/quotabasket_model/working_model/price and cost exploreNPV_b_p10.20.50.100.200.csv")
+output_ex <- read_csv("C:/Users/kll86/OneDrive/Documents/UCSB/quotabasket_model/working_model/price and cost explore/model run result files/price and cost exploreoutput_p10.20.50.100.200.csv")
+NPV_ex <- read_csv("C:/Users/kll86/OneDrive/Documents/UCSB/quotabasket_model/working_model/price and cost explore/model run result files/price and cost exploreNPV_p10.20.50.100.200.csv")
 
-output_20 <- read_csv("C:/Users/kll86/OneDrive/Documents/UCSB/quotabasket_model/working_model/price and cost explore/model run result files/price and cost exploreoutput_all_c.csv")
-NPV_20 <- read_csv("C:/Users/kll86/OneDrive/Documents/UCSB/quotabasket_model/working_model/price and cost explore/model run result files/price and cost exploreNPV_all_c.csv")
+output_20 <- read_csv("C:/Users/kll86/OneDrive/Documents/UCSB/quotabasket_model/working_model/price and cost explore/model run result files/price and cost exploreoutput_p20.csv")
+NPV_20 <- read_csv("C:/Users/kll86/OneDrive/Documents/UCSB/quotabasket_model/working_model/price and cost explore/model run result files/price and cost exploreNPV_p20.csv")
 
-output_p1t40 <- read_csv("C:/Users/kll86/OneDrive/Documents/UCSB/quotabasket_model/working_model/price and cost explore/model run result files/price and cost exploreoutput_p1t40.csv")
+output_p1t40 <- read_csv("C:/Users/kll86/OneDrive/Documents/UCSB/quotabasket_model/working_model/price and cost explore/model run result files/price and cost exploreoutput_def_p1t40.csv")
 NPV_p1t40 <- read_csv("C:/Users/kll86/OneDrive/Documents/UCSB/quotabasket_model/working_model/price and cost explore/model run result files/price and cost exploreNPV_p1t40.csv")
 
-output_p1all40 <- read_csv("C:/Users/kll86/OneDrive/Documents/UCSB/quotabasket_model/working_model/price and cost explore/model run result files/price and cost exploreoutput_p1all40.csv")
+output_p1all40 <- read_csv("C:/Users/kll86/OneDrive/Documents/UCSB/quotabasket_model/working_model/price and cost explore/model run result files/price and cost exploreoutput_def_p1all40.csv")
 NPV_p1all40 <- read_csv("C:/Users/kll86/OneDrive/Documents/UCSB/quotabasket_model/working_model/price and cost explore/model run result files/price and cost exploreNPV_p1all40.csv")
 
 output_p10.70t100 <- read_csv("C:/Users/kll86/OneDrive/Documents/UCSB/quotabasket_model/working_model/price and cost explore/model run result files/price and cost exploreoutput_p10.70t100.csv")
@@ -46,31 +46,32 @@ NPVs <- rbind(NPV_20, NPV_p1all40, NPV_p1t40, NPV_p10.70t100, NPV_ex)
 # profits
 
 pfts_ex <- output_ex%>% 
-  select(profit_per_t.t_1:profit_per_t.t_5) %>% 
+  select(profit_per_t.t_1:profit_per_t.t_2.3) %>% 
   mutate(run = "extreme")
 
 pfts_20 <- output_20%>% 
-  select(profit_per_t.t_1:profit_per_t.t_5) %>% 
+  select(profit_per_t.t_1:profit_per_t.t_2.3) %>% 
   mutate(run = "20 all")
 
-pfts_p1all40 <- output_p1all40%>%    select(profit_per_t.t_1:profit_per_t.t_5) %>% 
+pfts_p1all40 <- output_p1all40%>%    select(profit_per_t.t_1:profit_per_t.t_2.3) %>% 
   mutate(run = "1,1,1,1,40")
 
-pfts_p1t40 <- output_p1t40%>%    select(profit_per_t.t_1:profit_per_t.t_5) %>% 
+pfts_p1t40 <- output_p1t40%>%    select(profit_per_t.t_1:profit_per_t.t_2.3) %>% 
   mutate(run = "1,10,20,30,40")
 
-pfts_p10.70t100 <- output_p10.70t100%>%    select(profit_per_t.t_1:profit_per_t.t_5) %>% 
+pfts_p10.70t100 <- output_p10.70t100%>%    select(profit_per_t.t_1:profit_per_t.t_2.3) %>% 
   mutate(run = "10,70,80,90,100")
 
 combo_pfts <- rbind(pfts_20, pfts_p1all40, pfts_p1t40, pfts_p10.70t100, pfts_ex)
 
-tots <- combo_pfts$profit_per_t.t_1 + combo_pfts$profit_per_t.t_2 + combo_pfts$profit_per_t.t_3 + combo_pfts$profit_per_t.t_4 + combo_pfts$profit_per_t.t_5
+tots <- combo_pfts$profit_per_t.t_1 + combo_pfts$profit_per_t.t_2 + combo_pfts$profit_per_t.t_2.1 + combo_pfts$profit_per_t.t_2.2 + combo_pfts$profit_per_t.t_2.3
 
 combo_pfts_f <- cbind(combo_pfts, tots)
 
 ```
 
 ```{r}
+
 pft_g <- ggplot()+
   geom_smooth(data = combo_pfts_f, aes(y=tots/1000, x=rep(0:30,5), color = as.factor(run)), se = FALSE)+ theme_minimal()+
   labs(title= str_wrap("Predicted annual profits for a multi-species fishery of various prices managed by 2 quota baskets", 80),
@@ -113,7 +114,9 @@ combo_stock_f <- cbind(combo_stock, tots)
 
 ```{r}
 stock_g <- ggplot()+
-  geom_smooth(data = combo_stock_f, aes(y=tots, x=rep(0:30,5), color = as.factor(run)), se = FALSE)+ theme_minimal()+
+  geom_smooth(data = combo_stock_f, aes(y=tots, x=rep(0:30,5), color = as.factor(run), size = as.factor(run)), se = FALSE)+
+  scale_size_manual(values = c(1,1,1.6,1.3,1), guide = FALSE)+
+  theme_minimal()+
   labs(title= str_wrap("Predicted annual stock levels for a multi-species fishery of various prices managed by 2 quota baskets", 80),
        caption= str_wrap("Results of a 2 quota basket model for 5 species and 5 technologies parameterized such that species only differ in their respective market prices. Model was run for 4 different price arrangements (see legend). Parameters used: initial stock size = 50, fishing costs = 1, catchabilities = 0.04, carrying capacities = 100, growth rate = 0.2, coefficient for quota basket limits = 0.2. A coefficient for a quota basket limit defines the total combined biomass that can be extracted per year as a proportion of the total available biomass for that year.", 100),
          x= "Number of Years",
@@ -153,9 +156,9 @@ df$`Ex: Low and High Prices`$Species <- factor(df$`Ex: Low and High Prices`$Spec
 df$`Ex: Extreme Low and High Prices`$Species <- factor(df$`Ex: Extreme Low and High Prices`$Species, levels = unique(df$`Ex: Extreme Low and High Prices`$Species),
                                                        labels = c('Sp1: $10', 'Sp2: $20', 'Sp3: $50', 'Sp4: $100', 'Sp5: $150', 'Fishery Wide'))
 
-
-p1 <- ggplot(filter(df$`Ex: Uniform Prices`, Species != "Fishery Wide"), aes(x = rep(0:30,5),y = Stock_Level, colour = Species)) + 
-  geom_smooth(se = FALSE) +  theme_minimal()+
+p1 <- ggplot(filter(df$`Ex: Uniform Prices`, Species != "Fishery Wide"), aes(x = rep(0:30,5),y = Stock_Level, colour = Species, size = Species)) + 
+  geom_smooth(se = FALSE)+
+  scale_size_manual(values = c(1.4,1.3,1.2,1.1,1), guide = FALSE) +  theme_minimal()+
   facet_wrap(~run, ncol=1)+
   labs(x= "Number of Years",
        y=NULL,
@@ -201,25 +204,25 @@ Export results
 # pft
 
 path_store <- "C:/Users/kll86/OneDrive/Documents/UCSB/quotabasket_model/working_model/price and cost explore/"
-  csvname <- "pft_data_p_varried_constant_ex_ex.csv"
+  csvname <- "pft_data_p_varried_ident_ex.csv"
   csvfile <- paste(path_store, csvname, sep="")
   write.table(na.omit(combo_pfts_f),csvfile, row.names=FALSE, sep=",")
   
-  csvname <- "pft_comparison_p_varried_constant_ex.csv"
+  csvname <- "pft_comparison_p_varried_ident_ex.csv"
   csvfile <- paste(path_store, csvname, sep="")
   write.table(na.omit(compare_pft_prices),csvfile, row.names=FALSE, sep=",")
 
 # stock
 
-  csvname <- "stock_data_p_varried_constant_ex.csv"
+  csvname <- "stock_data_p_varried_ident_ex.csv"
   csvfile <- paste(path_store, csvname, sep="")
   write.table(na.omit(combo_stock_f),csvfile, row.names=FALSE, sep=",")
 
-  csvname <- "stock_comparison_p_varried_constant_ex.csv"
+  csvname <- "stock_comparison_p_varried_ident_ex.csv"
   csvfile <- paste(path_store, csvname, sep="")
   write.table(na.omit(compare_stock_prices),csvfile, row.names=FALSE, sep=",")
   
-  csvname <- "stock_level30_p_varried_constant_ex.csv"
+  csvname <- "stock_level30_p_varried_ident_ex.csv"
   csvfile <- paste(path_store, csvname, sep="")
   write.table(na.omit(level_30),csvfile, row.names=FALSE, sep=",")
   
@@ -227,18 +230,18 @@ path_store <- "C:/Users/kll86/OneDrive/Documents/UCSB/quotabasket_model/working_
 
 # pft
 ggsave(
-  filename = 'pft_data_p_varried_constant_ex.jpg',
+  filename = 'pft_data_p_varried_ident_ex.jpg',
   plot = pft_g,
   path = path_store)
 
 # stock
 ggsave(
-  filename = 'stock_data_p_varried_constant_ex.jpg',
+  filename = 'stock_data_p_varried_ident_ex.jpg',
   plot = stock_g,
   path = path_store)
 
 ggsave(
-  filename = 'stock_comp_p_varried_constant_ex.jpg',
+  filename = 'stock_comp_p_varried_ident_ex.jpg',
   plot = stock_comp_g,
   path = path_store)
 
