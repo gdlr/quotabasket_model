@@ -21,23 +21,23 @@ library(grid)
 
 # read in data
 
-output_20 <- read_csv("C:/Users/kll86/OneDrive/Documents/UCSB/quotabasket_model/working_model/price and cost explore/model run result files/price and cost exploreoutput_b_p20.csv")
-NPV_20 <- read_csv("C:/Users/kll86/OneDrive/Documents/UCSB/quotabasket_model/working_model/price and cost explore/model run result files/price and cost exploreNPV_b_p20.csv")
+output_20 <- read_csv("C:/Users/kll86/OneDrive/Documents/UCSB/quotabasket_model/working_model/price and cost explore/model run result files/price and cost exploreoutput_def_p20.csv")
+NPV_20 <- read_csv("C:/Users/kll86/OneDrive/Documents/UCSB/quotabasket_model/working_model/price and cost explore/model run result files/price and cost exploreNPV_def_p20.csv")
 
-output_p1t40 <- read_csv("C:/Users/kll86/OneDrive/Documents/UCSB/quotabasket_model/working_model/price and cost explore/model run result files/price and cost exploreoutput_b_p1t40.csv")
-NPV_p1t40 <- read_csv("C:/Users/kll86/OneDrive/Documents/UCSB/quotabasket_model/working_model/price and cost explore/model run result files/price and cost exploreNPV_b_p1t40.csv")
+output_p1t40 <- read_csv("C:/Users/kll86/OneDrive/Documents/UCSB/quotabasket_model/working_model/price and cost explore/model run result files/price and cost exploreoutput_def_p1t40.csv")
+NPV_p1t40 <- read_csv("C:/Users/kll86/OneDrive/Documents/UCSB/quotabasket_model/working_model/price and cost explore/model run result files/price and cost exploreNPV_def_p1t40.csv")
 
-#output_p1all40 <- read_csv("C:/Users/kll86/OneDrive/Documents/UCSB/quotabasket_model/working_model/price and cost explore/model run result files/price and cost exploreoutput_b_p1all40.csv")
-#NPV_p1all40 <- read_csv("C:/Users/kll86/OneDrive/Documents/UCSB/quotabasket_model/working_model/price and cost explore/model run result files/price and cost exploreNPV_b_p1all40.csv")
+output_p1all40 <- read_csv("C:/Users/kll86/OneDrive/Documents/UCSB/quotabasket_model/working_model/price and cost explore/model run result files/price and cost exploreoutput_def_p1all40.csv")
+NPV_p1all40 <- read_csv("C:/Users/kll86/OneDrive/Documents/UCSB/quotabasket_model/working_model/price and cost explore/model run result files/price and cost exploreNPV_def_p1all40.csv")
 
-# got error when ran p1all40
+output_p10.70t100 <- read_csv("C:/Users/kll86/OneDrive/Documents/UCSB/quotabasket_model/working_model/price and cost explore/model run result files/price and cost exploreoutput_def_p10.70.100.csv")
+NPV_p10.70t100 <- read_csv("C:/Users/kll86/OneDrive/Documents/UCSB/quotabasket_model/working_model/price and cost explore/model run result files/price and cost exploreNPV_def_p10.70.100.csv")
 
-output_p10.70t100 <- read_csv("C:/Users/kll86/OneDrive/Documents/UCSB/quotabasket_model/working_model/price and cost explore/model run result files/price and cost exploreoutput_b_p10.70t100.csv")
-NPV_p10.70t100 <- read_csv("C:/Users/kll86/OneDrive/Documents/UCSB/quotabasket_model/working_model/price and cost explore/model run result files/price and cost exploreNPV_b_p10.70t100.csv")
+output_ex <- read_csv("C:/Users/kll86/OneDrive/Documents/UCSB/quotabasket_model/working_model/price and cost explore/model run result files/price and cost exploreoutput_def_p10.20.50.100.200.csv")
+NPV_ex <- read_csv("C:/Users/kll86/OneDrive/Documents/UCSB/quotabasket_model/working_model/price and cost explore/model run result files/price and cost exploreNPV_def_p10.20.50.100.200.csv")
 
-
-NPVs <- rbind(NPV_20, #NPV_p1all40,
-              NPV_p1t40, NPV_p10.70t100)
+NPVs <- rbind(NPV_20, NPV_p1all40,
+              NPV_p1t40, NPV_p10.70t100, NPV_ex)
 
 ```
 # Visualize Results
@@ -46,32 +46,39 @@ NPVs <- rbind(NPV_20, #NPV_p1all40,
 # profits
 
 pfts_20 <- output_20%>% 
-  select(profit_per_t.t_1:profit_per_t.t_5) %>% 
+  select(profit_per_t.t_1:profit_per_t.t_2.3) %>% 
   mutate(run = "20 all")
 
-# pfts_p1all40 <- output_p1all40%>%    select(profit_per_t.t_1:profit_per_t.t_5) %>% 
-#   mutate(run = "1,1,1,1,40")
+pfts_p1all40 <- output_p1all40%>%    select(profit_per_t.t_1:profit_per_t.t_2.3) %>% 
+ mutate(run = "1,1,1,1,40")
 
-pfts_p1t40 <- output_p1t40%>%    select(profit_per_t.t_1:profit_per_t.t_5) %>% 
+pfts_p1t40 <- output_p1t40%>%    select(profit_per_t.t_1:profit_per_t.t_2.3) %>% 
   mutate(run = "1,10,20,30,40")
 
-pfts_p10.70t100 <- output_p10.70t100%>%    select(profit_per_t.t_1:profit_per_t.t_5) %>% 
+pfts_p10.70t100 <- output_p10.70t100%>%    select(profit_per_t.t_1:profit_per_t.t_2.3) %>% 
   mutate(run = "10,70,80,90,100")
 
-combo_pfts <- rbind(pfts_20, #pfts_p1all40,
-                    pfts_p1t40, pfts_p10.70t100)
+pfts_ex <- output_ex %>% 
+  select(profit_per_t.t_1:profit_per_t.t_2.3) %>% 
+  mutate(run = "extreme")
 
-tots <- combo_pfts$profit_per_t.t_1 + combo_pfts$profit_per_t.t_2 + combo_pfts$profit_per_t.t_3 + combo_pfts$profit_per_t.t_4 + combo_pfts$profit_per_t.t_5
+combo_pfts <- rbind(pfts_20, pfts_p1all40,
+                    pfts_p1t40, pfts_p10.70t100, pfts_ex)
+
+tots <- combo_pfts$profit_per_t.t_1 + combo_pfts$profit_per_t.t_2 + combo_pfts$profit_per_t.t_2.1 + combo_pfts$profit_per_t.t_2.2 + combo_pfts$profit_per_t.t_2.3
 
 combo_pfts_f <- cbind(combo_pfts, tots)
 
 ```
 
 ```{r}
+combo_pfts_f$run <- factor(combo_pfts_f$run, levels = unique(combo_pfts_f$run),
+                             labels = c("Ex: Uniform Prices", "Ex: Single High Price", "Ex: Ranging Prices", "Ex: Low and High Prices", "Ex: Extreme Low and High Prices"))
+
 pft_g <- ggplot()+
-  geom_smooth(data = combo_pfts_f, aes(y=tots/1000, x=rep(0:30,3), color = as.factor(run)), se = FALSE)+ theme_minimal()+
+  geom_smooth(data = combo_pfts_f, aes(y=tots/1000, x=rep(0:30,5), color = as.factor(run)), se = FALSE)+ theme_minimal()+
   labs(title= str_wrap("Predicted annual profits for a multi-species fishery of various prices managed by 2 quota baskets", 80),
-       caption= str_wrap("Results of a 2 quota basket model for 5 species and 5 technologies parameterized such that species are identical in the following parameters: initial stock size = 50, fishing costs = 1, carrying capacities = 100, coefficient for quota basket limits = 0.2. The coefficient for quota basket limit defines the total combined biomass that can be extracted per year as a proportion of the total available biomass for that year. Species differ in terms of: their respective market prices, growth rates = 0.15, 0.2, 0.2, 0.3, 0.4 (respective to each species, 1-5), catchabilities per technology = all 0.01 except for t1 catches species1 at 0.04, t2 catches species2 at 0.04, t3 catches species3 at 0.04, t4 catches species4 at 0.04, and t5 catches species5 at 0.04. . Model was run for 3 different price arrangements (see legend). Note: an arrangement of 4 species with prices of $1 and 1 species of price $40 was attempted, but yielded an error and thus was omitted.", 100),
+       caption= str_wrap("Results of a 2 quota basket model for 5 species and 5 technologies parameterized such that species are identical in the following parameters: initial stock size = 50, fishing costs = 1, carrying capacities = 100, coefficient for quota basket limits = 0.2. The coefficient for quota basket limit defines the total combined biomass that can be extracted per year as a proportion of the total available biomass for that year. Species differ in terms of: their respective market prices, growth rates = 0.15, 0.2, 0.2, 0.3, 0.4 (respective to each species, 1-5), catchabilities per technology = all 0.01 except for t1 catches species1 at 0.04, t2 catches species2 at 0.04, t3 catches species3 at 0.04, t4 catches species4 at 0.04, and t5 catches species5 at 0.04. . Model was run for 5 different price arrangements (see legend).", 100),
          x= "Number of Years",
          y= "Fishery-wide Annual Profits (thousands)",
        color= "Prices")+
@@ -87,8 +94,8 @@ stock_20 <- output_20 %>%
   select(stock.s_1:stock.s_5) %>% 
   mutate(run = "20 all")
 
-# stock_p1all40 <- output_p1all40 %>%    select(stock.s_1:stock.s_5) %>% 
-#   mutate(run = "1,1,1,1,40")
+stock_p1all40 <- output_p1all40 %>%    select(stock.s_1:stock.s_5) %>% 
+ mutate(run = "1,1,1,1,40")
 
 stock_p1t40 <- output_p1t40 %>%    select(stock.s_1:stock.s_5) %>% 
   mutate(run = "1,10,20,30,40")
@@ -96,9 +103,12 @@ stock_p1t40 <- output_p1t40 %>%    select(stock.s_1:stock.s_5) %>%
 stock_p10.70t100 <- output_p10.70t100 %>%    select(stock.s_1:stock.s_5) %>% 
   mutate(run = "10,70,80,90,100")
 
+stock_ex <- output_ex %>% 
+  select(stock.s_1:stock.s_5) %>% 
+  mutate(run = "extreme")
 
-combo_stock <- rbind(stock_20, #stock_p1all40,
-                     stock_p1t40, stock_p10.70t100)
+combo_stock <- rbind(stock_20, stock_p1all40,
+                     stock_p1t40, stock_p10.70t100, stock_ex)
 
 tots <- combo_stock$stock.s_1 + combo_stock$stock.s_2 + combo_stock$stock.s_3 + combo_stock$stock.s_4 + combo_stock$stock.s_5
 
@@ -107,10 +117,13 @@ combo_stock_f <- cbind(combo_stock, tots)
 ```
 
 ```{r}
+combo_stock_f$run <- factor(combo_pfts_f$run, levels = unique(combo_pfts_f$run),
+                             labels = c("Ex: Uniform Prices", "Ex: Single High Price", "Ex: Ranging Prices", "Ex: Low and High Prices", "Ex: Extreme Low and High Prices"))
+
 stock_g <- ggplot()+
-  geom_smooth(data = combo_stock_f, aes(y=tots, x=rep(0:30,3), color = as.factor(run)), se = FALSE)+ theme_minimal()+
+  geom_smooth(data = combo_stock_f, aes(y=tots, x=rep(0:30, 5), color = as.factor(run)), se = FALSE)+ theme_minimal()+
   labs(title= str_wrap("Predicted annual stock levels for a multi-species fishery of various prices managed by 2 quota baskets", 80),
-        caption= str_wrap("Results of a 2 quota basket model for 5 species and 5 technologies parameterized such that species are identical in the following parameters: initial stock size = 50, fishing costs = 1, carrying capacities = 100, coefficient for quota basket limits = 0.2. The coefficient for quota basket limit defines the total combined biomass that can be extracted per year as a proportion of the total available biomass for that year. Species differ in terms of: their respective market prices, growth rates = 0.15, 0.2, 0.2, 0.3, 0.4 (respective to each species, 1-5), catchabilities per technology = all 0.01 except for t1 catches species1 at 0.04, t2 catches species2 at 0.04, t3 catches species3 at 0.04, t4 catches species4 at 0.04, and t5 catches species5 at 0.04. Model was run for 3 different price arrangements (see legend). Note: an arrangement of 4 species with prices of $1 and 1 species of price $40 was attempted, but yielded an error and thus was omitted.", 100),
+        caption= str_wrap("Results of a 2 quota basket model for 5 species and 5 technologies parameterized such that species are identical in the following parameters: initial stock size = 50, fishing costs = 1, carrying capacities = 100, coefficient for quota basket limits = 0.2. The coefficient for quota basket limit defines the total combined biomass that can be extracted per year as a proportion of the total available biomass for that year. Species differ in terms of: their respective market prices, growth rates = 0.15, 0.2, 0.2, 0.3, 0.4 (respective to each species, 1-5), catchabilities per technology = all 0.01 except for t1 catches species1 at 0.04, t2 catches species2 at 0.04, t3 catches species3 at 0.04, t4 catches species4 at 0.04, and t5 catches species5 at 0.04. Model was run for 5 different price arrangements (see legend).", 100),
          x= "Number of Years",
          y= "Fishery-wide Annual Stock Level (tons)",
        color= "Prices")+
@@ -126,8 +139,8 @@ longer_stock_f <- combo_stock_f %>%
   pivot_longer(cols = c(stock.s_1:stock.s_5, tots), names_to = "Species", values_to = "Stock_Level")
 
 longer_stock_f$run <- factor(longer_stock_f$run, levels = unique(longer_stock_f$run),
-                             labels = c("Ex: Uniform Prices", #"Ex: Single High Price",
-                                        "Ex: Ranging Prices", "Ex: Low and High Prices"))
+                             labels = c("Ex: Uniform Prices", "Ex: Single High Price",
+                                        "Ex: Ranging Prices", "Ex: Low and High Prices", "Ex: Extreme Low and High Prices"))
 
 longer_stock_f$Species <- factor(longer_stock_f$Species, levels = c("stock.s_1", 'stock.s_2', 'stock.s_3', 'stock.s_4', 'stock.s_5', 'tots'), 
                   labels = c("Species 1", "Species 2", "Species 3", 'Species 4', 'Species 5', 'Fishery Total'))
@@ -137,13 +150,16 @@ df <- split(longer_stock_f,f = longer_stock_f$run)
 df$`Ex: Uniform Prices`$Species <- factor(df$`Ex: Uniform Prices`$Species, levels = unique(df$`Ex: Uniform Prices`$Species),
                                   labels = c('Sp1: $20', 'Sp2: $20', 'Sp3: $20', 'Sp4: $20', 'Sp5: $20', 'Fishery Wide'))
 
-# df$`Ex: Single High Price`$Species <- factor(df$`Ex: Single High Price`$Species, levels = unique(df$`Ex: Single High Price`$Species),
-#                                   labels = c('Sp1: $1', 'Sp2: $1', 'Sp3: $1', 'Sp4: $1', 'Sp5: $40', 'Fishery Wide'))
+df$`Ex: Single High Price`$Species <- factor(df$`Ex: Single High Price`$Species, levels = unique(df$`Ex: Single High Price`$Species),
+                                 labels = c('Sp1: $1', 'Sp2: $1', 'Sp3: $1', 'Sp4: $1', 'Sp5: $40', 'Fishery Wide'))
 
 df$`Ex: Ranging Prices`$Species <- factor(df$`Ex: Ranging Prices`$Species, levels = unique(df$`Ex: Ranging Prices`$Species),
                                   labels = c('Sp1: $1', 'Sp2: $10', 'Sp3: $20', 'Sp4: $30', 'Sp5: $40', 'Fishery Wide'))
 
 df$`Ex: Low and High Prices`$Species <- factor(df$`Ex: Low and High Prices`$Species, levels = unique(df$`Ex: Low and High Prices`$Species),
+                                  labels = c('Sp1: $10', 'Sp2: $70', 'Sp3: $80', 'Sp4: $90', 'Sp5: $100', 'Fishery Wide'))
+
+df$`Ex: Extreme Low and High Prices`$Species <- factor(df$`Ex: Low and High Prices`$Species, levels = unique(df$`Ex: Low and High Prices`$Species),
                                   labels = c('Sp1: $10', 'Sp2: $70', 'Sp3: $80', 'Sp4: $90', 'Sp5: $100', 'Fishery Wide'))
 
 
@@ -155,14 +171,15 @@ p1 <- ggplot(filter(df$`Ex: Uniform Prices`, Species != "Fishery Wide"), aes(x =
        color= "Species")+
   scale_color_viridis_d()
 
-#p2 <- p1 %+% filter(df$`Ex: Single High Price`, Species != "Fishery Wide")
+p2 <- p1 %+% filter(df$`Ex: Single High Price`, Species != "Fishery Wide")
 p3 <- p1 %+% filter(df$`Ex: Ranging Prices`, Species != "Fishery Wide")
 p4 <- p1 %+% filter(df$`Ex: Low and High Prices`, Species != "Fishery Wide")
+p5 <- p1 %+% filter(df$`Ex: Extreme Low and High Prices`, Species != "Fishery Wide")
 
 # note removed p2 below
-stock_comp_g <- grid.arrange(p1,p3,p4, ncol=2,
+stock_comp_g <- grid.arrange(p1,p2,p3,p4,p5, ncol=2,
   top=textGrob(str_wrap("Predicted annual stock levels for a fishery with varried prices under 2 quota baskets", 100), gp=gpar(fontsize = 13)),
-       bottom= textGrob(str_wrap("Results of a 2 quota basket model for 5 species and 5 technologies parameterized such that species are identical in the following parameters: initial stock size = 50, fishing costs = 1, carrying capacities = 100, coefficient for quota basket limits = 0.2. The coefficient for quota basket limit defines the total combined biomass that can be extracted per year as a proportion of the total available biomass for that year. Species differ in terms of: their respective market prices, growth rates = 0.15, 0.2, 0.2, 0.3, 0.4 (respective to each species, 1-5), catchabilities per technology = all 0.01 except for t1 catches species1 at 0.04, t2 catches species2 at 0.04, t3 catches species3 at 0.04, t4 catches species4 at 0.04, and t5 catches species5 at 0.04. Model was run for 3 different price arrangements (see legend). Note: an arrangement of 4 species with prices of $1 and 1 species of price $40 was attempted, but due to an error was omitted.", 140), gp=gpar(fontsize = 8)),
+       bottom= textGrob(str_wrap("Results of a 2 quota basket model for 5 species and 5 technologies parameterized such that species are identical in the following parameters: initial stock size = 50, fishing costs = 1, carrying capacities = 100, coefficient for quota basket limits = 0.2. The coefficient for quota basket limit defines the total combined biomass that can be extracted per year as a proportion of the total available biomass for that year. Species differ in terms of: their respective market prices, growth rates = 0.15, 0.2, 0.2, 0.3, 0.4 (respective to each species, 1-5), catchabilities per technology = all 0.01 except for t1 catches species1 at 0.04, t2 catches species2 at 0.04, t3 catches species3 at 0.04, t4 catches species4 at 0.04, and t5 catches species5 at 0.04. Model was run for 5 different price arrangements (see legend).", 140), gp=gpar(fontsize = 8)),
   left= textGrob("Annual Stock Levels (tons)", gp=gpar(fontsize = 12), rot = 90))
 
 ```

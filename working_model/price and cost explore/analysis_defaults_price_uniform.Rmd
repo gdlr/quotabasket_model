@@ -20,38 +20,38 @@ library(DT)
 
 # read in data
 
-output_b_20 <- read_csv("C:/Users/kll86/OneDrive/Documents/UCSB/quotabasket_model/working_model/price and cost explore/model run result files/price and cost exploreoutput_b_p20.csv")
-NPV_20 <- read_csv("C:/Users/kll86/OneDrive/Documents/UCSB/quotabasket_model/working_model/price and cost explore/model run result files/price and cost exploreNPV_b_p20.csv")
+output_b_20 <- read_csv("C:/Users/kll86/OneDrive/Documents/UCSB/quotabasket_model/working_model/price and cost explore/model run result files/price and cost exploreoutput_def_p20.csv")
+NPV_20 <- read_csv("C:/Users/kll86/OneDrive/Documents/UCSB/quotabasket_model/working_model/price and cost explore/model run result files/price and cost exploreNPV_def_p20.csv")
 
-output_b_1 <- read_csv("C:/Users/kll86/OneDrive/Documents/UCSB/quotabasket_model/working_model/price and cost explore/model run result files/price and cost exploreoutput_b_p1.csv")
-NPV_1 <- read_csv("C:/Users/kll86/OneDrive/Documents/UCSB/quotabasket_model/working_model/price and cost explore/model run result files/price and cost exploreNPV_b_p1.csv")
+output_b_1 <- read_csv("C:/Users/kll86/OneDrive/Documents/UCSB/quotabasket_model/working_model/price and cost explore/model run result files/price and cost exploreoutput_def_p1.csv")
+NPV_1 <- read_csv("C:/Users/kll86/OneDrive/Documents/UCSB/quotabasket_model/working_model/price and cost explore/model run result files/price and cost exploreNPV_def_p1.csv")
 
-output_b_10 <- read_csv("C:/Users/kll86/OneDrive/Documents/UCSB/quotabasket_model/working_model/price and cost explore/model run result files/price and cost exploreoutput_b_p10.csv")
-NPV_10 <- read_csv("C:/Users/kll86/OneDrive/Documents/UCSB/quotabasket_model/working_model/price and cost explore/model run result files/price and cost exploreNPV_b_p10.csv")
+output_b_10 <- read_csv("C:/Users/kll86/OneDrive/Documents/UCSB/quotabasket_model/working_model/price and cost explore/model run result files/price and cost exploreoutput_def_p10.csv")
+NPV_10 <- read_csv("C:/Users/kll86/OneDrive/Documents/UCSB/quotabasket_model/working_model/price and cost explore/model run result files/price and cost exploreNPV_def_p10.csv")
 
-output_b_30 <- read_csv("C:/Users/kll86/OneDrive/Documents/UCSB/quotabasket_model/working_model/price and cost explore/model run result files/price and cost exploreoutput_b_p30.csv")
-NPV_30 <- read_csv("C:/Users/kll86/OneDrive/Documents/UCSB/quotabasket_model/working_model/price and cost explore/model run result files/price and cost exploreNPV_b_p30.csv")
+output_b_30 <- read_csv("C:/Users/kll86/OneDrive/Documents/UCSB/quotabasket_model/working_model/price and cost explore/model run result files/price and cost exploreoutput_def_p30.csv")
+NPV_30 <- read_csv("C:/Users/kll86/OneDrive/Documents/UCSB/quotabasket_model/working_model/price and cost explore/model run result files/price and cost exploreNPV_def_p30.csv")
 
-output_b_40 <- read_csv("C:/Users/kll86/OneDrive/Documents/UCSB/quotabasket_model/working_model/price and cost explore/model run result files/price and cost exploreoutput_b_p40.csv")
-NPV_40 <- read_csv("C:/Users/kll86/OneDrive/Documents/UCSB/quotabasket_model/working_model/price and cost explore/model run result files/price and cost exploreNPV_b_p40.csv")
+output_b_40 <- read_csv("C:/Users/kll86/OneDrive/Documents/UCSB/quotabasket_model/working_model/price and cost explore/model run result files/price and cost exploreoutput_def_p40.csv")
+NPV_40 <- read_csv("C:/Users/kll86/OneDrive/Documents/UCSB/quotabasket_model/working_model/price and cost explore/model run result files/price and cost exploreNPV_def_p40.csv")
 
-output_b_50 <- read_csv("C:/Users/kll86/OneDrive/Documents/UCSB/quotabasket_model/working_model/price and cost explore/model run result files/price and cost exploreoutput_b_p50.csv")
-NPV_50 <- read_csv("C:/Users/kll86/OneDrive/Documents/UCSB/quotabasket_model/working_model/price and cost explore/model run result files/price and cost exploreNPV_b_p50.csv")
+output_b_50 <- read_csv("C:/Users/kll86/OneDrive/Documents/UCSB/quotabasket_model/working_model/price and cost explore/model run result files/price and cost exploreoutput_def_p50.csv")
+NPV_50 <- read_csv("C:/Users/kll86/OneDrive/Documents/UCSB/quotabasket_model/working_model/price and cost explore/model run result files/price and cost exploreNPV_def_p50.csv")
 
-output_b_60 <- read_csv("C:/Users/kll86/OneDrive/Documents/UCSB/quotabasket_model/working_model/price and cost explore/model run result files/price and cost exploreoutput_b_p60.csv")
-NPV_60 <- read_csv("C:/Users/kll86/OneDrive/Documents/UCSB/quotabasket_model/working_model/price and cost explore/model run result files/price and cost exploreNPV_b_p60.csv")
+output_b_60 <- read_csv("C:/Users/kll86/OneDrive/Documents/UCSB/quotabasket_model/working_model/price and cost explore/model run result files/price and cost exploreoutput_def_p60.csv")
+NPV_60 <- read_csv("C:/Users/kll86/OneDrive/Documents/UCSB/quotabasket_model/working_model/price and cost explore/model run result files/price and cost exploreNPV_def_p60.csv")
 
-output_b_70 <- read_csv("C:/Users/kll86/OneDrive/Documents/UCSB/quotabasket_model/working_model/price and cost explore/model run result files/price and cost exploreoutput_b_p70.csv")
-NPV_70 <- read_csv("C:/Users/kll86/OneDrive/Documents/UCSB/quotabasket_model/working_model/price and cost explore/model run result files/price and cost exploreNPV_b_p70.csv")
+output_b_70 <- read_csv("C:/Users/kll86/OneDrive/Documents/UCSB/quotabasket_model/working_model/price and cost explore/model run result files/price and cost exploreoutput_def_p70.csv")
+NPV_70 <- read_csv("C:/Users/kll86/OneDrive/Documents/UCSB/quotabasket_model/working_model/price and cost explore/model run result files/price and cost exploreNPV_def_p70.csv")
 
-output_b_80 <- read_csv("C:/Users/kll86/OneDrive/Documents/UCSB/quotabasket_model/working_model/price and cost explore/model run result files/price and cost exploreoutput_b_p80.csv")
-NPV_80 <- read_csv("C:/Users/kll86/OneDrive/Documents/UCSB/quotabasket_model/working_model/price and cost explore/model run result files/price and cost exploreNPV_b_p80.csv")
+output_b_80 <- read_csv("C:/Users/kll86/OneDrive/Documents/UCSB/quotabasket_model/working_model/price and cost explore/model run result files/price and cost exploreoutput_def_p80.csv")
+NPV_80 <- read_csv("C:/Users/kll86/OneDrive/Documents/UCSB/quotabasket_model/working_model/price and cost explore/model run result files/price and cost exploreNPV_def_p80.csv")
 
-output_b_90 <- read_csv("C:/Users/kll86/OneDrive/Documents/UCSB/quotabasket_model/working_model/price and cost explore/model run result files/price and cost exploreoutput_b_p90.csv")
-NPV_90 <- read_csv("C:/Users/kll86/OneDrive/Documents/UCSB/quotabasket_model/working_model/price and cost explore/model run result files/price and cost exploreNPV_b_p90.csv")
+output_b_90 <- read_csv("C:/Users/kll86/OneDrive/Documents/UCSB/quotabasket_model/working_model/price and cost explore/model run result files/price and cost exploreoutput_def_p90.csv")
+NPV_90 <- read_csv("C:/Users/kll86/OneDrive/Documents/UCSB/quotabasket_model/working_model/price and cost explore/model run result files/price and cost exploreNPV_def_p90.csv")
 
-output_b_100 <- read_csv("C:/Users/kll86/OneDrive/Documents/UCSB/quotabasket_model/working_model/price and cost explore/model run result files/price and cost exploreoutput_b_p100.csv")
-NPV_100 <- read_csv("C:/Users/kll86/OneDrive/Documents/UCSB/quotabasket_model/working_model/price and cost explore/model run result files/price and cost exploreNPV_b_p100.csv")
+output_b_100 <- read_csv("C:/Users/kll86/OneDrive/Documents/UCSB/quotabasket_model/working_model/price and cost explore/model run result files/price and cost exploreoutput_def_p100.csv")
+NPV_100 <- read_csv("C:/Users/kll86/OneDrive/Documents/UCSB/quotabasket_model/working_model/price and cost explore/model run result files/price and cost exploreNPV_def_p100.csv")
 
 NPVs <- rbind(NPV_1, NPV_10, NPV_20, NPV_30, NPV_40, NPV_50, NPV_60, NPV_70, NPV_80, NPV_90, NPV_100)
 
@@ -62,50 +62,52 @@ NPVs <- rbind(NPV_1, NPV_10, NPV_20, NPV_30, NPV_40, NPV_50, NPV_60, NPV_70, NPV
 # profits
 
 pfts_1 <- output_b_1 %>% 
-  select(profit_per_t.t_1:profit_per_t.t_5) %>% 
+  select(profit_per_t.t_1:profit_per_t.t_2.3) %>% 
   mutate(run = "1")
 
 pfts_10 <- output_b_10 %>% 
-  select(profit_per_t.t_1:profit_per_t.t_5) %>% 
+  select(profit_per_t.t_1:profit_per_t.t_2.3) %>% 
   mutate(run = "10")
 
 pfts_20 <- output_b_20%>% 
-  select(profit_per_t.t_1:profit_per_t.t_5) %>% 
+  select(profit_per_t.t_1:profit_per_t.t_2.3) %>% 
   mutate(run = "20")
 
-pfts_30 <- output_b_30%>%    select(profit_per_t.t_1:profit_per_t.t_5) %>% 
+pfts_30 <- output_b_30%>%    select(profit_per_t.t_1:profit_per_t.t_2.3) %>% 
   mutate(run = "30")
 
-pfts_40 <- output_b_40%>%    select(profit_per_t.t_1:profit_per_t.t_5) %>% 
+pfts_40 <- output_b_40%>%    select(profit_per_t.t_1:profit_per_t.t_2.3) %>% 
   mutate(run = "40")
 
-pfts_50 <- output_b_50%>%    select(profit_per_t.t_1:profit_per_t.t_5) %>% 
+pfts_50 <- output_b_50%>%    select(profit_per_t.t_1:profit_per_t.t_2.3) %>% 
   mutate(run = "50")
 
-pfts_60 <- output_b_60%>%    select(profit_per_t.t_1:profit_per_t.t_5) %>% 
+pfts_60 <- output_b_60%>%    select(profit_per_t.t_1:profit_per_t.t_2.3) %>% 
   mutate(run = "60")
 
-pfts_70 <- output_b_70%>%    select(profit_per_t.t_1:profit_per_t.t_5) %>% 
+pfts_70 <- output_b_70%>%    select(profit_per_t.t_1:profit_per_t.t_2.3) %>% 
   mutate(run = "70")
 
-pfts_80 <- output_b_80%>%    select(profit_per_t.t_1:profit_per_t.t_5) %>% 
+pfts_80 <- output_b_80%>%    select(profit_per_t.t_1:profit_per_t.t_2.3) %>% 
   mutate(run = "80")
 
-pfts_90 <- output_b_90%>%    select(profit_per_t.t_1:profit_per_t.t_5) %>% 
+pfts_90 <- output_b_90%>%    select(profit_per_t.t_1:profit_per_t.t_2.3) %>% 
   mutate(run = "90")
 
-pfts_100 <- output_b_100%>%    select(profit_per_t.t_1:profit_per_t.t_5) %>% 
+pfts_100 <- output_b_100%>%    select(profit_per_t.t_1:profit_per_t.t_2.3) %>% 
   mutate(run = "100")
 
 combo_pfts <- rbind(pfts_1, pfts_10, pfts_20, pfts_30, pfts_40, pfts_50, pfts_60, pfts_70, pfts_80, pfts_90, pfts_100)
 
-tots <- combo_pfts$profit_per_t.t_1 + combo_pfts$profit_per_t.t_2 + combo_pfts$profit_per_t.t_3 + combo_pfts$profit_per_t.t_4 + combo_pfts$profit_per_t.t_5
+tots <- combo_pfts$profit_per_t.t_1 + combo_pfts$profit_per_t.t_2 + combo_pfts$profit_per_t.t_2.1 + combo_pfts$profit_per_t.t_2.2 + combo_pfts$profit_per_t.t_2.3
 
 combo_pfts_f <- cbind(combo_pfts, tots)
 
 ```
 
 ```{r}
+combo_pfts_f$run <- factor(combo_pfts_f$run, levels = c("1", "10", "20", "30", "40", "50", "60", "70", "80", "90", "100"))
+
 pft_g <- ggplot()+
   geom_smooth(data = combo_pfts_f, aes(y=tots/1000, x=rep(0:30,11), color = as.factor(run)), se = FALSE)+ theme_minimal()+
   labs(title= str_wrap("Predicted annual profits for a multi-species fishery with uniform prices managed by 2 quota baskets", 80),
@@ -113,6 +115,7 @@ pft_g <- ggplot()+
          x= "Number of Years",
          y= "Fishery-wide Annual Profits (thousands)",
        color= "Price Level")+
+  scale_color_discrete(labels = c(dollar(as.numeric(levels(combo_pfts_f$run)))))+
   scale_y_continuous(labels=dollar_format(prefix="$"))+
   theme(plot.caption = element_text(hjust = 0))
 
@@ -164,6 +167,8 @@ combo_stock_f <- cbind(combo_stock, tots)
 ```
 
 ```{r}
+combo_stock_f$run <- factor(combo_stock_f$run, levels = c("1", "10", "20", "30", "40", "50", "60", "70", "80", "90", "100"))
+
 stock_g <- ggplot()+
   geom_smooth(data = combo_stock_f, aes(y=tots, x=rep(0:30,11), color = as.factor(run)), se = FALSE)+ theme_minimal()+
   labs(title= str_wrap("Predicted annual stock levels for a multi-species fishery with uniform prices managed by 2 quota baskets", 80),
@@ -171,6 +176,7 @@ stock_g <- ggplot()+
          x= "Number of Years",
          y= "Fishery-wide Annual Stock Level (tons)",
        color= "Price Level")+
+  scale_color_discrete(labels = c(dollar(unique(as.numeric(combo_pfts_f$run)))))+
   theme(plot.caption = element_text(hjust = 0))
 
 ```
