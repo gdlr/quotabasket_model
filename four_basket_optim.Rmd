@@ -1,5 +1,5 @@
 ---
-title: "two_basket_all_combos"
+title: "four_basket_optim"
 output: html_document
 ---
 
@@ -15,9 +15,6 @@ library(ggbeeswarm)
 library(gghighlight)
 library(kableExtra)
 ```
-### This is okay but it kinda sucks...
-
-
 
 ### Preparing the inputs and outputs for `qb_stock.r`:
 
@@ -73,7 +70,7 @@ c5 <- c(t=5, cost=1)
 # Quotas: position = basket, number is the harvest limit.
 # We want this to be 0.1 of the preceding stock under constant mortality, so this will have to change to just input constant m.
 
-mort_guess = c(0.2, 0.2)
+mort_guess = c(0.2, 0.2, 0.2, 0.2)
 
 # Years
 years = 30
@@ -85,13 +82,13 @@ years = 30
 species = list(s1, s2, s3, s4, s5)
 tech = list(t1, t2, t3, t4, t5)
 cost = list(c1, c2, c3, c4, c5)
-baskets = list(b1, b2, b3, b4, b5)
+# baskets = list(b1, b2, b3, b4, b5)
 ```
 
 
 
 
-```{r}
+```{r, eval = FALSE}
 # Test run..
 source(here("working_model", "functions", "optimal_baskets.R"))
 output <- optimal_baskets(species, tech, cost, baskets, mort_guess, years)
@@ -114,6 +111,7 @@ matrixCombn <- function(nrow, ncol) {
     return(ret);
 }
 
+
 ```
 
 ```{r}
@@ -122,9 +120,7 @@ every_basket <- function(species, tech, cost, n_baskets, mort_guess, years){
   source(here("working_model", "functions", "qb_stock_m.R"))
   source(here("working_model", "functions", "qb_stock_for_optim.R"))
   source(here("working_model", "functions", "matrix_nodup.R"))
-  
-  n_baskets <- 2
-  
+
   # Calculate every basket combo: matrix of length 
   bmtx <- matrix_nodup(n_baskets, length(species))
   
@@ -162,7 +158,7 @@ every_basket <- function(species, tech, cost, n_baskets, mort_guess, years){
 
 # Run this!
 ```{r}
-output <- every_basket(species, tech, cost, n_baskets = 2, mort_guess, years)
+output <- every_basket(species, tech, cost, n_baskets = 4, mort_guess, years)
 
 output$profits
 output$biomass
@@ -178,114 +174,18 @@ profits <- output$profits %>%
   mutate(basket = seq(1, nrow(output$biomass)))
 ```
 
-# Let's start by plotting every biomass 
-```{r}
+# Plot the biomass!
 
+```{r}
 ggplot(data = biomass, aes(x = species, y = biomass)) +
   geom_jitter(width = 0.2) +
   theme_bw()
-
 ```
 
-### Basket 5
-```{r}
-ggplot(data = biomass, aes(x = species, y = biomass), color = "red") +
-  geom_jitter(width = 0.2) +
-  theme_bw() +
-  gghighlight(basket == 5, use_direct_label = FALSE)
-
-kbl(output$basket[5], col.names = c("s1", "s2", "s3", "s4", "s5")) %>% 
-  kable_paper()
-```
-
-### Basket 10:
-
-```{r}
-ggplot(data = biomass, aes(x = species, y = biomass), color = "red") +
-  geom_jitter(width = 0.2) +
-  theme_bw() +
-  gghighlight(basket == 10, use_direct_label = FALSE)
-
-kbl(output$basket[10], col.names = c("s1", "s2", "s3", "s4", "s5")) %>% 
-  kable_paper()
-```
-
-### Basket 7
-
-```{r}
-ggplot(data = biomass, aes(x = species, y = biomass), color = "red") +
-  geom_jitter(width = 0.2) +
-  theme_bw() +
-  gghighlight(basket == 7, use_direct_label = FALSE)
-
-kbl(output$basket[7], col.names = c("s1", "s2", "s3", "s4", "s5")) %>% 
-  kable_paper()
-```
-
-
-### Profits
+# Plot the profits
 ```{r}
 ggplot(data = profits, aes(x = fct_reorder(as.factor(basket), desc(V1)), y = V1, fill = V1)) +
   geom_col() +
   theme_bw() +
   labs (x = "Basket", y = "Profits", title = "Net Profits", fill = "Profits")
 ```
-Let's see if the top 4 have anything in common...
-```{r}
-top_4 <- biomass %>% 
-  filter(basket %in% c(15, 13, 7, 9))
-
-ggplot() +
-  set.seed(1) +
-  geom_point(data = biomass, aes(x = species, y = biomass), color = "grey80",
-             position = position_jitter(seed = 30, width = 0.1))+
-  set.seed(1) +
-  geom_point(data = top_4, aes(x = species, y = biomass, color = as.factor(basket)),
-              position = position_jitter(seed = 30, width = 0.1)) +
-  scale_discrete_manual(aesthetics = "color", values = c("firebrick4", "cyan3", "forestgreen", "orange"))+
-  theme_bw() 
-```
-```{r}
-kbl(output$basket[15], col.names = c("s1", "s2", "s3", "s4", "s5"), caption = "Basket 15") %>% 
-  kable_paper()
-kbl(output$basket[13], col.names = c("s1", "s2", "s3", "s4", "s5"), caption = "Basket 3") %>% 
-  kable_paper()
-kbl(output$basket[7], col.names = c("s1", "s2", "s3", "s4", "s5"), caption = "Basket 7") %>% 
-  kable_paper()
-kbl(output$basket[9], col.names = c("s1", "s2", "s3", "s4", "s5"), caption = "Basket 9") %>% 
-  kable_paper()
-```
-
-
-# What about the worst combinations?
-```{r}
-
-low_4 <- biomass %>% 
-  filter(basket %in% c(3, 8, 10, 5))
-
-ggplot() +
-  set.seed(1) +
-  geom_point(data = biomass, aes(x = species, y = biomass), color = "grey80",
-             position = position_jitter(seed = 30, width = 0.1))+
-  set.seed(1) +
-  geom_point(data = low_4, aes(x = species, y = biomass, color = as.factor(basket)),
-              position = position_jitter(seed = 30, width = 0.1)) +
-  scale_discrete_manual(aesthetics = "color", values = c("firebrick4", "cyan3", "forestgreen", "orange"))+
-  theme_bw() 
-```
-```{r}
-kbl(output$basket[3], col.names = c("s1", "s2", "s3", "s4", "s5"), caption = "Basket 3") %>% 
-  kable_paper()
-kbl(output$basket[8], col.names = c("s1", "s2", "s3", "s4", "s5"), caption = "Basket 8") %>% 
-  kable_paper()
-kbl(output$basket[10], col.names = c("s1", "s2", "s3", "s4", "s5"), caption = "Basket 10") %>% 
-  kable_paper()
-kbl(output$basket[5], col.names = c("s1", "s2", "s3", "s4", "s5"), caption = "Basket 5") %>% 
-  kable_paper()
-```
-
-
-
-
-
-
