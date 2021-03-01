@@ -120,3 +120,22 @@ NPV <- sum(drop_na(output$profit_per_t))
 
 ```
 
+```{r}
+# tables
+sp_df <- as.data.frame(do.call(rbind, species))
+tech_df <- as.data.frame(do.call(rbind, tech))
+cost_df <- as.data.frame(do.call(rbind, cost))
+baskets_df <- as.data.frame(do.call(rbind, baskets))
+
+tech_tbl_df <- tech_df %>% 
+  inner_join(cost_df, by = "t")
+
+csvname <- "species.csv"
+csvfile <- paste(csvname, sep="")
+write.table(sp_df, csvfile, row.names=FALSE, sep=",")
+
+csvname <- "tech_cost.csv"
+csvfile <- paste(csvname, sep="")
+write.table(tech_tbl_df, csvfile, row.names=FALSE, sep=",")
+ 
+```

@@ -41,9 +41,9 @@ For each technology we need:
 # Species:
 # s = species, r, K, X, p
 
-s1 <- c(s=1, r=0.1, K=100, X=50, p=20) #low r
-s2 <- c(s=2, r=0.1, K=100, X=50, p=20) #low r
-s3 <- c(s=3, r=0.1, K=100, X=50, p=20) #low r
+s1 <- c(s=1, r=0.2, K=100, X=50, p=20) #low r
+s2 <- c(s=2, r=0.2, K=100, X=50, p=20) #low r
+s3 <- c(s=3, r=0.2, K=100, X=50, p=20) #low r
 s4 <- c(s=4, r=0.4, K=100, X=50, p=20) #high r
 s5 <- c(s=5, r=0.4, K=100, X=50, p=20) #high r
 

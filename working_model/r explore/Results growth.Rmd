@@ -1,12 +1,12 @@
 ---
-title: "Health status results"
+title: "Intrinsic growth results"
 author: "mauricio"
 date: "2/27/2021"
 output: html_document
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_chunk$set(echo = TRUE, message=FALSE, warning=FALSE, echo=FALSE)
 
 library(tidyverse)
 library(here)
@@ -18,6 +18,11 @@ library(kableExtra)
 
 ```{r}
 # Read files results
+
+# data
+species_df <- read_csv(here("working_model","r explore","model run results files","species.csv"))
+# data
+tech_df <- read_csv(here("working_model","r explore","model run results files","tech_cost.csv"))
 
 # general output files
 output_sc1 <- read_csv(here("working_model","r explore","model run results files","output_b_r1.csv")) %>% 
@@ -51,15 +56,35 @@ NPVs <- rbind(npv_sc1, npv_sc2, npv_sc3) %>%
 
 # 1. Scenarios
 
-In this section, we test how grouping stocks by their intrinsic growth (r) affect the profits, biomass and effort allocation. We are considering 3 species/fish have a low growth (r=0.1), and 2 species/fish with high growth (r = 0.4) at time zero. 
+In this section, we test how grouping stocks by their intrinsic growth (r) affect the profits, biomass and effort allocation. We are considering 3 species/fish have a low growth (r=0.1), and 2 species/fish with high growth (r = 0.4) at time zero. <br />
 
-We considered 3 arrangement for the quota baskets:
-- *Species with similar r:* we have a QB of low r and a group of high r.
-- *The normal r species predominates in a basket:* we have a QB were the "low r" species predominates (2 low r and 1 high r), and the other basket has the remaining species (1 low r and 1 high r).
-- *The high r species predominates in a basket:*we have a QB were the "high r" species predominates (1 low r and 2 high r), and the other basket has the remaining species (2 low r).
+<br />
+We considered 3 arrangement for the quota baskets:<br />
+- *Species with similar r:* we have a QB of low r and a group of high r.<br />
+- *The normal r species predominates in a basket:* we have a QB were the "low r" species predominates (2 low r and 1 high r), and the other basket has the remaining species (1 low r and 1 high r).<br />
+- *The high r species predominates in a basket:*we have a QB were the "high r" species predominates (1 low r and 2 high r), and the other basket has the remaining species (2 low r).<br />
 
 We are going to compare these arrangements in terms of biomass, efforts, ant total profits.
   
+## 1.1 Parameters
+
+```{r}
+
+# Make tables
+species_table <- kable(species_df, col.names = c("Species", "r", "K", "Starting stock (X)", "price")) %>% 
+  kable_classic(full_width = F)
+
+tech_table <- kable(tech_df, col.names = c("Tech", "
+                                               q1", "q2", "q3", 
+                                               "q4", "q5",
+                                               "cost")) %>% 
+  kable_classic(full_width = F)
+
+species_table
+
+tech_table
+```
+
 
 # 2. Biomass
 
@@ -80,6 +105,45 @@ ggplot(data = all_outputs)+
 
 ```
 
+```{r}
+# Graph
+stocck_1gr <- ggplot(data = all_outputs, aes(y=stock.s_1, x=year, group=run, color=run))+
+  geom_line()+
+  theme_minimal()+
+  labs(x= "Years",
+         y= "Stock 1 (tons)")
+
+stocck_2gr <- ggplot(data = all_outputs, aes(y=stock.s_2, x=year, group=run, color=run))+
+  geom_line()+
+  theme_minimal()+
+  labs(x= "Years",
+         y= "Stock 2 (tons)")
+
+stocck_3gr <- ggplot(data = all_outputs, aes(y=stock.s_3, x=year, group=run, color=run))+
+  geom_line()+
+  theme_minimal()+
+  labs(x= "Years",
+         y= "Stock 3 (tons)")
+
+stocck_4gr <- ggplot(data = all_outputs, aes(y=stock.s_4, x=year, group=run, color=run))+
+  geom_line()+
+  theme_minimal()+
+  labs(x= "Years",
+         y= "Stock 4 (tons)")
+
+stocck_5gr <- ggplot(data = all_outputs, aes(y=stock.s_5, x=year, group=run, color=run))+
+  geom_line()+
+  theme_minimal()+
+  labs(x= "Years",
+         y= "Stock 5 (tons)")
+
+grid.arrange(stocck_1gr, stocck_4gr, stocck_2gr, stocck_5gr, stocck_3gr, ncol=2, nrow= 3)
+```
+<br />
+- The low r species display a stable stock when they are part of quota baskets without high r species.<br />
+- The high r species display a descending stock when they are part of quota baskets without low r species.<br />
+- The high r species have a more stable stock over time in basket dominated by low r species, however the stocks of the low r species are diminishing over time.<br />
+
 ## 2.2 Total biomass in the ocean
 
 ```{r}
@@ -91,6 +155,10 @@ ggplot(data = all_outputs, aes(y=tot_stock, x=year, group=run, color=run))+
          y= "Stock (tons)")
   
 ```
+
+<br />
+- Despite the better results for high r species, scenario 2 provides the worst results in stock. <br />
+- Grouping species with similar r seems more reasonable to enjoy stable stocks over time.<br />
 
 # 3. Effort
 
@@ -108,6 +176,45 @@ ggplot(data = all_outputs)+
   facet_wrap(~ run, nrow=2)
 
 ```
+
+```{r}
+# Graph
+e_1gr <- ggplot(data = all_outputs, aes(y=effort.t_1, x=year, group=run, color=run))+
+  geom_line()+
+  theme_minimal()+
+  labs(x= "Years",
+         y= "Tech 1")
+
+e_2gr <- ggplot(data = all_outputs, aes(y=effort.t_2, x=year, group=run, color=run))+
+  geom_line()+
+  theme_minimal()+
+  labs(x= "Years",
+         y= "Tech 2")
+
+e_3gr <- ggplot(data = all_outputs, aes(y=effort.t_3, x=year, group=run, color=run))+
+  geom_line()+
+  theme_minimal()+
+  labs(x= "Years",
+         y= "Tech 3")
+
+e_4gr <- ggplot(data = all_outputs, aes(y=effort.t_4, x=year, group=run, color=run))+
+  geom_line()+
+  theme_minimal()+
+  labs(x= "Years",
+         y= "Tech 4")
+
+e_5gr <- ggplot(data = all_outputs, aes(y=effort.t_5, x=year, group=run, color=run))+
+  geom_line()+
+  theme_minimal()+
+  labs(x= "Years",
+         y= "Tech 5")
+
+grid.arrange(e_1gr, e_4gr, e_2gr, e_5gr, e_3gr, ncol=2, nrow= 3)
+```
+
+<br />
+- In all the scenarios, the allocation favor the technologies that excel at harvesting high r species. The baskets dominated by high r species present **high mortality** (0.9). <br />
+- Baskets with only low r species display low allocations (0 in many years) on the technologies that are good at catching them. <br />
 
 # 4. Profit
 
@@ -127,6 +234,44 @@ ggplot(data = all_outputs)+
 
 ```
 
+```{r}
+# Graph
+p_1gr <- ggplot(data = all_outputs, aes(y=profit_per_t.t_1, x=year, group=run, color=run))+
+  geom_line()+
+  theme_minimal()+
+  labs(x= "Years",
+         y= "Profit (tech 1)")
+
+p_2gr <- ggplot(data = all_outputs, aes(y=profit_per_t.t_2, x=year, group=run, color=run))+
+  geom_line()+
+  theme_minimal()+
+  labs(x= "Years",
+         y= "Profit (tech 2)")
+
+p_3gr <- ggplot(data = all_outputs, aes(y=profit_per_t.t_3, x=year, group=run, color=run))+
+  geom_line()+
+  theme_minimal()+
+  labs(x= "Years",
+         y= "Profit (tech 3)")
+
+p_4gr <- ggplot(data = all_outputs, aes(y=profit_per_t.t_4, x=year, group=run, color=run))+
+  geom_line()+
+  theme_minimal()+
+  labs(x= "Years",
+         y= "Profit (tech 4)")
+
+p_5gr <- ggplot(data = all_outputs, aes(y=profit_per_t.t_5, x=year, group=run, color=run))+
+  geom_line()+
+  theme_minimal()+
+  labs(x= "Years",
+         y= "Profit (tech 5)")
+
+grid.arrange(p_1gr, p_4gr, p_2gr, p_5gr, p_3gr, ncol=2, nrow= 3)
+```
+<br />
+- The low or zero efforts allocated in baskets with only low r species have null(or almost zero) profits in their best technologies. <br />
+- Profits are positive for the technologies good at catching high r species in all scenarios. The best results are for baskets dominated by high r species. <br />
+
 # 4.2 Total profit per scenario
 
 ```{r}
@@ -138,6 +283,30 @@ ggplot(data = all_outputs, aes(y=tot_profits, x=year, group=run, color=run))+
          y= "Profit (dollars)")
 
 ```
+
+<br />
+- Over time, the baskets dominated by high r species provide better total profits results in the period of analysis.
+
+# 5. Summary
+
+**Stocks**
+<br />
+- The low r species display a stable stock when they are part of quota baskets without high r species.<br />
+- The high r species display a descending stock when they are part of quota baskets without low r species.<br />
+- The high r species have a more stable stock over time in basket dominated by low r species, however the stocks of the low r species are diminishing over time.<br />
+- Despite the better results for high r species, scenario 2 provides the worst results in stock. <br />
+- Grouping species with similar r seems more reasonable to enjoy stable stocks over time.<br />
+
+**Effort** 
+<br />
+- In all the scenarios, the allocation favor the technologies that excel at harvesting high r species. The baskets dominated by high r species present **high mortality** (0.9). <br />
+- Baskets with only low r species display low allocations (0 in many years) on the technologies that are good at catching them. <br />
+
+**Profit** 
+<br />
+- The low or zero efforts allocated in baskets with only low r species have null(or almost zero) profits in their best technologies. <br />
+- Profits are positive for the technologies good at catching high r species in all scenarios. The best results are for baskets dominated by high r species. <br />
+- Over time, the baskets dominated by high r species provide better total profits results in the period of analysis.
 
 
 
