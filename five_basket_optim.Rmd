@@ -94,5 +94,17 @@ source(here("working_model", "functions", "optimal_baskets.R"))
 output <- optimal_baskets(species, tech, cost, baskets, mort_guess, years)
 
 output$stock
+output$profit_per_t
+
+five_basket_profits <- output$profit_per_t
+
+# Let's just save these...
+total_profit <- tibble(profit = sum(colSums(output$profit_per_t, na.rm = TRUE)))
+ending_biomass <- tail(output$stock, 1)
+optimal_mortalities <- tibble(mortality = c(output$mortality1, output$mortality2, output$mortality3, output$mortality4, output$mortality5))
+
+write_csv(total_profit, here("working_model", "scratch", "optim", "data", "five_basket_profit.csv"))
+write_csv(ending_biomass, here("working_model", "scratch", "optim", "data", "five_basket_biomass.csv"))
+write_csv(optimal_mortalities, here("working_model", "scratch", "optim", "data", "five_basket_mortalities.csv"))
 ```
 

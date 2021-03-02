@@ -85,39 +85,15 @@ years = 30
 species = list(s1, s2, s3, s4, s5)
 tech = list(t1, t2, t3, t4, t5)
 cost = list(c1, c2, c3, c4, c5)
-baskets = list(b1, b2, b3, b4, b5)
-```
-
-
-
-
-```{r}
-# Test run..
-source(here("working_model", "functions", "optimal_baskets.R"))
-output <- optimal_baskets(species, tech, cost, baskets, mort_guess, years)
-
-# Calculate every basket combo:
-matrixCombn <- function(nrow, ncol) {
-    # All possible column combinations for a matrix of dimension dim
-    # Here we assume two different values c(1, 0)
-    require(gtools);
-    columns <- t(permutations(n = 2, r = nrow, v = c(1, 0), repeats.allowed = TRUE));
-    columns <- columns[, colSums(columns) == 1];
-
-    # Construct all possible combinations of dim column vectors and
-    # impose constraint that row and column sum >= 1
-    ret <- lapply(as.data.frame(t(permutations(ncol(columns), ncol, repeats.allowed = TRUE))), function(x) {
-        m.cand <- columns[, x];
-        if (all(rowSums(m.cand) > 0) & all(colSums(m.cand) > 0)) m.cand else NULL;
-    })
-    ret <- Filter(Negate(is.null), ret);
-    return(ret);
-}
-
+# baskets = list(b1, b2, b3, b4, b5)
 ```
 
 ```{r}
-every_basket <- function(species, tech, cost, n_baskets, mort_guess, years){
+every_basket <- function(species, tech, cost, n_baskets, mort_guess, years, cores = 5){
+  require(future)
+  require(future.apply)
+  require(quadprog)
+  require(here)
   # Load the two functions
   source(here("working_model", "functions", "qb_stock_m.R"))
   source(here("working_model", "functions", "qb_stock_for_optim.R"))
@@ -150,7 +126,7 @@ every_basket <- function(species, tech, cost, n_baskets, mort_guess, years){
         end_biomass = as_vector(tail(result$stock, 1))
         return(list(profit, end_biomass))
   }
-  plan(multiprocess, workers = 5)
+  plan(multiprocess, workers = cores)
   result <- future.apply::future_lapply(bmtx, possibly(basket_fx, otherwise = NA))
 
   
@@ -176,6 +152,9 @@ biomass <- output$biomass %>%
 
 profits <- output$profits %>% 
   mutate(basket = seq(1, nrow(output$biomass)))
+
+write_csv(profits, here("working_model", "scratch", "optim", "data", "two_basket_profits.csv"))
+write_csv(biomass, here("working_model", "scratch", "optim", "data", "two_basket_biomass.csv"))
 ```
 
 # Let's start by plotting every biomass 

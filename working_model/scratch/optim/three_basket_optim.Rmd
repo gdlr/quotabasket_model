@@ -3,11 +3,6 @@ title: "three_basket_optim"
 output: html_document
 ---
 
----
-title: "two_basket_all_combos"
-output: html_document
----
-
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = FALSE, warning = FALSE, message = FALSE)
 
@@ -38,7 +33,7 @@ For each technology we need:
 # Inputs
 
 ## Step 1: Input parameters
-```{r}
+```{r, include = TRUE}
 # Species:
 # s = species, r, K, X, p
 
@@ -52,9 +47,9 @@ s5 <- c(s=5, r=0.4, K=100, X=50, p=12)
 
 t1 <- c(t=1, q1=0.04, q2=0.01, q3=0.01, q4=0.01, q5 = 0.1)
 t2 <- c(t=2, q1=0.01, q2=0.04, q3=0.01, q4=0.01, q5 = 0.01)
-t3 <- c(t=2, q1=0.01, q2=0.01, q3=0.04, q4=0.01, q5 = 0.01)
-t4 <- c(t=2, q1=0.01, q2=0.01, q3=0.01, q4=0.04, q5 = 0.01)
-t5 <- c(t=2, q1=0.01, q2=0.01, q3=0.01, q4=0.01, q5 = 0.04)
+t3 <- c(t=3, q1=0.01, q2=0.01, q3=0.04, q4=0.01, q5 = 0.01)
+t4 <- c(t=4, q1=0.01, q2=0.01, q3=0.01, q4=0.04, q5 = 0.01)
+t5 <- c(t=5, q1=0.01, q2=0.01, q3=0.01, q4=0.01, q5 = 0.04)
 
 # Tech cost: t = tech, cost = cost per unit effort
 c1 <- c(t=1, cost=1)
@@ -89,35 +84,7 @@ tech = list(t1, t2, t3, t4, t5)
 cost = list(c1, c2, c3, c4, c5)
 # baskets = list(b1, b2, b3, b4, b5)
 ```
-
-
-
-
-```{r}
-# Test run..
-source(here("working_model", "functions", "optimal_baskets.R"))
-output <- optimal_baskets(species, tech, cost, baskets, mort_guess, years)
-
-# Calculate every basket combo:
-matrixCombn <- function(nrow, ncol) {
-    # All possible column combinations for a matrix of dimension dim
-    # Here we assume two different values c(1, 0)
-    require(gtools);
-    columns <- t(permutations(n = 2, r = nrow, v = c(1, 0), repeats.allowed = TRUE));
-    columns <- columns[, colSums(columns) == 1];
-
-    # Construct all possible combinations of dim column vectors and
-    # impose constraint that row and column sum >= 1
-    ret <- lapply(as.data.frame(t(permutations(ncol(columns), ncol, repeats.allowed = TRUE))), function(x) {
-        m.cand <- columns[, x];
-        if (all(rowSums(m.cand) > 0) & all(colSums(m.cand) > 0)) m.cand else NULL;
-    })
-    ret <- Filter(Negate(is.null), ret);
-    return(ret);
-}
-
-
-```
+# Run every basket...
 
 ```{r}
 every_basket <- function(species, tech, cost, n_baskets, mort_guess, years){
@@ -178,8 +145,8 @@ biomass <- output$biomass %>%
 profits <- output$profits %>% 
   mutate(basket = seq(1, nrow(output$biomass)))
 
-write_csv(profits, here("working_model", "scratch", "optim", "data", "two_basket_profits.csv"))
-write_csv(biomass, here("working_model", "scratch", "optim", "data", "two_basket_biomass.csv"))
+write_csv(profits, here("working_model", "scratch", "optim", "data", "three_basket_profits.csv"))
+write_csv(biomass, here("working_model", "scratch", "optim", "data", "three_basket_biomass.csv"))
 ```
 
 # Plot the biomass!
