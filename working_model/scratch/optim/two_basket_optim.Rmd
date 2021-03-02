@@ -99,7 +99,6 @@ every_basket <- function(species, tech, cost, n_baskets, mort_guess, years, core
   source(here("working_model", "functions", "qb_stock_for_optim.R"))
   source(here("working_model", "functions", "matrix_nodup.R"))
   
-  n_baskets <- 2
   
   # Calculate every basket combo: matrix of length 
   bmtx <- matrix_nodup(n_baskets, length(species))
