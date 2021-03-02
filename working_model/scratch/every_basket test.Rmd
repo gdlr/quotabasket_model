@@ -92,7 +92,7 @@ source(here("working_model", "functions", "every_basket.R"))
 
 # Run this!
 ```{r}
-output <- every_basket(species, tech, cost, n_baskets = 2, mort_guess, years)
+output <- every_basket(species, tech, cost, n_baskets = 2, mort_guess, years, cores = 1)
 
 output$profits
 output$biomass
