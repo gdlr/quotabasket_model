@@ -1,0 +1,2 @@
+"sum(colSums(output$profit_per_t, na.rm = TRUE))"
+9958.013281563033

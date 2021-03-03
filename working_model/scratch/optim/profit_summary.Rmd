@@ -5,5 +5,151 @@ output: html_document
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+library(here)
 ```
+
+# Read in our data
+```{r}
+five_basket_biomass <-  read_csv(here("working_model", "scratch", "optim", "data", "five_basket_biomass.csv"))
+five_basket_profits <-  read_csv(here("working_model", "scratch", "optim", "data", "five_basket_profit.csv"))
+four_basket_biomass <-  read_csv(here("working_model", "scratch", "optim", "data", "four_basket_biomass.csv"))
+four_basket_profits <-  read_csv(here("working_model", "scratch", "optim", "data", "four_basket_profit.csv"))
+three_basket_biomass <-  read_csv(here("working_model", "scratch", "optim", "data", "three_basket_biomass.csv"))
+three_basket_profits <-  read_csv(here("working_model", "scratch", "optim", "data", "three_basket_profits.csv"))
+two_basket_biomass <-  read_csv(here("working_model", "scratch", "optim", "data", "two_basket_biomass.csv"))
+two_basket_profits <-  read_csv(here("working_model", "scratch", "optim", "data", "two_basket_profits.csv"))
+one_basket_biomass <-  read_csv(here("working_model", "scratch", "optim", "data", "one_basket_biomass.csv"))
+one_basket_profits <-  read_csv(here("working_model", "scratch", "optim", "data", "one_basket_profits.csv"))
+
+
+five_basket_names <- five_basket_profits %>% 
+  mutate(profits = profit,
+         baskets = 5) %>% 
+  select(profits, baskets)
+
+four_basket_names <- four_basket_profits %>% 
+  mutate(profits = V1,
+         baskets = 4) %>% 
+  select(profits, baskets)
+
+three_basket_names <- three_basket_profits %>% 
+  mutate(profits = V1,
+         baskets = 3) %>% 
+  select(profits, baskets)
+
+two_basket_names <- two_basket_profits %>% 
+  mutate(profits = V1,
+         baskets = 2) %>% 
+  select(profits, baskets)
+
+colnames(one_basket_profits) <- "profits"
+
+one_basket_names <- one_basket_profits %>% 
+  mutate(baskets = 1) %>% 
+  select(profits, baskets)
+
+# This is for profits
+full_df <- five_basket_names %>% 
+  full_join(five_basket_names) %>% 
+  full_join(four_basket_names) %>% 
+  full_join(three_basket_names) %>% 
+  full_join(two_basket_names) %>% 
+  full_join(one_basket_names)
+```
+
+
+
+```{r}
+profit_plot <- ggplot(full_df, aes(x = profits, y = baskets)) +
+  stat_boxplot(geom ="errorbar", aes(group = as_factor(baskets)),
+               width = 0.2) +
+  geom_boxplot(aes(group = as_factor(baskets)),
+               width = 0.5, 
+               fatten = 1) +
+  geom_jitter(aes(x = profits, y = baskets),
+             height = 0.1,
+             size = 0.4,
+             color = "firebrick",
+             alpha = 0.5) +
+  coord_flip()+
+  theme_bw(base_size = 15) +
+  expand_limits(x = 11500) +
+  theme(#panel.grid = element_blank(),
+        axis.ticks.length = unit(-0.05, "in"),
+        axis.text.y = element_text(margin=unit(c(0.3,0.3,0.3,0.3), "cm")),
+        axis.text.x = element_text(margin=unit(c(0.3,0.3,0.3,0.3), "cm")))+
+  labs(x = "30 year net profits", y = "Number of baskets", title = "Net profits for every combination of quota baskets \n in a 5 species fishery")
+
+profit_plot
+
+ggsave(plot = profit_plot, filename = here("working_model", "scratch", "optim", "plots", "profit_plot.png"), device = "png")
+
+# Do I believe our four basket results? Good question. 
+```
+
+# Make a biomass data frame:
+
+```{r}
+
+five_basket_bm2 <- five_basket_biomass %>% 
+  pivot_longer(everything(), names_to = "species", values_to = "biomass") %>% 
+  mutate(baskets = 5)
+
+four_basket_bm2 <- four_basket_biomass %>% 
+  mutate(baskets = 4)
+
+three_basket_bm2 <- three_basket_biomass %>% 
+  mutate(baskets = 3)
+
+two_basket_b2 <- two_basket_biomass %>% 
+  mutate(baskets = 2)
+
+one_basket_bm2 <- one_basket_biomass %>% 
+  pivot_longer(everything(), names_to = "species", values_to = "biomass") %>% 
+  mutate(baskets = 1)
+
+full_biomass <- five_basket_bm2 %>% 
+  full_join(four_basket_bm2) %>% 
+  full_join(three_basket_bm2) %>% 
+  full_join(two_basket_b2) %>% 
+  full_join(one_basket_bm2)
+```
+
+```{r}
+
+species_labs = c(s_1 = "Species 1", s_2 = "Species 2", s_3 = "Species 3", s_4 = "Species 4", s_5 = "Species 5")
+
+  
+biomass_plot <- ggplot(data = full_biomass) +
+  stat_boxplot(geom ="errorbar", aes(x = as_factor(baskets), y = biomass, color =as_factor(baskets)),
+                size = 0.2) +
+  geom_boxplot(aes(x = as_factor(baskets), y = biomass, color = as_factor(baskets), fill = as_factor(baskets)), 
+               size = 0.5,
+               outlier.shape = 21,
+               outlier.size = 0.5) +
+  facet_grid(~species, 
+             labeller = labeller(species = species_labs)) +
+  theme_bw() +
+  scale_discrete_manual(aesthetics = "fill", values = c("black", "firebrick2", "orange", "burlywood", "black")) +
+  scale_discrete_manual(aesthetics = "color", values = c("black", "firebrick4", "orange4", "burlywood4", "black")) +
+  # scale_x_discrete(labels = c("Species 1", "Species 2", "Species 3", "Species 4", "Species 5")) +
+  theme(panel.grid = element_blank(),
+   strip.background = element_rect(fill="white"),
+        axis.ticks.length = unit(-0.05, "in"),
+        axis.text.y = element_text(margin=unit(c(0.3,0.3,0.3,0.3), "cm")),
+        axis.text.x = element_text(margin=unit(c(0.3,0.3,0.3,0.3), "cm")),
+        legend.position = "none") +
+  labs(x = "Number of baskets", y = "Year 30 biomass", fill = "Number of \nBaskets", color = "Number of \nBaskets",
+       title = "Boxplot of year 30 biomasses for each species for every basket combination \nin a 5 speicies fishery") +
+  expand_limits(y = 0)
+  
+biomass_plot
+
+
+ggsave(plot = biomass_plot, filename = here("working_model", "scratch", "optim", "plots", "biomass_plot.png"), device = "png")
+```
+
+
+
 
