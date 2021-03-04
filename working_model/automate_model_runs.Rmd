@@ -1,0 +1,29 @@
+## run this to automate the generation of the result files. Just modify the make up for the species once.
+
+```{r}
+
+render_model = function(species_p1, species_p2, species_p3, species_p4, species_p5) {
+  rmarkdown::render(
+    input = "C:/Users/kll86/OneDrive/Documents/UCSB/quotabasket_model/working_model/auto_model_defaults_price.Rmd", # What's the input file to render?
+    params = list(species_p1=species_p1, species_p2=species_p2, species_p3=species_p3, species_p4=species_p4, species_p5=species_p5), # What are the parameters?
+    output_file = paste0("runs_", species_p1, species_p2, species_p3, species_p4, species_p5, "_mix .html") # What should I name the output file?
+  )
+}
+
+species_p1 = 1
+species_p2 = 10
+species_p3 = 20
+species_p4 = 30
+species_p5 = 40
+
+species_p <- as.vector(c(species_p1, species_p2, species_p3, species_p4, species_p5))
+
+possible_scenarios <- permutations(n=5,r=5,species_p,set=FALSE)
+
+ for (i in 1:nrow(possible_scenarios)){
+   
+   render_model(possible_scenarios[i,1], possible_scenarios[i,2], possible_scenarios[i,3], possible_scenarios[i,4], possible_scenarios[i,5])
+   
+}
+
+```
