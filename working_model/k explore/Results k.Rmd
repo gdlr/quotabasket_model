@@ -112,29 +112,34 @@ ggplot(data = all_outputs)+
 stocck_1gr <- ggplot(data = all_outputs, aes(y=stock.s_1, x=year, group=run, color=run))+
   geom_line(size=1)+
   theme_minimal()+
+  coord_cartesian(ylim=c(0,130))+
   labs(x= "Years",
          y= "Stock 1 (tons)")
 
 stocck_2gr <- ggplot(data = all_outputs, aes(y=stock.s_2, x=year, group=run, color=run))+
   geom_line(size=1)+
   theme_minimal()+
+  coord_cartesian(ylim=c(0,130))+
   labs(x= "Years",
          y= "Stock 2 (tons)")
 
 stocck_3gr <- ggplot(data = all_outputs, aes(y=stock.s_3, x=year, group=run, color=run))+
   geom_line(size=1)+
   theme_minimal()+
+  coord_cartesian(ylim=c(0,130))+
   labs(x= "Years",
          y= "Stock 3 (tons)")
 
 stocck_4gr <- ggplot(data = all_outputs, aes(y=stock.s_4, x=year, group=run, color=run))+
   geom_line(size=1)+
   theme_minimal()+
+  coord_cartesian(ylim=c(0,130))+
   labs(x= "Years",
          y= "Stock 4 (tons)")
 
 stocck_5gr <- ggplot(data = all_outputs, aes(y=stock.s_5, x=year, group=run, color=run))+
   geom_line(size=1)+
+  coord_cartesian(ylim=c(0,130))+
   theme_minimal()+
   labs(x= "Years",
          y= "Stock 5 (tons)")
@@ -181,30 +186,35 @@ ggplot(data = all_outputs)+
 e_1gr <- ggplot(data = all_outputs, aes(y=effort.t_1, x=year, group=run, color=run))+
   geom_line(size=1)+
   theme_minimal()+
+  coord_cartesian(ylim=c(0,2))+
   labs(x= "Years",
          y= "Tech 1")
 
 e_2gr <- ggplot(data = all_outputs, aes(y=effort.t_2, x=year, group=run, color=run))+
   geom_line(size=1)+
   theme_minimal()+
+  coord_cartesian(ylim=c(0,2))+
   labs(x= "Years",
          y= "Tech 2")
 
 e_3gr <- ggplot(data = all_outputs, aes(y=effort.t_3, x=year, group=run, color=run))+
   geom_line(size=1)+
   theme_minimal()+
+  coord_cartesian(ylim=c(0,2))+
   labs(x= "Years",
          y= "Tech 3")
 
 e_4gr <- ggplot(data = all_outputs, aes(y=effort.t_4, x=year, group=run, color=run))+
   geom_line(size=1)+
   theme_minimal()+
+  coord_cartesian(ylim=c(0,2))+
   labs(x= "Years",
          y= "Tech 4")
 
 e_5gr <- ggplot(data = all_outputs, aes(y=effort.t_5, x=year, group=run, color=run))+
   geom_line(size=1)+
   theme_minimal()+
+  coord_cartesian(ylim=c(0,2))+
   labs(x= "Years",
          y= "Tech 5")
 
@@ -237,30 +247,35 @@ ggplot(data = all_outputs)+
 p_1gr <- ggplot(data = all_outputs, aes(y=profit_per_t.t_1, x=year, group=run, color=run))+
   geom_line(size=1)+
   theme_minimal()+
+  coord_cartesian(ylim=c(0,250))+
   labs(x= "Years",
          y= "Profit (tech 1)")
 
 p_2gr <- ggplot(data = all_outputs, aes(y=profit_per_t.t_2, x=year, group=run, color=run))+
   geom_line(size=1)+
   theme_minimal()+
+  coord_cartesian(ylim=c(0,250))+
   labs(x= "Years",
          y= "Profit (tech 2)")
 
 p_3gr <- ggplot(data = all_outputs, aes(y=profit_per_t.t_3, x=year, group=run, color=run))+
   geom_line(size=1)+
   theme_minimal()+
+  coord_cartesian(ylim=c(0,250))+
   labs(x= "Years",
          y= "Profit (tech 3)")
 
 p_4gr <- ggplot(data = all_outputs, aes(y=profit_per_t.t_4, x=year, group=run, color=run))+
   geom_line(size=1)+
   theme_minimal()+
+  coord_cartesian(ylim=c(0,250))+
   labs(x= "Years",
          y= "Profit (tech 4)")
 
 p_5gr <- ggplot(data = all_outputs, aes(y=profit_per_t.t_5, x=year, group=run, color=run))+
   geom_line(size=1)+
   theme_minimal()+
+  coord_cartesian(ylim=c(0,250))+
   labs(x= "Years",
          y= "Profit (tech 5)")
 
@@ -280,6 +295,8 @@ tot_profits_graph <- ggplot(data = all_outputs, aes(y=tot_profits, x=year, group
   theme_minimal()+
   labs(x= "Years",
          y= "Profit (dollars)")
+
+tot_profits_graph 
 
 ```
 
