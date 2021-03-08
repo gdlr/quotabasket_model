@@ -1,0 +1,316 @@
+---
+title: "Price results"
+author: "mauricio"
+date: "2/27/2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, message=FALSE, warning=FALSE, echo=FALSE)
+
+library(tidyverse)
+library(here)
+library(scales)
+library(gridExtra)
+library(grid)
+library(kableExtra)
+```
+
+```{r}
+# Read files results
+
+# data
+species_df <- read_csv(here("working_model","p explore","model run results files","species.csv"))
+# data
+tech_df <- read_csv(here("working_model","p explore","model run results files","tech_cost.csv"))
+
+# general output files
+output_sc1 <- read_csv(here("working_model","p explore","model run results files","output_b_price1.csv")) %>% 
+  mutate(run = "Scenario 1",
+         year = seq(0,30))
+output_sc2 <- read_csv(here("working_model","p explore","model run results files","output_b_price2.csv"))%>% 
+  mutate(run = "Scenario 2",
+         year = seq(0,30))
+output_sc3 <- read_csv(here("working_model","p explore","model run results files","output_b_price3.csv"))%>% 
+  mutate(run = "Scenario 3",
+         year = seq(0,30))
+
+# sum of profits
+
+npv_sc1 <- read_csv(here("working_model","p explore","model run results files","NPV_b_price1.csv")) %>% 
+  mutate(run = "Scenario 1")
+npv_sc2 <- read_csv(here("working_model","p explore","model run results files","NPV_b_price2.csv")) %>% 
+  mutate(run = "Scenario 2")
+npv_sc3 <- read_csv(here("working_model","p explore","model run results files","NPV_b_price3.csv")) %>% 
+  mutate(run = "Scenario 3")
+
+#Group them
+all_outputs <- rbind(output_sc1, output_sc2, output_sc3) %>% 
+  mutate(tot_profits = profit_per_t.t_1+profit_per_t.t_2+profit_per_t.t_3+profit_per_t.t_4+profit_per_t.t_5,
+         tot_stock=stock.s_1+stock.s_2+stock.s_3+stock.s_4+stock.s_5)
+
+NPVs <- rbind(npv_sc1, npv_sc2, npv_sc3) %>% 
+  rename(total_profit=x)
+
+```
+
+# 1. Scenarios
+<br />
+  
+
+## 1.1 Parameters
+
+```{r}
+
+# Make tables
+species_table <- kable(species_df, col.names = c("Species", "r", "K", "Starting stock (X)", "price")) %>% 
+  kable_classic(full_width = F)
+
+tech_table <- kable(tech_df, col.names = c("Tech", "
+                                               q1", "q2", "q3", 
+                                               "q4", "q5",
+                                               "cost")) %>% 
+  kable_classic(full_width = F)
+
+species_table
+
+tech_table
+```
+
+# 2. Biomass
+
+## 2.1 Biomass per species
+
+```{r}
+# Graph
+ggplot(data = all_outputs)+
+  geom_line(aes(y=stock.s_1, x=year), color="purple")+ 
+  geom_line(aes(y=stock.s_2, x=year), color="royalblue")+ 
+  geom_line(aes(y=stock.s_3, x=year), color="lightblue")+ 
+  geom_line(aes(y=stock.s_4, x=year), color="red")+ 
+  geom_line(aes(y=stock.s_5, x=year), color="orange")+ 
+  theme_minimal()+
+  labs(x= "Years",
+         y= "Stock Level (tons)")+
+  facet_wrap(~ run, nrow=2)
+
+```
+
+<br />
+
+```{r}
+# Graph
+stocck_1gr <- ggplot(data = all_outputs, aes(y=stock.s_1, x=year, group=run, color=run))+
+  geom_line(size=1)+
+  theme_minimal()+
+  coord_cartesian(ylim=c(0,70))+
+  labs(x= "Years",
+         y= "Stock 1 (tons)")
+
+stocck_2gr <- ggplot(data = all_outputs, aes(y=stock.s_2, x=year, group=run, color=run))+
+  geom_line(size=1)+
+  theme_minimal()+
+  coord_cartesian(ylim=c(0,70))+
+  labs(x= "Years",
+         y= "Stock 2 (tons)")
+
+stocck_3gr <- ggplot(data = all_outputs, aes(y=stock.s_3, x=year, group=run, color=run))+
+  geom_line(size=1)+
+  theme_minimal()+
+  coord_cartesian(ylim=c(0,70))+
+  labs(x= "Years",
+         y= "Stock 3 (tons)")
+
+stocck_4gr <- ggplot(data = all_outputs, aes(y=stock.s_4, x=year, group=run, color=run))+
+  geom_line(size=1)+
+  theme_minimal()+
+  coord_cartesian(ylim=c(0,70))+
+  labs(x= "Years",
+         y= "Stock 4 (tons)")
+
+stocck_5gr <- ggplot(data = all_outputs, aes(y=stock.s_5, x=year, group=run, color=run))+
+  geom_line(size=1)+
+  coord_cartesian(ylim=c(0,70))+
+  theme_minimal()+
+  labs(x= "Years",
+         y= "Stock 5 (tons)")
+
+ind_stock_graph <- grid.arrange(stocck_1gr, stocck_4gr, stocck_2gr, stocck_5gr, stocck_3gr, ncol=2, nrow= 3)
+```
+<br />
+.<br />
+
+## 2.2 Total biomass in the ocean
+
+```{r}
+# Graph
+tot_stock_graph <- ggplot(data = all_outputs, aes(y=tot_stock, x=year, group=run, color=run))+
+  geom_line(size=1)+
+  theme_minimal()+
+  labs(x= "Years",
+         y= "Stock (tons)")
+  
+```
+<br />
+.<br />
+
+# 3. Effort
+
+```{r}
+# Graph
+ggplot(data = all_outputs)+
+  geom_line(aes(y=effort.t_1, x=year), color="purple")+ 
+  geom_line(aes(y=effort.t_2, x=year), color="royalblue")+ 
+  geom_line(aes(y=effort.t_3, x=year), color="lightblue")+ 
+  geom_line(aes(y=effort.t_4, x=year), color="red")+ 
+  geom_line(aes(y=effort.t_5, x=year), color="orange")+ 
+  theme_minimal()+
+  labs(x= "Years",
+         y= "Effort (units)")+
+  facet_wrap(~ run, nrow=2)
+
+```
+```{r}
+# Graph
+e_1gr <- ggplot(data = all_outputs, aes(y=effort.t_1, x=year, group=run, color=run))+
+  geom_line(size=1)+
+  theme_minimal()+
+  coord_cartesian(ylim=c(0,7))+
+  labs(x= "Years",
+         y= "Tech 1")
+
+e_2gr <- ggplot(data = all_outputs, aes(y=effort.t_2, x=year, group=run, color=run))+
+  geom_line(size=1)+
+  theme_minimal()+
+  coord_cartesian(ylim=c(0,7))+
+  labs(x= "Years",
+         y= "Tech 2")
+
+e_3gr <- ggplot(data = all_outputs, aes(y=effort.t_3, x=year, group=run, color=run))+
+  geom_line(size=1)+
+  theme_minimal()+
+  coord_cartesian(ylim=c(0,7))+
+  labs(x= "Years",
+         y= "Tech 3")
+
+e_4gr <- ggplot(data = all_outputs, aes(y=effort.t_4, x=year, group=run, color=run))+
+  geom_line(size=1)+
+  theme_minimal()+
+  coord_cartesian(ylim=c(0,7))+
+  labs(x= "Years",
+         y= "Tech 4")
+
+e_5gr <- ggplot(data = all_outputs, aes(y=effort.t_5, x=year, group=run, color=run))+
+  geom_line(size=1)+
+  theme_minimal()+
+  coord_cartesian(ylim=c(0,7))+
+  labs(x= "Years",
+         y= "Tech 5")
+
+ind_effort_graph <- grid.arrange(e_1gr, e_4gr, e_2gr, e_5gr, e_3gr, ncol=2, nrow= 3)
+```
+
+<br />
+. <br />
+
+# 4. Profit
+
+# 4.1 Profit per technology
+```{r}
+# Graph
+ggplot(data = all_outputs)+
+  geom_line(aes(y=profit_per_t.t_1, x=year), color="purple")+ 
+  geom_line(aes(y=profit_per_t.t_2, x=year), color="royalblue")+ 
+  geom_line(aes(y=profit_per_t.t_3, x=year), color="lightblue")+ 
+  geom_line(aes(y=profit_per_t.t_4, x=year), color="red")+ 
+  geom_line(aes(y=profit_per_t.t_5, x=year), color="orange")+ 
+  theme_minimal()+
+  labs(x= "Years",
+         y= "Profit (dollars)")+
+  facet_wrap(~ run, nrow=2)
+
+```
+```{r}
+# Graph
+p_1gr <- ggplot(data = all_outputs, aes(y=profit_per_t.t_1, x=year, group=run, color=run))+
+  geom_line(size=1)+
+  theme_minimal()+
+  coord_cartesian(ylim=c(0,700))+
+  labs(x= "Years",
+         y= "Profit (tech 1)")
+
+p_2gr <- ggplot(data = all_outputs, aes(y=profit_per_t.t_2, x=year, group=run, color=run))+
+  geom_line(size=1)+
+  theme_minimal()+
+  coord_cartesian(ylim=c(0,700))+
+  labs(x= "Years",
+         y= "Profit (tech 2)")
+
+p_3gr <- ggplot(data = all_outputs, aes(y=profit_per_t.t_3, x=year, group=run, color=run))+
+  geom_line(size=1)+
+  theme_minimal()+
+  coord_cartesian(ylim=c(0,700))+
+  labs(x= "Years",
+         y= "Profit (tech 3)")
+
+p_4gr <- ggplot(data = all_outputs, aes(y=profit_per_t.t_4, x=year, group=run, color=run))+
+  geom_line(size=1)+
+  theme_minimal()+
+  coord_cartesian(ylim=c(0,700))+
+  labs(x= "Years",
+         y= "Profit (tech 4)")
+
+p_5gr <- ggplot(data = all_outputs, aes(y=profit_per_t.t_5, x=year, group=run, color=run))+
+  geom_line(size=1)+
+  theme_minimal()+
+  coord_cartesian(ylim=c(0,700))+
+  labs(x= "Years",
+         y= "Profit (tech 5)")
+
+ind_profit_graph <- grid.arrange(p_1gr, p_4gr, p_2gr, p_5gr, p_3gr, ncol=2, nrow= 3)
+```
+
+<br />
+ <br />
+
+# 4.2 Total profit per scenario
+
+```{r}
+# Graph
+tot_profits_graph <- ggplot(data = all_outputs, aes(y=tot_profits, x=year, group=run, color=run))+
+  geom_line(size=1)+
+  theme_minimal()+
+  labs(x= "Years",
+         y= "Profit (dollars)")
+
+tot_profits_graph 
+
+```
+
+<br />
+.<br />
+
+# 5. Summary
+
+**Stocks**
+<br />
+<br />
+
+**Effort** 
+<br />
+ <br />
+
+
+**Profit** 
+<br />
+
+.<br />
+
+```{r}
+ggsave("p_tot_stock.png", plot=tot_stock_graph)
+ggsave("p_tot_profit.png", plot=tot_profits_graph)
+ggsave("p_ind_profit_graph.png", plot=ind_profit_graph)
+ggsave("p_ind_effort_graph.png", plot=ind_effort_graph)
+ggsave("p_ind_stock_graph.png", plot=ind_stock_graph)
+```
+
