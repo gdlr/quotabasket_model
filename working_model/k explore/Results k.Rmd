@@ -110,36 +110,36 @@ ggplot(data = all_outputs)+
 ```{r}
 # Graph
 stocck_1gr <- ggplot(data = all_outputs, aes(y=stock.s_1, x=year, group=run, color=run))+
-  geom_line()+
+  geom_line(size=1)+
   theme_minimal()+
   labs(x= "Years",
          y= "Stock 1 (tons)")
 
 stocck_2gr <- ggplot(data = all_outputs, aes(y=stock.s_2, x=year, group=run, color=run))+
-  geom_line()+
+  geom_line(size=1)+
   theme_minimal()+
   labs(x= "Years",
          y= "Stock 2 (tons)")
 
 stocck_3gr <- ggplot(data = all_outputs, aes(y=stock.s_3, x=year, group=run, color=run))+
-  geom_line()+
+  geom_line(size=1)+
   theme_minimal()+
   labs(x= "Years",
          y= "Stock 3 (tons)")
 
 stocck_4gr <- ggplot(data = all_outputs, aes(y=stock.s_4, x=year, group=run, color=run))+
-  geom_line()+
+  geom_line(size=1)+
   theme_minimal()+
   labs(x= "Years",
          y= "Stock 4 (tons)")
 
 stocck_5gr <- ggplot(data = all_outputs, aes(y=stock.s_5, x=year, group=run, color=run))+
-  geom_line()+
+  geom_line(size=1)+
   theme_minimal()+
   labs(x= "Years",
          y= "Stock 5 (tons)")
 
-grid.arrange(stocck_1gr, stocck_4gr, stocck_2gr, stocck_5gr, stocck_3gr, ncol=2, nrow= 3)
+ind_stock_graph <- grid.arrange(stocck_1gr, stocck_4gr, stocck_2gr, stocck_5gr, stocck_3gr, ncol=2, nrow= 3)
 ```
 <br />
 - Holding the rest of the variables constants, grouping only species with low K lead to its stock reduction.<br />
@@ -150,8 +150,8 @@ grid.arrange(stocck_1gr, stocck_4gr, stocck_2gr, stocck_5gr, stocck_3gr, ncol=2,
 
 ```{r}
 # Graph
-ggplot(data = all_outputs, aes(y=tot_stock, x=year, group=run, color=run))+
-  geom_line()+
+tot_stock_graph <- ggplot(data = all_outputs, aes(y=tot_stock, x=year, group=run, color=run))+
+  geom_line(size=1)+
   theme_minimal()+
   labs(x= "Years",
          y= "Stock (tons)")
@@ -179,36 +179,36 @@ ggplot(data = all_outputs)+
 ```{r}
 # Graph
 e_1gr <- ggplot(data = all_outputs, aes(y=effort.t_1, x=year, group=run, color=run))+
-  geom_line()+
+  geom_line(size=1)+
   theme_minimal()+
   labs(x= "Years",
          y= "Tech 1")
 
 e_2gr <- ggplot(data = all_outputs, aes(y=effort.t_2, x=year, group=run, color=run))+
-  geom_line()+
+  geom_line(size=1)+
   theme_minimal()+
   labs(x= "Years",
          y= "Tech 2")
 
 e_3gr <- ggplot(data = all_outputs, aes(y=effort.t_3, x=year, group=run, color=run))+
-  geom_line()+
+  geom_line(size=1)+
   theme_minimal()+
   labs(x= "Years",
          y= "Tech 3")
 
 e_4gr <- ggplot(data = all_outputs, aes(y=effort.t_4, x=year, group=run, color=run))+
-  geom_line()+
+  geom_line(size=1)+
   theme_minimal()+
   labs(x= "Years",
          y= "Tech 4")
 
 e_5gr <- ggplot(data = all_outputs, aes(y=effort.t_5, x=year, group=run, color=run))+
-  geom_line()+
+  geom_line(size=1)+
   theme_minimal()+
   labs(x= "Years",
          y= "Tech 5")
 
-grid.arrange(e_1gr, e_4gr, e_2gr, e_5gr, e_3gr, ncol=2, nrow= 3)
+ind_effort_graph <- grid.arrange(e_1gr, e_4gr, e_2gr, e_5gr, e_3gr, ncol=2, nrow= 3)
 ```
 
 <br />
@@ -235,36 +235,36 @@ ggplot(data = all_outputs)+
 ```{r}
 # Graph
 p_1gr <- ggplot(data = all_outputs, aes(y=profit_per_t.t_1, x=year, group=run, color=run))+
-  geom_line()+
+  geom_line(size=1)+
   theme_minimal()+
   labs(x= "Years",
          y= "Profit (tech 1)")
 
 p_2gr <- ggplot(data = all_outputs, aes(y=profit_per_t.t_2, x=year, group=run, color=run))+
-  geom_line()+
+  geom_line(size=1)+
   theme_minimal()+
   labs(x= "Years",
          y= "Profit (tech 2)")
 
 p_3gr <- ggplot(data = all_outputs, aes(y=profit_per_t.t_3, x=year, group=run, color=run))+
-  geom_line()+
+  geom_line(size=1)+
   theme_minimal()+
   labs(x= "Years",
          y= "Profit (tech 3)")
 
 p_4gr <- ggplot(data = all_outputs, aes(y=profit_per_t.t_4, x=year, group=run, color=run))+
-  geom_line()+
+  geom_line(size=1)+
   theme_minimal()+
   labs(x= "Years",
          y= "Profit (tech 4)")
 
 p_5gr <- ggplot(data = all_outputs, aes(y=profit_per_t.t_5, x=year, group=run, color=run))+
-  geom_line()+
+  geom_line(size=1)+
   theme_minimal()+
   labs(x= "Years",
          y= "Profit (tech 5)")
 
-grid.arrange(p_1gr, p_4gr, p_2gr, p_5gr, p_3gr, ncol=2, nrow= 3)
+ind_profit_graph <- grid.arrange(p_1gr, p_4gr, p_2gr, p_5gr, p_3gr, ncol=2, nrow= 3)
 ```
 
 <br />
@@ -275,8 +275,8 @@ grid.arrange(p_1gr, p_4gr, p_2gr, p_5gr, p_3gr, ncol=2, nrow= 3)
 
 ```{r}
 # Graph
-ggplot(data = all_outputs, aes(y=tot_profits, x=year, group=run, color=run))+
-  geom_line()+
+tot_profits_graph <- ggplot(data = all_outputs, aes(y=tot_profits, x=year, group=run, color=run))+
+  geom_line(size=1)+
   theme_minimal()+
   labs(x= "Years",
          y= "Profit (dollars)")
@@ -308,4 +308,11 @@ ggplot(data = all_outputs, aes(y=tot_profits, x=year, group=run, color=run))+
 <br />
 - Scenario 1 has the best results in total profits for all the period of analysis.<br />
 
+```{r}
+ggsave("k_tot_stock.png", plot=tot_stock_graph)
+ggsave("k_tot_profit.png", plot=tot_profits_graph)
+ggsave("k_ind_profit_graph.png", plot=ind_profit_graph)
+ggsave("k_ind_effort_graph.png", plot=ind_effort_graph)
+ggsave("k_ind_stock_graph.png", plot=ind_stock_graph)
+```
 
