@@ -22,6 +22,10 @@ two_basket_profits <-  read_csv(here("working_model", "scratch", "optim", "data"
 one_basket_biomass <-  read_csv(here("working_model", "scratch", "optim", "data", "one_basket_biomass.csv"))
 one_basket_profits <-  read_csv(here("working_model", "scratch", "optim", "data", "one_basket_profits.csv"))
 
+max(five_basket_profits$profit)
+max(four_basket_profits$V1)
+max(three_basket_profits$V1)
+max(two_basket_profits$V1) -max(one_basket_profits$profits)
 
 five_basket_names <- five_basket_profits %>% 
   mutate(profits = profit,
