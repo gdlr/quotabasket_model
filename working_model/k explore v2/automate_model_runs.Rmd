@@ -1,0 +1,29 @@
+## run this to automate the generation of the result files. Just modify the make up for the species once.
+
+```{r}
+
+render_model = function(species_k1, species_k2, species_k3, species_k4, species_k5) {
+  rmarkdown::render(
+    input = here("working_model", "k explore v2", "auto_model_defaults_k.Rmd"), # What's the input file to render?
+    params = list(species_k1=species_k1, species_k2=species_k2, species_k3=species_k3, species_k4=species_k4, species_k5=species_k5), # What are the parameters?
+    output_file = paste0("runs_", species_k1, species_k2, species_k3, species_k4, species_k5, "_mix .html") # What should I name the output file?
+  )
+}
+
+species_k1 = 100
+species_k2 = 150
+species_k3 = 200
+species_k4 = 250
+species_k5 = 300
+
+species_p <- as.vector(c(species_k1, species_k2, species_k3, species_k4, species_k5))
+
+possible_scenarios <- permutations(n=5,r=5,species_p,set=FALSE)
+
+ for (i in 1:nrow(possible_scenarios)){
+   
+   render_model(possible_scenarios[i,1], possible_scenarios[i,2], possible_scenarios[i,3], possible_scenarios[i,4], possible_scenarios[i,5])
+   
+}
+
+```

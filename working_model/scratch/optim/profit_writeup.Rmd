@@ -1,0 +1,35 @@
+---
+title: "Profit Summary Writeup"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(here)
+```
+
+## Exploring profit hypotheses using our quota basket model.
+
+![](working_model/scratch/optim/plots/profit_plot.png)
+
+Our project revolves around the theory that a fishery managed with two or more quota baskets will outperform a global catch limit, in terms of fishery profits. To do this, we can compare an fishery managed with a global  harvest limit optimized to maximize 30 year profits for the fishery with quota baskets where each basket harvest limit is individually optimized for 30 year profits. In theory, a global management should underperform compared to quota baskets, as a global harvest limit is a compromise between all five species whereas each basket harvest limit compromises between fewer species. The profit ceiling is determined by optimal single species management, which our model calculating the maximum profit returned when each species is in its own basket.
+
+However, there are many ways to group a five species fishery into two groups. This leads to a second hypothesis: that some basket groupings will perform worse than a global harvest quota in terms of profit.
+
+To test both of these hypotheses, we ran our model for every possible grouping of five species into two, three, and four baskets. Each basket harvest limit was individually optimized to return the maximum 30-year net profit.
+
+Our results show that with each additional basket, the highest profit quota basket combination gets closer to the profits obtained with perfect single species management. So, our hypothesis holds true: quota baskets can outperform global management. However, we also see that the improvement in profits with an additional quota basket decreases as the number of baskets increases. In our example, it is possible to get very close to optimal management, in terms of profit, with either three or four baskets. However, as you increase the number of baskets, the marginal benefit of an additional basket declines. 
+
+At the low end, we see that profits can actually fall below optimal global management in a two basket scheme. This provides a key takeaway for quota baskets: that a poorly designed quota basket can cause fishery performance to decline. Furthermore, increasing the number of quota baskets does not necessarily improve fishery outcomes: the lowest profits returned from 2, 3, and 4 quota baskets are below many profits from 1, 2, and 3 baskets, respectively. So, adding additional baskets can improve fishery outcomes, but adding additional baskets does not guarantee a more profitable fishery.
+
+
+![](working_model/scratch/optim/plots/biomass_plot.png)
+
+One great predicted benefit of quota baskets is that they can shift the targeting behavior of fisherman, depending on the basket orientation. We know that fisherman target high value fish in a basket, and will preferentially fill their quota with high value fish first. When a basket contains high and low value species, we expect fisherman to mainly fish the high value species. However, in a five species fishery, three species must have prices that fall in the middle of the range. So, depending on the basket combinations, these species could be the high or the low value species in a given basket. Which baskets are chosen, then, are essential in determining the fishing pressure on these species. In other words, basket choice can change fishers' targeting practices and lead to very different biological outcomes for species. 
+
+We can test this hypothesis by observing the biomass of each species at the end of our model run, in year 30. When we look at the distribution of biomasses for every basket combination by species, we see a lot of variation in certain species biomass outcomes. In other words, depending on which basket combination is chosen, a certain species can see either a low or high amount of fishing. This is most obvious in species four, where different combinations of two baskets can lead to stock levels from 25% of carrying capacity all the way up to 75% of carrying capacity. In essence, we see a large distribution of targeting behavior of species four with two baskets, and we see that fishing pressure can be both high and low depending on which basket combination is chosen. 
+
+
+
+
+

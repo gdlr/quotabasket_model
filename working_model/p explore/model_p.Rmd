@@ -1,0 +1,141 @@
+---
+title: "price 1"
+author: "Mauricio Collado"
+date: "2/27/2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+library(tidyverse)
+library(ggplot2)
+library(here)
+library(quadprog)
+library(future)
+```
+
+### Preparing the inputs and outputs for `qb_stock.r`:
+
+For each species, we need:
+
+* r - growth rate
+* K - carrying capacity
+* X - starting stock
+* p - price
+
+For each technology we need:
+
+* Catchability per species
+* Cost per unit effort
+
+# Inputs
+
+## Step 1: Input parameters
+```{r}
+
+# the following model will test what happens:
+# - when we group high k
+# - when we group normal k
+# should we also adjust X???
+# the rest of variables
+# Species:
+# s = species, r, K, X, p
+
+s1 <- c(s=1, r=0.2, K=100, X=50, p=20) #normal
+s2 <- c(s=2, r=0.2, K=100, X=50, p=20) #normal
+s3 <- c(s=3, r=0.2, K=100, X=50, p=20) #normal
+s4 <- c(s=4, r=0.2, K=100, X=50, p=40) #high p 
+s5 <- c(s=5, r=0.2, K=100, X=50, p=40) #high p
+
+# t = tech, q1 = catchability species 1, q2 = catchability species 2...
+
+t1 <- c(t=1, q1=0.04, q2=0.01, q3=0.01, q4=0.01, q5 = 0.01)
+t2 <- c(t=2, q1=0.01, q2=0.04, q3=0.01, q4=0.01, q5 = 0.01)
+t3 <- c(t=3, q1=0.01, q2=0.01, q3=0.04, q4=0.01, q5 = 0.01)
+t4 <- c(t=4, q1=0.01, q2=0.01, q3=0.01, q4=0.04, q5 = 0.01)
+t5 <- c(t=5, q1=0.01, q2=0.01, q3=0.01, q4=0.01, q5 = 0.04)
+
+# Tech cost: t = tech, cost = cost per unit effort
+c1 <- c(t=1, cost=1)
+c2 <- c(t=2, cost=1)
+c3 <- c(t=3, cost=1)
+c4 <- c(t=4, cost=1)
+c5 <- c(t=5, cost=1)
+
+# Baskets: binary matrix of # species x # baskets, where 1 means that species is in that basket
+
+b1 <- c(s1 = 1, s2 = 1, s3 = 1, s4 = 0, s5 = 0)
+b2 <- c(s1 = 0, s2 = 0, s3 = 0, s4 = 1, s5 = 1)
+# b3 <- c(s1 = 0, s2 = 0, s3 = 1, s4 = 0, s5 = 0)
+# b4 <- c(s1 = 0, s2 = 0, s3 = 0, s4 = 1, s5 = 0)
+# b5 <- c(s1 = 0, s2 = 0, s3 = 0, s4 = 0, s5 = 1)
+
+
+# Quotas: position = basket, number is the harvest limit.
+# We want this to be 0.1 of the preceding stock under constant mortality, so this will have to change to just input constant m.
+
+
+# This is a guess of optimal mortality for each bakset. A good starting point is r/2.
+mort_guess = c(0.2, 0.2)
+
+# Years
+years = 30
+```
+
+# Step 2: make a list of the inputs
+```{r}
+# Change these to reflect the number of species and technologies above:
+species = list(s1, s2, s3, s4, s5)
+tech = list(t1, t2, t3, t4, t5)
+cost = list(c1, c2, c3, c4, c5)
+baskets = list(b1, b2) #, b3, b4, b5)
+```
+
+# Step 3: Run the function
+
+```{r}
+source(here("working_model", "functions", "optimal_baskets.R"))
+
+output <- optimal_baskets(species, tech, cost, baskets, mort_guess, years)
+```
+
+# Step 4: save results of each run
+
+
+```{r}
+NPV <- sum(drop_na(output$profit_per_t))
+#here("health status explore") 
+# I dont know why it refuses to save in my G drive
+  csvname <- "output_b_price1.csv"
+  #csvfile <- paste(path_store, csvname, sep="")
+  csvfile <- paste(csvname, sep="")
+  write.table(na.omit(output),csvfile, row.names=FALSE, sep=",")
+  
+#path_store <- here("health status explore") 
+  csvname <- "NPV_b_price1.csv"
+  #csvfile <- paste(path_store, csvname, sep="")
+  csvfile <- paste(csvname, sep="")
+  write.table(na.omit(NPV),csvfile, row.names=FALSE, sep=",")
+
+```
+
+```{r}
+# tables
+sp_df <- as.data.frame(do.call(rbind, species))
+tech_df <- as.data.frame(do.call(rbind, tech))
+cost_df <- as.data.frame(do.call(rbind, cost))
+baskets_df <- as.data.frame(do.call(rbind, baskets))
+
+tech_tbl_df <- tech_df %>% 
+  inner_join(cost_df, by = "t")
+
+csvname <- "species.csv"
+csvfile <- paste(csvname, sep="")
+write.table(sp_df, csvfile, row.names=FALSE, sep=",")
+
+csvname <- "tech_cost.csv"
+csvfile <- paste(csvname, sep="")
+write.table(tech_tbl_df, csvfile, row.names=FALSE, sep=",")
+ 
+```
