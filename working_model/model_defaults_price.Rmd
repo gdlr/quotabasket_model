@@ -47,11 +47,11 @@ run this entire document for each scenario you want to test
 # Species:
 # s = species, r, K, X, p
 
-s1 <- c(s=1, r=0.15, K=100, X=50, p=1) 
+s1 <- c(s=1, r=0.15, K=100, X=50, p=30) 
 s2 <- c(s=2, r=0.2, K=100, X=50, p=1)
-s3 <- c(s=3, r=0.2, K=100, X=50, p=1)
-s4 <- c(s=4, r=0.3, K=100, X=50, p=40)
-s5 <- c(s=5, r=0.4, K=100, X=50, p=1)
+s3 <- c(s=3, r=0.2, K=100, X=50, p=40)
+s4 <- c(s=4, r=0.3, K=100, X=50, p=10)
+s5 <- c(s=5, r=0.4, K=100, X=50, p=20)
 
 # t = tech, q1 = catchability species 1, q2 = catchability species 2...
 
@@ -143,7 +143,7 @@ av_pfts <-  mget(ls(pattern="av_pft_basket")) %>%
   tibble::rownames_to_column("basket") %>% 
   arrange(-.)
 
-av_stocks <- mget(ls(pattern="av_biomass")) %>%
+av_stocks <- mget(ls(pattern="av_biomass[.]")) %>%
   unlist() %>% 
   as.data.frame() %>%
   tibble::rownames_to_column("basket") %>% 
@@ -171,22 +171,22 @@ optimals <- rbind(optimal_basket_av_pft, optimal_basket_NPV, optimal_basket_stoc
 # this is designed to automatically extract the 3 optimal basket arrangements as well as their summary info. just change the file name for each run!
 
 path_store <- "C:/Users/kll86/OneDrive/Documents/UCSB/quotabasket_model/working_model/price and cost explore/"
-  csvname <- "opt_NPV_ps4-40.csv"
+  csvname <- "opt_NPV_p30.1.40.10.20.csv"
   csvfile <- paste(path_store, csvname, sep="")
   write.table(get(str_split(optimal_basket_NPV$basket, pattern = "_")[[1]][2]),csvfile, row.names=FALSE, sep=",")
   
 path_store <- "C:/Users/kll86/OneDrive/Documents/UCSB/quotabasket_model/working_model/price and cost explore/"
-  csvname <- "opt_av_pft_ps4-40.csv"
+  csvname <- "opt_av_pft_p30.1.40.10.20.csv"
   csvfile <- paste(path_store, csvname, sep="")
   write.table(get(str_split(optimal_basket_av_pft$basket, pattern = "_")[[1]][3]),csvfile, row.names=FALSE, sep=",")
 
 path_store <- "C:/Users/kll86/OneDrive/Documents/UCSB/quotabasket_model/working_model/price and cost explore/"
-  csvname <- "opt_stock_p_s5-40.csv"
+  csvname <- "opt_stock_p30.1.40.10.20.csv"
   csvfile <- paste(path_store, csvname, sep="")
   write.table(get(paste("basket",str_split(optimal_basket_stock$basket, pattern = "[.]")[[1]][2], sep = '.')),csvfile, row.names=FALSE, sep=",")
 
  path_store <- "C:/Users/kll86/OneDrive/Documents/UCSB/quotabasket_model/working_model/price and cost explore/"
-  csvname <- "opt_summaries_ps4-40.csv"
+  csvname <- "opt_summaries_p30.1.40.10.20.csv"
   csvfile <- paste(path_store, csvname, sep="")
   write.table(optimals,csvfile, row.names=FALSE, sep=",")
   

@@ -1,0 +1,389 @@
+---
+title: "automated results analysis"
+author: "Kat Leigh"
+date: "3/3/2021"
+output: html_document
+---
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE, message = FALSE, warning = FALSE)
+
+library(tidyverse)
+library(ggplot2)
+library(here)
+library(quadprog)
+library(scales)
+library(gridExtra)
+library(grid)
+library(patchwork)
+```
+
+
+# read in the data for best in NPV, best in av profit, and best in avstock for each assignment of species to prices.
+
+```{r}
+# get specific data for run
+setwd("C:/Users/kll86/OneDrive/Documents/UCSB/quotabasket_model/working_model/price and cost explore/model run result files/p1n40/")
+temp = list.files(pattern="*.csv")
+for (i in 1:length(temp))
+  {assign(temp[i], read_csv(temp[i]))}
+
+```
+
+```{r}
+# get control data
+
+setwd("C:/Users/kll86/OneDrive/Documents/UCSB/quotabasket_model/working_model/price and cost explore/model run result files/p20all/")
+temp = list.files(pattern="*.csv")
+for (i in 1:length(temp))
+  {assign(temp[i], read_csv(temp[i]))}
+
+```
+
+# choose which assignment to focus on via exploratory graphs of all inputs for each of the 3 categories
+
+- NPV graph (all assigns)
+
+```{r}
+# NPV
+
+all_NPVs <- mget(ls(pattern=".NPV.")) %>% 
+  as.data.frame()
+
+names_col<- c("s_1", "s_2", "s_3", "s_4", "s_5", "pft_t1", "pft_t2", "pft_t3", "pft_t4", "pft_t5", "tot_pft", "tot_biomass", "mort_1", "mort_2", "run")
+
+p20all <- all_NPVs %>% 
+  select(contains("pall20")) %>% 
+  select(contains("s_1"):contains("s_5"), contains("t_1"):contains("t_2.3"), contains("tot_profit"), contains("tot_biomass"), contains("mortality")) %>% 
+  mutate(run = "p20all") 
+names(p20all) <- names_col
+
+p_ps1_40 <- all_NPVs %>% 
+  select(contains("ps1.40"), contains("ps1_40")) %>% 
+  select(contains("s_1"):contains("s_5"), contains("t_1"):contains("t_2.3"), contains("tot_profit"), contains("tot_biomass"), contains("mortality")) %>%
+  mutate(run = "ps1_40")
+names(p_ps1_40) <- names_col
+
+p_ps2_40 <- all_NPVs %>% 
+  select(contains("ps2.40"), contains("ps2_40")) %>%
+  select(contains("s_1"):contains("s_5"), contains("t_1"):contains("t_2.3"), contains("tot_profit"), contains("tot_biomass"), contains("mortality")) %>%
+  mutate(run = "ps2_40")
+names(p_ps2_40) <- names_col
+
+p_ps3_40 <- all_NPVs %>% 
+  select(contains("ps3.40"), contains("ps3_40")) %>%
+  select(contains("s_1"):contains("s_5"), contains("t_1"):contains("t_2.3"), contains("tot_profit"), contains("tot_biomass"), contains("mortality")) %>%
+  mutate(run = "ps3_40")
+names(p_ps3_40) <- names_col
+
+p_ps4_40 <- all_NPVs %>% 
+  select(contains("ps4.40"), contains("ps4_40")) %>%
+  select(contains("s_1"):contains("s_5"), contains("t_1"):contains("t_2.3"), contains("tot_profit"), contains("tot_biomass"), contains("mortality")) %>%
+  mutate(run = "ps4_40")
+names(p_ps4_40) <- names_col
+
+p_ps5_40 <- all_NPVs %>% 
+  select(contains("ps5.40"), contains("ps5_40")) %>%
+  select(contains("s_1"):contains("s_5"), contains("t_1"):contains("t_2.3"), contains("tot_profit"), contains("tot_biomass"), contains("mortality")) %>%
+  mutate(run = "ps5_40")
+names(p_ps5_40) <- names_col
+
+tidy_NPVs <- rbind(p20all, p_ps1_40, p_ps2_40, p_ps3_40, p_ps4_40, p_ps5_40)
+```
+
+```{r}
+all_av_pft <- mget(ls(pattern=".av_pft.")) %>% 
+  as.data.frame()
+
+names_col<- c("s_1", "s_2", "s_3", "s_4", "s_5", "pft_t1", "pft_t2", "pft_t3", "pft_t4", "pft_t5", "tot_pft", "tot_biomass", "mort_1", "mort_2", "run")
+
+p20all <- all_av_pft %>% 
+  select(contains("pall20")) %>% 
+  select(contains("s_1"):contains("s_5"), contains("t_1"):contains("t_2.3"), contains("tot_profit"), contains("tot_biomass"), contains("mortality")) %>% 
+  mutate(run = "p20all") 
+names(p20all) <- names_col
+
+p_ps1_40 <- all_av_pft %>% 
+  select(contains("ps1.40"), contains("ps1_40")) %>% 
+  select(contains("s_1"):contains("s_5"), contains("t_1"):contains("t_2.3"), contains("tot_profit"), contains("tot_biomass"), contains("mortality")) %>%
+  mutate(run = "ps1_40")
+names(p_ps1_40) <- names_col
+
+p_ps2_40 <- all_av_pft %>% 
+  select(contains("ps2.40"), contains("ps2_40")) %>%
+  select(contains("s_1"):contains("s_5"), contains("t_1"):contains("t_2.3"), contains("tot_profit"), contains("tot_biomass"), contains("mortality")) %>%
+  mutate(run = "ps2_40")
+names(p_ps2_40) <- names_col
+
+p_ps3_40 <- all_av_pft %>% 
+  select(contains("ps3.40"), contains("ps3_40")) %>%
+  select(contains("s_1"):contains("s_5"), contains("t_1"):contains("t_2.3"), contains("tot_profit"), contains("tot_biomass"), contains("mortality")) %>%
+  mutate(run = "ps3_40")
+names(p_ps3_40) <- names_col
+
+p_ps4_40 <- all_av_pft %>% 
+  select(contains("ps4.40"), contains("ps4_40")) %>%
+  select(contains("s_1"):contains("s_5"), contains("t_1"):contains("t_2.3"), contains("tot_profit"), contains("tot_biomass"), contains("mortality")) %>%
+  mutate(run = "ps4_40")
+names(p_ps4_40) <- names_col
+
+p_ps5_40 <- all_av_pft %>% 
+  select(contains("ps5.40"), contains("ps5_40")) %>%
+  select(contains("s_1"):contains("s_5"), contains("t_1"):contains("t_2.3"), contains("tot_profit"), contains("tot_biomass"), contains("mortality")) %>%
+  mutate(run = "ps5_40")
+names(p_ps5_40) <- names_col
+
+tidy_av_pft <- rbind(p20all, p_ps1_40, p_ps2_40, p_ps3_40, p_ps4_40, p_ps5_40)
+```
+
+```{r}
+all_av_biomass <- mget(ls(pattern=".stock.")) %>% 
+  as.data.frame()
+
+names_col<- c("s_1", "s_2", "s_3", "s_4", "s_5", "pft_t1", "pft_t2", "pft_t3", "pft_t4", "pft_t5", "tot_pft", "tot_biomass", "mort_1", "mort_2", "run")
+
+p20all <- all_av_biomass %>% 
+  select(contains("pall20")) %>% 
+  select(contains("s_1"):contains("s_5"), contains("t_1"):contains("t_2.3"), contains("tot_profit"), contains("tot_biomass"), contains("mortality")) %>% 
+  mutate(run = "p20all") 
+names(p20all) <- names_col
+
+p_ps1_40 <- all_av_biomass %>% 
+  select(contains("ps1.40"), contains("ps1_40")) %>% 
+  select(contains("s_1"):contains("s_5"), contains("t_1"):contains("t_2.3"), contains("tot_profit"), contains("tot_biomass"), contains("mortality")) %>%
+  mutate(run = "ps1_40")
+names(p_ps1_40) <- names_col
+
+p_ps2_40 <- all_av_biomass %>% 
+  select(contains("ps2.40"), contains("ps2_40")) %>%
+  select(contains("s_1"):contains("s_5"), contains("t_1"):contains("t_2.3"), contains("tot_profit"), contains("tot_biomass"), contains("mortality")) %>%
+  mutate(run = "ps2_40")
+names(p_ps2_40) <- names_col
+
+p_ps3_40 <- all_av_biomass %>% 
+  select(contains("ps3.40"), contains("ps3_40")) %>%
+  select(contains("s_1"):contains("s_5"), contains("t_1"):contains("t_2.3"), contains("tot_profit"), contains("tot_biomass"), contains("mortality")) %>%
+  mutate(run = "ps3_40")
+names(p_ps3_40) <- names_col
+
+p_ps4_40 <- all_av_biomass %>% 
+  select(contains("ps4.40"), contains("ps4_40")) %>%
+  select(contains("s_1"):contains("s_5"), contains("t_1"):contains("t_2.3"), contains("tot_profit"), contains("tot_biomass"), contains("mortality")) %>%
+  mutate(run = "ps4_40")
+names(p_ps4_40) <- names_col
+
+p_ps5_40 <- all_av_biomass %>% 
+  select(contains("ps5.40"), contains("ps5_40")) %>%
+  select(contains("s_1"):contains("s_5"), contains("t_1"):contains("t_2.3"), contains("tot_profit"), contains("tot_biomass"), contains("mortality")) %>%
+  mutate(run = "ps5_40")
+names(p_ps5_40) <- names_col
+
+tidy_av_biomass <- rbind(p20all, p_ps1_40, p_ps2_40, p_ps3_40, p_ps4_40, p_ps5_40)
+```
+
+# make graphs
+
+```{r}
+
+run_factors <- factor(tidy_NPVs$run, levels = unique(tidy_NPVs$run),
+                             labels = c("Ex: $20 all", "Ex: Sp1- $40", "Ex: Sp2- $40", "Ex: Sp3- $40", "Ex: Sp4- $40", "Ex: Sp5- $40"))
+
+tidy_av_biomass$run <- run_factors
+tidy_NPVs$run <- run_factors
+tidy_av_pft$run <- run_factors
+
+#NPV
+pft_g_NPV <- ggplot()+
+  geom_smooth(data = tidy_NPVs, aes(y=tot_pft, x=rep(0:30,6), color = as.factor(run)), se = FALSE)+ theme_minimal()+
+  labs(title= str_wrap("Profits for optimal-NPV arrangements, ", 80),
+         x= "Number of Years",
+         y= "Fishery-wide Annual Profits",
+       color= "Prices")+
+  scale_y_continuous(labels=dollar_format(prefix="$"))+
+  theme(plot.caption = element_text(hjust = 0))
+
+# Ex: sp5 = best
+
+```
+```{r}
+# av_pft
+pft_g_av_pft <- ggplot()+
+  geom_smooth(data = tidy_av_pft, aes(y=tot_pft, x=rep(0:30,6), color = as.factor(run)), se = FALSE)+ theme_minimal()+
+  labs(title= str_wrap("Profits for optimal-av_pft arrangements, ", 80),
+         x= "Number of Years",
+         y= "Fishery-wide Annual Profits",
+       color= "Prices")+
+  scale_y_continuous(labels=dollar_format(prefix="$"))+
+  theme(plot.caption = element_text(hjust = 0))
+
+# sp5 is best
+```
+```{r}
+# av_biomass
+
+pft_g_biomass <- ggplot()+
+  geom_smooth(data = tidy_av_biomass, aes(y=tot_pft, x=rep(0:30,6), color = as.factor(run)), se = FALSE)+ theme_minimal()+
+  labs(title= str_wrap("Profits for optimal-biomass arrangements, ", 80),
+         x= "Number of Years",
+         y= "Fishery-wide Annual Profits",
+       color= "Prices")+
+  scale_y_continuous(labels=dollar_format(prefix="$"))+
+  theme(plot.caption = element_text(hjust = 0))
+
+# sp1 is best
+
+```
+```{r}
+# stock compare each
+
+#NPV
+
+stock_g_NPV <- ggplot()+
+  geom_smooth(data = tidy_NPVs, aes(y=tot_biomass, x=rep(0:30,6), color = as.factor(run)), se = FALSE)+ theme_minimal()+
+  labs(title= str_wrap("Stock Level for optimal-NPV arrangements, ", 80),
+         x= "Number of Years",
+         y= "Fishery-wide Annual Stock Levels",
+       color= "Prices")+
+  theme(plot.caption = element_text(hjust = 0))
+
+# sp1 is best
+
+```
+```{r}
+# av_pft
+
+stock_g_av_pft <- ggplot()+
+  geom_smooth(data = tidy_av_pft, aes(y=tot_biomass, x=rep(0:30,6), color = as.factor(run)), se = FALSE)+ theme_minimal()+
+  labs(title= str_wrap("Stock Level for optimal-NPV arrangements, ", 80),
+         x= "Number of Years",
+         y= "Fishery-wide Annual Stock Levels",
+       color= "Prices")+
+  theme(plot.caption = element_text(hjust = 0))
+
+# sp1 is best
+```
+```{r}
+# stock
+
+stock_g_av_biomass <- ggplot()+
+  geom_smooth(data = tidy_av_biomass, aes(y=tot_biomass, x=rep(0:30,6), color = as.factor(run)), se = FALSE)+ theme_minimal()+
+  labs(title= str_wrap("Stock Level for optimal-NPV arrangements, ", 80),
+         x= "Number of Years",
+         y= "Fishery-wide Annual Stock Levels",
+       color= "Prices")+
+  theme(plot.caption = element_text(hjust = 0))
+
+#sp4 is best
+```
+
+
+
+# compare the best in NPV, avpft, and avstocks to each other for each assignment in terms of NPV, avpft, and avstock
+
+- for selected assignment, sp5
+    - 1 graph of profit that has optimalNPV, optimalavpft, and optimalavstock lines
+    - 1 graph of biomass that has optimalNPV, optimalavpft, and optimalavstock lines
+    - 1 grpha of biomass per species that has optimalNPV, optimalavpft, and optimalavstock lines
+
+```{r}
+# compare profits, av_pft, and av_biomass between whether optimized for NPV, average biomass, or average profits
+
+tidy_NPVs2 <- tidy_NPVs %>% 
+  mutate(optimal = case_when(run == "Ex: $20 all" ~ "$20 all",
+    TRUE ~ "NPV"))
+
+tidy_av_pft2 <- tidy_av_pft %>% 
+  mutate(optimal = "average annual profits")
+
+tidy_av_biomass2 <- tidy_av_biomass %>% 
+  mutate(optimal = "average annual biomass")
+
+comparez <- rbind(filter(tidy_av_biomass2, run == "Ex: Sp5- $40"),
+                        filter(tidy_av_pft2, run == "Ex: Sp5- $40"),
+                        filter(tidy_NPVs2, run == "Ex: Sp5- $40"),
+                  filter(tidy_NPVs2, run == "Ex: $20 all"))
+```
+
+
+```{r}
+# graphs
+
+profit_comp <- ggplot()+
+  geom_smooth(data = comparez, aes(y=tot_pft, x=rep(0:30,4), color = as.factor(optimal)), se = FALSE)+ theme_minimal()+
+  labs(title= str_wrap("Annual fishery-wide profits for various optimal arrangments of a 2-quota basket scheme with 5 species & 5 technologies", 80),
+       caption= "note: average annual profits and NPV results are identical",
+         x= "Number of Years",
+         y= "Fishery-wide Annual Profits",
+       color= "Prices")+
+    scale_y_continuous(labels=dollar_format(prefix="$"))+
+    theme(plot.caption = element_text(hjust = 0))
+
+```
+```{r}
+biomass_comp <- ggplot()+
+  geom_smooth(data = comparez, aes(y=tot_biomass, x=rep(0:30,4), color = as.factor(optimal)), se = FALSE)+ theme_minimal()+
+  labs(title= str_wrap("Annual fishery-wide stock levels for various optimal arrangments of a 2-quota basket scheme with 5 species & 5 technologies", 80),
+       caption= "note: average annual profits and NPV results are identical",
+         x= "Number of Years",
+         y= "Fishery-wide Annual Stock Levels",
+       color= "Prices")+
+    theme(plot.caption = element_text(hjust = 0))
+```
+what happens to each stock under these arrangements?
+
+```{r}
+
+longer_comp <- comparez %>%
+  select(s_1:s_5, tot_biomass:optimal) %>% 
+  pivot_longer(cols = c(s_1:s_5, tot_biomass), names_to = "Species", values_to = "Stock_Level")
+
+longer_comp$Species <- factor(longer_comp$Species, levels = c("s_1", 's_2', 's_3', 's_4', 's_5', 'tot_biomass'), 
+                  labels = c("Species 1", "Species 2", "Species 3", 'Species 4', 'Species 5', 'Fishery Wide'))
+
+df <- split(longer_comp,f = longer_comp$optimal)
+
+df$`$20 all`$Species <- factor(df$`$20 all`$Species, levels = unique(df$`$20 all`$Species),
+                                  labels = c('Sp1: $20', 'Sp2: $20', 'Sp3: $20', 'Sp4: $20', 'Sp5: $20', 'Fishery Wide'))
+
+legend_runs <- factor(df$NPV$Species, levels = unique(df$NPV$Species),
+                                  labels = c('Sp1: $1', 'Sp2: $1', 'Sp3: $1', 'Sp4: $1', 'Sp5: $40', 'Fishery Wide'))
+
+df$`average annual biomass`$Species <- legend_runs
+
+p1 <- ggplot(filter(df$`$20 all`, Species != "Fishery Wide"), aes(x = rep(0:30,5),y = Stock_Level, colour = Species)) + 
+  geom_smooth(se = FALSE) +  theme_minimal()+
+  facet_wrap(~optimal, ncol=1)+
+  labs(x= "Number of Years",
+       y="Annual Stock Level",
+       color= "Species")+
+  scale_color_viridis_d()
+
+p2 <- p1 %+% filter(df$NPV, Species != "Fishery Wide") + theme(legend.position = "none")
+p3 <- p1 %+% filter(df$`average annual profits`, Species != "Fishery Wide")+ theme(legend.position = "none")
+p4 <- p1 %+% filter(df$`average annual biomass`, Species != "Fishery Wide")
+
+layout <- "
+AAAAAAA
+BBBBBBB
+"
+
+stock_comp_g <- (p1 /((p2|p3)|p4)) +
+  plot_layout(design = layout) + plot_annotation(
+  title = str_wrap("Predicted annual stock levels for a fishery with varried prices under 2 quota baskets", 100),
+  caption = str_wrap("Results of a 2 quota basket model for 5 species and 5 technologies parameterized such that species are identical in the following parameters: initial stock size = 50, fishing costs = 1, carrying capacities = 100, coefficient for quota basket limits = 0.2. The coefficient for quota basket limit defines the total combined biomass that can be extracted per year as a proportion of the total available biomass for that year. Species differ in terms of: their respective market prices, growth rates = 0.15, 0.2, 0.2, 0.3, 0.4 (respective to each species, 1-5), catchabilities per technology = all 0.01 except for t1 catches species1 at 0.04, t2 catches species2 at 0.04, t3 catches species3 at 0.04, t4 catches species4 at 0.04, and t5 catches species5 at 0.04. Model was run for 6 different price arrangements (see legend).", 140)
+)
+
+
+
+
+```
+
+
+
+
+# export results
+
+- graphs of the most interesting comparison
+- summary table of results for each item in graph
+

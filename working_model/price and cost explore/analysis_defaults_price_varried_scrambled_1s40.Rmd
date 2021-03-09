@@ -499,18 +499,29 @@ stock_comp_g <- grid.arrange(p1,p2,p3,p4,p5,p6, ncol=3,
 
 
 ```{r}
-# analyze a bit...
+# analyze a bit... compare one arrangement of species across the best in terms of NPV, av_pft, and stock.
 
-compare_pft_prices <- combo_pfts_f %>% 
+# arrangement: species_p1: 1, species_p2: 1, species_p3: 1, species_p4: 1, species_p5: 40
+
+
+
+
+```
+
+```{r}
+
+#NPV
+
+compare_pft_prices_NPV <- combo_pfts_NPV %>% 
   group_by(as.factor(run)) %>% 
-  summarise(sum = sum(tots, na.rm = TRUE),
-            average = mean(tots, na.rm = TRUE)) %>% 
+  summarise(sum = sum(tot_profit, na.rm = TRUE),
+            average = mean(tot_profit, na.rm = TRUE)) %>% 
   arrange(-average)
 
-compare_stock_prices <- combo_stock_f %>% 
+compare_stock_prices <- combo_stock_NPV %>% 
   group_by(as.factor(run)) %>% 
-  summarise(sum = sum(tots, na.rm = TRUE),
-            average = mean(tots, na.rm = TRUE)) %>% 
+  summarise(sum = sum(tot_biomass, na.rm = TRUE),
+            average = mean(tot_biomass, na.rm = TRUE)) %>% 
   arrange(-average)
 
 level_30 <- stock_20$s_1[31] + stock_20$s_2[31] + stock_20$s_3[31] + stock_20$s_4[31] + stock_20$s_5[31]

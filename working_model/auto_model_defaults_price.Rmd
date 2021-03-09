@@ -4,11 +4,11 @@ author: "Kat Leigh"
 date: "2/26/2021"
 output: html_document
 params:
-  species_p1: 1
-  species_p2: 1
-  species_p3: 1
-  species_p4: 1
-  species_p5: 1
+  species_p1: 30
+  species_p2: 30
+  species_p3: 30
+  species_p4: 20
+  species_p5: 20
 ---
 
 ```{r setup, include=FALSE}
