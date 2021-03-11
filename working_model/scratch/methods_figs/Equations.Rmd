@@ -1,0 +1,70 @@
+---
+title: "Equations"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+### This markdown creates all the equations needed for our final report:
+
+
+
+### Yearly Stock growth equation
+
+$X_{t+1} = X_{t} + rX_{t}\times(1-\frac{X_{t}}{K}) - H_{t}$
+
+
+### Harvest equation:
+
+$H = qEX$
+
+### Fishery harvest
+
+$H_{S_{1}} = H_{S_{1},t_{1}}+H_{S_{1}, t_{2}} + ... + H_{S_{1}, t_{n}}$
+
+### Fishery profits
+
+$Cost_{total} = C_{t_{1}}E_{t_{1}}^2 + C_{t_{2}}E_{t_{2}}^2 + ... + C_{t_{n}}E_{t_{n}}^2$
+
+### Profit per species
+
+$Profit_{S_{1}}= H_{S_{1}} \times Price_{S_{1}}$
+
+### Fishery profit
+
+$Profit_{fishery} = Profit_{S_{1}} + Profit_{S_{2}} + ... + Profit_{S_{n}}$
+
+
+### Objective function
+
+$$
+\begin{equation*}
+\begin{aligned}
+& \underset{}{\text{minimize}}
+& & {\frac{1}{2}E'DE-d'E} \\
+& \underset{}{\text{where}}
+& & {d' = P'BZ} \\
+& \underset{}{\text{}}
+&& {A = -MBZ}
+\end{aligned}
+\end{equation*}
+$$
+
+### Objective function with constraints
+
+$$
+\begin{equation*}
+\begin{aligned}
+& \underset{}{\text{minimize}}
+& & {\frac{1}{2}E'DE-d'E} \\
+& \underset{}{\text{s.t.}}
+& & {AE \geq B} \\
+\end{aligned}
+\end{equation*}
+$$
+
+
+
+
