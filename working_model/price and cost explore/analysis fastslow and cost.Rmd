@@ -1,0 +1,403 @@
+---
+title: "automated results analysis: tech cost and species differences"
+author: "Kat Leigh"
+date: "3/3/2021"
+output: html_document
+---
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE, message = FALSE, warning = FALSE)
+
+library(tidyverse)
+library(ggplot2)
+library(here)
+library(quadprog)
+library(scales)
+library(gridExtra)
+library(grid)
+library(patchwork)
+```
+
+
+# read in the data for best in NPV, best in av profit, and best in avstock for each assignment of species to prices.
+
+```{r}
+# get specific data for run spec 11122
+setwd("C:/Users/kll86/OneDrive/Documents/UCSB/quotabasket_model/working_model/price and cost explore/model run result files/costs/r.2.2.2.3.3_c1.1.1.2.2/NPV/")
+temp = list.files(pattern="*.csv")
+for (i in 1:length(temp))
+  {assign(paste("runz", temp[i], sep = "."), read_csv(temp[i]))}
+
+```
+
+```{r}
+# get specific data for run spec 22211
+setwd("C:/Users/kll86/OneDrive/Documents/UCSB/quotabasket_model/working_model/price and cost explore/model run result files/costs/r.2.2.2.3.3_c11222/NPV")
+temp = list.files(pattern="*.csv")
+for (i in 1:length(temp))
+  {assign(paste("runz", temp[i], sep = "."), read_csv(temp[i]))}
+
+```
+
+```{r}
+# get specific data for run identical c, diff rs
+setwd("C:/Users/kll86/OneDrive/Documents/UCSB/quotabasket_model/working_model/price and cost explore/model run result files/costs/r22233_c11111/NPV")
+temp = list.files(pattern="*rdiff.csv")
+for (i in 1:length(temp))
+  {assign(paste("identc", temp[i], sep = "."), read_csv(temp[i]))}
+
+```
+
+```{r}
+# get control data (ident uniform cost = 1)
+
+control.opt_NPV_p <- read_csv("C:/Users/kll86/OneDrive/Documents/UCSB/quotabasket_model/working_model/price and cost explore/model run result files/prices/p20all/opt_NPV_uniident.csv")
+
+```
+
+# choose which assignment to focus on via exploratory graphs of all inputs for each of the 3 categories
+
+- NPV graph (all assigns)
+
+```{r}
+
+# NPV
+
+names_col<- c("s_1", "s_2", "s_3", "s_4", "s_5", "pft_t1", "pft_t2", "pft_t3", "pft_t4", "pft_t5", "mort_1", "mort_2", "tot_pft", "tot_biomass", "run")
+
+cntrol <- mget(ls(pattern="control.")) %>% 
+  as.data.frame() %>% 
+  select(-contains("s_1."),
+         -contains("s_2."),
+         -contains("s_3."),
+         -contains("s_4."),
+         -contains("s_5."),
+         -contains("t_3."),
+         -contains("t_4."),
+         -contains("t_5."),
+         -contains("t_1.1"),
+         -contains("t_2.4"),
+         -contains("t_2.2.1"),
+         -contains("t_2.1."),
+         -contains("t_2.3.")) %>% 
+  mutate(run = "control")
+
+uni_tech <- mget(ls(pattern="identc.")) %>% 
+  as.data.frame() %>% 
+  select(-contains("s_1."),
+         -contains("s_2."),
+         -contains("s_3."),
+         -contains("s_4."),
+         -contains("s_5."),
+         -contains("t_3."),
+         -contains("t_4."),
+         -contains("t_5."),
+         -contains("t_1.1"),
+         -contains("t_2.4"),
+         -contains("t_2.2.1"),
+         -contains("t_2.1."),
+         -contains("t_2.3.")) %>% 
+  mutate(run = "uni_tech")
+
+match_spec_slow_low <- mget(ls(pattern=".c1.1.1.2.2")) %>% 
+  as.data.frame() %>% 
+  select(-contains("s_1."),
+         -contains("s_2."),
+         -contains("s_3."),
+         -contains("s_4."),
+         -contains("s_5."),
+         -contains("t_3."),
+         -contains("t_4."),
+         -contains("t_5."),
+         -contains("t_1.1"),
+         -contains("t_2.4"),
+         -contains("t_2.2.1"),
+         -contains("t_2.1."),
+         -contains("t_2.3.")) %>% 
+  mutate(run = "match_slow_low")
+
+match_spec_slow_high <- mget(ls(pattern="c2.2.2.1.1")) %>% 
+  as.data.frame() %>% 
+  select(-contains("s_1."),
+         -contains("s_2."),
+         -contains("s_3."),
+         -contains("s_4."),
+         -contains("s_5."),
+         -contains("t_3."),
+         -contains("t_4."),
+         -contains("t_5."),
+         -contains("t_1.1"),
+         -contains("t_2.4"),
+         -contains("t_2.2.1"),
+         -contains("t_2.1."),
+         -contains("t_2.3.")) %>% 
+  mutate(run = "match_slow_high")
+
+mix_1h_n_slow <- mget(ls(pattern="c1.2.1.2.2|c2.1.1.2.2|c1.1.2.2.2")) %>% 
+  as.data.frame() %>% 
+  select(-contains("s_1."),
+         -contains("s_2."),
+         -contains("s_3."),
+         -contains("s_4."),
+         -contains("s_5."),
+         -contains("t_3."),
+         -contains("t_4."),
+         -contains("t_5."),
+         -contains("t_1.1"),
+         -contains("t_2.4"),
+         -contains("t_2.2.1"),
+         -contains("t_2.1."),
+         -contains("t_2.3.")) %>% 
+  mutate(run = "mix_1h_n_slow")
+
+mix_1h_n_each <- mget(ls(pattern="c1.1.2.1.2|c1.2.1.1.2|c2.1.1.1.2")) %>% 
+  as.data.frame() %>% 
+  select(-contains("s_1."),
+         -contains("s_2."),
+         -contains("s_3."),
+         -contains("s_4."),
+         -contains("s_5."),
+         -contains("t_3."),
+         -contains("t_4."),
+         -contains("t_5."),
+         -contains("t_1.1"),
+         -contains("t_2.4"),
+         -contains("t_2.2.1"),
+         -contains("t_2.1."),
+         -contains("t_2.3.")) %>% 
+  mutate(run = "mix_1h_n_each")
+
+mix_1l_n_each <- mget(ls(pattern="c2.2.1.1.2|c2.1.2.1.2|c1.2.2.1.2")) %>% 
+  as.data.frame() %>% 
+  select(-contains("s_1."),
+         -contains("s_2."),
+         -contains("s_3."),
+         -contains("s_4."),
+         -contains("s_5."),
+         -contains("t_3."),
+         -contains("t_4."),
+         -contains("t_5."),
+         -contains("t_1.1"),
+         -contains("t_2.4"),
+         -contains("t_2.2.1"),
+         -contains("t_2.1."),
+         -contains("t_2.3.")) %>% 
+  mutate(run = "mix_1l_n_each")
+
+names(cntrol) <- names_col
+names(uni_tech) <- names_col
+names(match_spec_slow_high) <- names_col
+names(match_spec_slow_low) <- names_col
+# names(mix_1l_n_each) <- names_col_mix
+# names(mix_1h_n_each) <- names_col_mix
+# names(mix_1h_n_slow) <- names_col_mix
+
+```
+
+```{r}
+
+mixapart1 <- mix_1h_n_each %>% 
+  select(1:14) %>% 
+  mutate(run = 'mix_1h_n_each')
+names(mixapart1) <- names_col
+
+mixapart2 <- mix_1h_n_each %>% 
+  select(15:28) %>% 
+  mutate(run = 'mix_1h_n_each')
+names(mixapart2) <- names_col
+
+mixapart3 <- mix_1h_n_each %>% 
+  select(29:43)
+names(mixapart3) <- names_col
+
+mix_1h_n_each <- do.call(rbind, mget(ls(pattern= 'mixapart.'))) %>% 
+  mutate(verz = c(rep(1,31),rep(2,31),rep(3,31))) %>% 
+  filter(verz == 1)
+
+mixapart1 <- mix_1h_n_slow %>% 
+  select(1:14) %>% 
+  mutate(run = 'mix_1h_n_slow')
+names(mixapart1) <- names_col
+
+mixapart2 <- mix_1h_n_slow %>% 
+  select(15:28) %>% 
+  mutate(run = 'mix_1h_n_slow')
+names(mixapart2) <- names_col
+
+mixapart3 <- mix_1h_n_slow %>% 
+  select(29:43)
+names(mixapart3) <- names_col
+
+mix_1h_n_slow <- do.call(rbind, mget(ls(pattern= 'mixapart.')))%>% 
+  mutate(verz = c(rep(1,31),rep(2,31),rep(3,31))) %>% 
+  filter(verz == 1)
+
+mixapart1 <- mix_1l_n_each %>% 
+  select(1:14) %>% 
+  mutate(run = 'mix_1l_n_each')
+names(mixapart1) <- names_col
+
+mixapart2 <- mix_1l_n_each %>% 
+  select(15:28) %>% 
+  mutate(run = 'mix_1l_n_each')
+names(mixapart2) <- names_col
+
+mixapart3 <- mix_1l_n_each %>% 
+  select(29:43)
+names(mixapart3) <- names_col
+
+mix_1l_n_each <- do.call(rbind, mget(ls(pattern= 'mixapart.')))%>% 
+  mutate(verz = c(rep(1,31),rep(2,31),rep(3,31))) %>% 
+  filter(verz == 1)
+
+uni_tech <- uni_tech %>% 
+  mutate(verz = '0u')
+
+cntrol <- cntrol %>% 
+  mutate(verz = '0c')
+
+match_spec_slow_low <- match_spec_slow_low %>% 
+  mutate(verz = '0msl')
+
+match_spec_slow_high <- match_spec_slow_high %>% 
+  mutate(verz = '0msh')
+
+
+v1 <- ls(pattern = "uni_|cntrol|mix_|match")
+
+v2 <- do.call(rbind,mget(v1))
+
+v2 <- v2 %>% 
+  mutate(linetype = case_when(grepl("control", run) ~ "identuni",
+                              grepl("uni", run) ~ "diffuni",
+                              grepl("match.", run) ~ "match",
+                              grepl("mix", run) ~ "mix"))
+
+v2 <- v2 %>% 
+  mutate(run = case_when(grepl("control", run) ~ "identical species, uniform costs: $1",
+                              grepl("uni", run) ~ "3 slow-growing species, 2 fast-growing, uniform costs",
+                              grepl("slow_high", run) ~ "3 slow-growing with high costs",
+                              grepl("slow_low", run) ~ "3 slow-growing with low costs",
+                              grepl("1l_n_each", run) ~ "3 slow-growing, 2 fast with 1 low cost of each",
+                              grepl("1h_n_each", run) ~ "3 slow-growing, 2 fast with 1 high cost of each",
+                              grepl("1h_n_slow", run) ~ "3 slow-growing, 1 with a high cost, 2 fast"))
+
+```
+
+# make graphs
+
+```{r}
+
+#run_factors <- factor(v2$run, levels = unique(v2$run),
+ #                            labels = c("Ex: $20 all", "Ex: Sp1- $40", "Ex: Sp2- $40", "Ex: Sp3- $40", "Ex: Sp4- $40", "Ex: Sp5- $40"))
+
+# tidy_av_biomass$run <- run_factors
+# tidy_NPVs$run <- run_factors
+# tidy_av_pft$run <- run_factors
+
+#NPV
+pft_g_NPV_v2 <- ggplot()+
+  geom_smooth(data = v2, aes(y=tot_pft, x=rep(0:30,7), color = as.factor(run),
+                             linetype = as.factor(linetype)), se = FALSE, na.rm = TRUE)+ theme_minimal()+
+  labs(title= str_wrap("Profits for optimal-NPV arrangements, ", 80),
+         x= "Number of Years",
+         y= "Fishery-wide Annual Profits",
+       color= "Trial Run")+
+  scale_y_continuous(labels=dollar_format(prefix="$"))+
+  #facet_wrap(~run)+
+  theme(plot.caption = element_text(hjust = 0))
+
+```
+
+what happens to each stock under these arrangements?
+
+```{r}
+
+longer_comp <- v2 %>%
+  rownames_to_column() %>% 
+  pivot_longer(cols = c(s_1:s_5, tot_biomass), names_to = "Species", values_to = "Stock_Level")
+
+longer_comp$Species <- factor(longer_comp$Species, levels = c("s_1", 's_2', 's_3', 's_4', 's_5', 'tot_biomass'), 
+                  labels = c("Species 1", "Species 2", "Species 3", 'Species 4', 'Species 5', 'Fishery Wide'))
+
+df <- split(longer_comp,f = longer_comp$run)
+
+# df$`$20 all`$Species <- factor(df$`$20 all`$Species, levels = unique(df$`$20 all`$Species),
+#                                   labels = c('Sp1: $20', 'Sp2: $20', 'Sp3: $20', 'Sp4: $20', 'Sp5: $20', 'Fishery Wide'))
+# 
+# legend_runs <- factor(df$NPV$Species, levels = unique(df$NPV$Species),
+#                                   labels = c('Sp1: $1', 'Sp2: $1', 'Sp3: $1', 'Sp4: $1', 'Sp5: $40', 'Fishery Wide'))
+# 
+# df$`average annual biomass`$Species <- legend_runs
+
+p1 <- ggplot(filter(df$`identical species, uniform costs: $1`, Species != "Fishery Wide"), aes(x = rep(0:30,5),y = Stock_Level, colour = Species, linetype = linetype)) + 
+  geom_smooth(method = "loess", se = FALSE, formula = 'y ~ x') +  theme_minimal()+
+  facet_wrap(~run, labeller = labeller(run = label_wrap_gen(30)))+
+  labs(x= NULL,
+       y=NULL,
+       color= "Species",
+       linetype=NULL)+
+  scale_color_viridis_d()+
+  scale_y_continuous(limits = c(0,60))+
+  scale_linetype(guide = "none")
+
+p2 <- p1 %+% filter(df$`3 slow-growing species, 2 fast-growing, uniform costs`, Species != "Fishery Wide") + theme(legend.position = "none")
+p3 <- p1 %+% filter(df$`3 slow-growing with high costs`, Species != "Fishery Wide")+ theme(legend.position = "none")
+p4 <- p1 %+% filter(df$`3 slow-growing with low costs`, Species != "Fishery Wide")+ theme(legend.position = "none")
+p5<- p1 %+% filter(df$`3 slow-growing, 2 fast with 1 high cost of each`, Species != "Fishery Wide")+ theme(legend.position = "none")
+p6<- p1 %+% filter(df$`3 slow-growing, 2 fast with 1 low cost of each`, Species != "Fishery Wide")+ theme(legend.position = "none")
+p7<- p1 %+% filter(df$`3 slow-growing, 1 with a high cost, 2 fast`, Species != "Fishery Wide")+ theme(legend.position = "none")
+
+stock_comp_g <- (plot_spacer()|p1|p2|plot_spacer()) / (p3|p4|p5|p6|p7) + plot_annotation(
+  title = str_wrap("Predicted annual stock levels for a fishery with varried technology costs under 2 quota baskets", 100),
+  caption = str_wrap("Results of a 2 quota basket model for 5 species and 5 technologies parameterized such that the control has identical species and technology costs. The trials have identical species besides growth rates, and the technologies differ in their respective costs. Growth rates are: 3 species of 0.2, and 2 species of 0.3. Technology costs are either 3 at $1 and 2 at $2, or 3 at $1 and 2 at $2.", 140)
+)
+
+
+
+
+```
+
+mortality analysis
+
+```{r}
+
+morts <- v2 %>% 
+  group_by(mort_1, mort_2) %>% 
+  select(tot_pft:run,linetype) %>% 
+  summarise(tot_pft = mean(tot_pft, na.rm = TRUE),
+            tot_biomass = mean(tot_biomass),
+            run = unique(run),
+            linetype = unique(linetype))
+
+test <- v2 %>% 
+  group_by(run) %>% 
+  summarise(av_pft = mean(tot_pft, na.rm = TRUE),
+            av_bio = mean(tot_biomass))
+
+nulling <- v2 %>% 
+  filter(run == 'identical species, uniform costs: $1')
+
+avtest <- mean(nulling$tot_biomass)
+  
+#gut check:
+  
+avtestp <- mean(match_spec_slow_high$tot_pft, na.rm = TRUE)
+avtestb <- mean(match_spec_slow_high$tot_biomass)
+
+avtestpl <- mean(match_spec_slow_low$tot_pft, na.rm = TRUE)
+avtestbl <- mean(match_spec_slow_low$tot_biomass) 
+
+avtestpm <- mean(mix_1h_n_each$tot_pft, na.rm = TRUE)
+avtestbm <- mean(mix_1h_n_each$tot_biomass)
+
+```
+
+
+
+# export results
+
+- graphs of the most interesting comparison
+- summary table of results for each item in graph
+

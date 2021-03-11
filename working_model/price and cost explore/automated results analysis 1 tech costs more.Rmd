@@ -255,7 +255,7 @@ names(def_tech4h) <- names_col
 names(def_tech1h) <- names_col
 names(def_tech3h) <- names_col
 names(ident_tech3h) <- names_col
-names(ident_tech2h) <- names_col
+#names(ident_tech2h) <- names_col
 names(ident_tech1h) <- names_col
 names(ident_tech4h) <- names_col
 names(ident_tech5h) <- names_col
@@ -352,6 +352,21 @@ stock_comp_g <- (plot_spacer()|p1|plot_spacer()) / (p2|p3|p4|p5|p6) / (p7|p9|p10
 
 ```
 
+```{r}
+
+# get summary info
+
+summaryinfo <- v2 %>%
+  group_by(mort_1, mort_2) %>% 
+  select(tot_pft, tot_biomass, run, linetype) %>% 
+  summarise(av_pft = mean(tot_pft, na.rm = TRUE),
+            av_biomass = mean(tot_biomass),
+            run = unique(run),
+            linetype = unique(linetype))
+  
+
+
+```
 
 
 

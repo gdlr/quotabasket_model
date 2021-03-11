@@ -1,0 +1,392 @@
+---
+title: ""
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+
+# Packages
+library(tidyverse)
+library(Matrix)
+library(kableExtra)
+```
+
+
+
+<center><h1>Multi-Species Fishery Model</h1></center>
+
+<center><p>This is a multi-species fishery model that allows us to reflect how quota baskets affect stock levels</p></center>
+
+<br>
+
+### Our Model: Population Growth & Profit 
+<br>
+<center><p>**Stock Dynamic**</p></center>
+
+<center><p><mark>$X_{t+1} = X_t + rX_t\times (1-{X_t\over K}) - H_t$</mark></p></center>
+
+<center><p>**Harvest:**</p></center>
+
+<center><p><mark>$H_t = qX_tE_t$</mark></p></center>
+
+<center><p>**Profit**</p></center>
+
+<center><p><mark>$\pi_t = p \times H_t - c$</mark></p></center>
+
+<center><p>**Present Value of Net Benefit (PVNB)**</p></center>
+
+<center><p><mark>$\sum_{t=0}^{year}[({1\over 1+\delta})^t \times \pi_t]$</mark></p></center>
+*where,*<br>
+
+- *$X_0$ = initial population size*<br>
+
+- *$r$ = intrinsic growth rate*<br>
+
+- *$K$ = carrying capacity*<br>
+
+- *$q$ = catchability coefficient*<br>
+
+- *$E$ = fishing effort*<br>
+
+- *$p$ = price of 1 unit of fish*<br>
+
+- *$\pi$ = revenue* <br>
+
+- *$c$ = cost*<br>
+
+- *$\delta$ = discount rate*<br>
+
+<br>
+
+### Check Our Model for Single Species
+
+```{r, echo=FALSE}
+stock_size_fx <- function(r = 0.1, K = 1, X0 = 0.1, years = 100, q = 0.01, E = 1, p = 1){
+ 
+  ## Stock size ##
+  # Create a stock size vector
+  stock <- vector(length = years)
+  stock[1] <- X0
+  # And write a stock size equation
+  for(y in 2:years){
+    stock[y] = stock[y-1] + (r*stock[y-1])*(1-(stock[y-1]/K)) - q*E*stock[y-1]
+  }
+  
+  ## Harvest ##
+  # Create harvest vector:
+  harvest <- vector(length = years)
+  stock[1] <- 0
+  # And write an equation...
+  for(y in 2:years){
+    harvest[y] = q*E*stock[y]
+  }
+  ## Profit
+  # Create profit vector
+  revenue <- vector(length = y)
+  revenue[1] = 0
+  # Write an equation...
+  for(y in 2:years){
+    revenue[y] = p*stock[y]
+  }
+  
+  data.frame(year = seq(1, years, by = 1), 
+             stock = stock, 
+             harvest = harvest, 
+             revenue = revenue)
+}
+
+test <- stock_size_fx(0.1, 1, 0.1, 100, 0.01, 1, 1)
+plot(test)
+```
+
+**Great, this works for a single species. Can we include this for multiple species? **
+
+1. We will need to define parameters for each of these species.
+
+2. Then, we can write a function that allows us to plug these parameters in as a list of values, as many times as we want.
+
+```{r, echo=FALSE}
+# We first need to define species parameters 
+params1 = list(0.1, 1, 0.1, 100, 0.01, 1, 1)
+params2 = list(0.1, 5, 0.1, 100, 0.01, 1, 1)
+
+
+multi_speciesfx <- function(...){
+  # Define input arguments as a list to use with lapply later
+  x = list(...)
+
+  dcfx <- function(y){
+    # This applies a function over a vector of parameters...
+    # Unlist the params so we can plug them into our fx
+    unlist(y)
+    # do.call runs the function for certain parameters
+    do.call(stock_size_fx, y)
+  }
+    # Apply it to every set of parameters
+    lapply(x, dcfx)
+  }
+
+ms_test <- multi_speciesfx(params1, params2)
+
+```
+
+<br>
+
+### Maxmize Profit
+
+```{r}
+# To maxmize profit, we need to create a catchability coefficient matrix first. 
+
+# First, set seed to ensure we have the same result 
+set.seed(666)
+
+
+# set the number of species and technologies we want to study
+species_num <- 4
+tech_num <- 10
+
+
+# set the number of years we want to model the stock dynamic 
+year = 50
+
+
+# set values for variables in the "Our Model" section
+X0 = runif(species_num, max = 1, min = 0.1)
+
+r = runif(species_num, max = 0.8, min = 0.1)
+
+K = runif(species_num, max = 5, min = 1)
+
+p = runif(species_num, max = 600, min = 50)
+
+q = runif(species_num*tech_num, max = 0.01, min = 0)
+
+c = runif(tech_num, min = 0.2, max = 8)
+
+E = runif(tech_num, min = 0.1, max = 6)
+
+o = 0.05  # o: discount rate
+```
+
+1. Imagine the *Species-Technology Catchability Coefficient Matrix*, and the cost and effort for each technology are given. Here, we create a model for `r species_num` species and `r tech_num` technologies.
+
+```{r}
+# randomly generate q (catchability coefficient) to the matrix
+species_tech_matrix <- data.frame(matrix(q, nrow = tech_num, ncol = species_num))
+
+# assign column and row names to the matrix
+matrix_col_name <-  paste("species_", 1:species_num, sep = "")
+colnames(species_tech_matrix) <- matrix_col_name
+
+matrix_row_name <-  paste("tech_", 1:tech_num, sep = "")
+rownames(species_tech_matrix) <- matrix_row_name
+
+```
+
+```{r}
+# Addin cost and effort for each technology. 
+species_tech_matrix$cost <- c
+
+species_tech_matrix$effort <- E
+```
+
+```{r}
+# print the catchability table in a nice formet 
+matrix_table = kbl(species_tech_matrix, caption = "Catchability Coefficient Matrix") %>% 
+  kable_classic(full_width = F, html_font = "Cambria")
+matrix_table
+```
+
+<br>
+
+2. Simulate the stock sizes for each of the `r species_num` species and `r tech_num` technologies for a period of `r year` years. Here are the first and last 5 lines of the simulated result. 
+
+```{r}
+# write a function to calculate the stock dynamic
+stock_dynamic <- function(species_index, 
+                          year, 
+                          r, 
+                          K, 
+                          X0){
+  
+  stock= NULL
+  stock=append(stock, X0)
+  
+  for( i in 2:year){
+    
+  # apply the first equation in the "Our Model" section
+  X = stock[i-1]+r*stock[i-1]*(1-stock[i-1]/K) - sum(species_tech_matrix[species_index]*species_tech_matrix$effort)*stock[i-1] 
+  
+  stock=append(stock, X)
+  
+  }
+  return(stock)
+}
+```
+
+```{r}
+# use the function above to simulate the stock dynamics for the 4 species
+simulated_stock_dynamic = NULL
+
+for(i in 1:species_num){
+  stock = stock_dynamic(species_index = i, 
+                        year = year, 
+                        r = r[i], 
+                        K = K[i], 
+                        X0 = X0[i])
+  
+  simulated_stock_dynamic = cbind(simulated_stock_dynamic, stock)
+  
+}
+
+```
+
+```{r}
+# turn the simulated result into a dataframe
+simulated_stock_dynamic <- data.frame(simulated_stock_dynamic)
+
+# create the column names and row names for the simulated result
+stock_col_name <-  paste("stock_", 1:length(r), sep = "")
+
+stock_row_name <-  paste("year_", 1:year, sep = "")
+
+colnames(simulated_stock_dynamic) <- stock_col_name
+
+rownames(simulated_stock_dynamic) <- stock_row_name
+```
+
+```{r}
+# print the first and last 5 lines of the stock dynamic dataframe in a nice formet 
+stock_table = kbl(simulated_stock_dynamic[c(1:5, (year-4):year),], caption = "Stock Dynamic") %>% 
+  kable_classic(full_width = F, html_font = "Cambria")
+stock_table
+```
+
+<br>
+
+3. Simulate the harvest for each species 
+```{r}
+#calculate the harvest for the each of the species
+harvest = NULL
+
+for(i in 1:species_num){
+  # apply the second equation in the "Our Model" section
+  X = sum(species_tech_matrix[i]*species_tech_matrix$effort)*simulated_stock_dynamic[i]
+
+  harvest=c(harvest, X)
+
+}
+
+harvest = data.frame(harvest)
+```
+
+
+```{r}
+# print the first and last 5 lines of the harvest dataframe in a nice formet 
+harvest_table = kbl(harvest[c(1:5, (year-4):year),], caption = "Harvest for each species") %>% 
+  kable_classic(full_width = F, html_font = "Cambria")
+
+harvest_table
+```
+
+<br>
+
+
+4. Simulate the profit generated by each technology and calculate the PVNB
+```{r}
+# calculate the cost for each technology 
+cost_tech <- species_tech_matrix$cost * species_tech_matrix$effort
+```
+
+
+```{r}
+# write a function to calculate the profit for one technology
+profit_tech <- function(tech_index){
+  
+  # apply the third equation in "Our Model" section. Calculate the revenue generated by the 1st species of the chosen technology
+  profit_tech_species = species_tech_matrix[tech_index, 1]*species_tech_matrix$effort[tech_index]*simulated_stock_dynamic[1]*p[1]
+  
+  # use a for-loop to generate the revenue for the rest of the species
+  for(j in 2:species_num){
+    x = species_tech_matrix[tech_index, j]*species_tech_matrix$effort[tech_index]*simulated_stock_dynamic[j]*p[j]
+    profit_tech_species <- cbind(profit_tech_species,x)
+  }
+
+  # sum by rows to get the revenue generated by that technology across species. Subtract cost from revenue to get profit of that technology
+  profit_tech = rowSums(profit_tech_species) - cost_tech[tech_index]
+  
+  return(profit_tech)
+}
+
+```
+
+
+```{r}
+# apply the function above to calculate the profit for all the technologies
+profit = NULL
+
+for(i in 1:tech_num){
+  profit = cbind(profit, profit_tech(i))
+}
+
+
+# create the column names and row names for the profit dataframe
+profit_col_name <-  paste("tech_", 1:tech_num, sep = "")
+profit_row_name <-  paste("year_", 1:year, sep = "")
+
+colnames(profit) <- profit_col_name
+rownames(profit) <- profit_row_name
+
+profit <- data.frame(profit)
+
+# add the total profit for each year 
+total_profit <- rowSums(profit)
+profit$total_profit <- total_profit
+```
+
+```{r}
+# calculate the present value of the profit generated by each technology each year
+pv = NULL
+
+for(i in 1:year){
+  x = (1/(1+o))^(i-1)*profit$total_profit[i]
+  pv = append(pv, x)
+}
+
+profit$present_value <- pv
+```
+
+```{r}
+# print the first and last 5 lines of the profit dataframe in a nice formet 
+profit_table = kbl(profit[c(1:5, (year-4):year),], caption = "Profit for each technology") %>% 
+  kable_classic(full_width = F, html_font = "Cambria")
+
+profit_table
+```
+
+```{r}
+# sum up the present values to get the PVNB
+pvnb = sum(pv)
+```
+<br>
+
+    The calculated PVNB is `r pvnb`.
+    <br>
+
+
+<br>
+<br>
+<br>
+*Assumptions:*<br>
+*1. We are interested in `r species_num` species and `r tech_num` technologies in a period of `r year` years*<br>
+*2. $X_0$, $r$, $K$, $q$, $E$, $p$, $c$ are randomly generated*<br>
+*3. $X_0$ is uniformly distributed with min = 0.1, and max = 1*<br>
+*4. $r$ is uniformly distributed with min = 0.1, and max = 0.8*<br>
+*5. $K$ is uniformly distributed with min = 1, and max = 5*<br>
+*6. $q$ is uniformly distributed with min = 0, and max = 0.01*<br>
+*7. $c$ is uniformly distributed with min = 0.2, and max = 8*<br>
+*8. $E$ is uniformly distributed with min = 0.1, and max = 6*<br>
+*9. $p$ is uniformly distributed with min = 50, and max = 600*<br>
+*9. $\delta$ is `r o`*<br>
+*11. $r$,$K$,$q$,$E$,$p$,$c$,$\delta$ do not change with respect to time*<br>
