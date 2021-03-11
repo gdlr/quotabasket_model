@@ -186,7 +186,7 @@ bio_outputs_arr <-  reshape(bio_outputs,
         times = c("stock.s_1", "stock.s_2", "stock.s_3", "stock.s_4", "stock.s_5"))
   
   
-species_labs = c(stock.s_1 = "S1-low trait", stock.s_2 = "S2-low trait", stock.s_3 = "S3-low trait", stock.s_4 = "S4-high trait", stock.s_5 = "S5-high trait")
+species_labs = c(stock.s_1 = "Species 1", stock.s_2 = "Species 2", stock.s_3 = "Species 3", stock.s_4 = "Species 4", stock.s_5 = "Species 5")
 
 bio30_result <- ggplot(data = bio_outputs_arr) +
   geom_point(alpha = 3, aes(x = key_variable, y = biomass, color = analysis), size=2)+
@@ -431,10 +431,12 @@ sc3_basket2_r
 
 
 ```{r}
+# harvest
+
 all_ouputs_all_sc3_e <- all_ouputs_all %>% 
   filter(analysis=="high dominant + low basket",
          key_variable=="Value" | key_variable=="r") %>% 
-  select(effort.t_1:effort.t_5, analysis, key_variable, year)
+  select(harvest.s_1:harvest.s_5, analysis, key_variable, year)
 
 
 all_ouputs_sc3_p_e <- all_ouputs_all_sc3_e %>% 
@@ -445,9 +447,9 @@ sc3_basket1_p_e <- ggplot(data = all_ouputs_sc3_p_e)+
   geom_line(aes(y=effort.t_4, x=year), size=1)+ 
   geom_line(aes(y=effort.t_5, x=year), color="red", size=1)+ 
   labs(x= "Years",
-         y= "Stock Level (tons)")+
+         y= "Effort")+
   labs(title="2 high traits + 1 low-trait",
-       y= "30 year biomass",
+       y= "Harvest",
        x= "Year")
   theme_bw()
 
@@ -455,9 +457,9 @@ sc3_basket2_p_e <- ggplot(data = all_ouputs_sc3_p_e)+
   geom_line(aes(y=effort.t_2, x=year), color="royalblue", size=1)+ 
   geom_line(aes(y=effort.t_2, x=year), color="royalblue", size=1)+ 
   labs(x= "Years",
-         y= "Stock Level (tons)")+
+         y= "Effort")+
   labs(title="2 low trait",
-       y= "30 year biomass",
+       y= "Harvest",
        x= "Year")
   theme_bw()
 
@@ -469,20 +471,20 @@ sc3_basket2_p_e
 all_ouputs_sc3_r_e <- all_ouputs_all_sc3_e %>% 
   filter(key_variable=="r")
 
-sc3_basket1_r_e <- ggplot(data = all_ouputs_sc3_r_e)+
-  geom_line(aes(y=effort.t_1, x=year), color="royalblue")+ 
-  geom_line(aes(y=effort.t_4, x=year), size=1)+ 
-  geom_line(aes(y=effort.t_5, x=year), color="red", size=1)+ 
+sc3_basket1_r_harvest <- ggplot(data = all_ouputs_sc3_r_e)+
+  geom_line(aes(y=harvest.s_1, x=year), color="royalblue")+ 
+  geom_line(aes(y=harvest.s_4, x=year), size=1)+ 
+  geom_line(aes(y=harvest.s_5, x=year), color="red", size=1)+ 
   labs(x= "Years",
          y= "Stock Level (tons)")+
   labs(title="2 high traits + 1 low-trait",
-       y= "30 year biomass",
+       y= "Harvest",
        x= "Year")
   theme_bw()
 
-sc3_basket2_r_e <- ggplot(data = all_ouputs_sc3_r_e)+
-  geom_line(aes(y=effort.t_2, x=year), color="royalblue", size=1)+ 
-  geom_line(aes(y=effort.t_2, x=year), color="royalblue", size=1)+ 
+sc3_basket2_r_harvest <- ggplot(data = all_ouputs_sc3_r_e)+
+  geom_line(aes(y=harvest.s_2, x=year), color="royalblue", size=1)+ 
+  geom_line(aes(y=harvest.s_3, x=year), color="royalblue", size=1)+ 
   labs(x= "Years",
          y= "Stock Level (tons)")+
   labs(title="2 low trait",
@@ -490,7 +492,7 @@ sc3_basket2_r_e <- ggplot(data = all_ouputs_sc3_r_e)+
        x= "Year")
   theme_bw()
 
-sc3_basket1_r_e 
-sc3_basket2_r_e
+sc3_basket1_r_harvest 
+sc3_basket2_r_harvest
 ```
 
