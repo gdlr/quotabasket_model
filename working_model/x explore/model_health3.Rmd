@@ -40,11 +40,11 @@ For each technology we need:
 # Species:
 # s = species, r, K, X, p
 
-s1 <- c(s=1, r=0.2, K=100, X=50, p=20) #Stable
-s2 <- c(s=2, r=0.2, K=100, X=50, p=20) #Stable
-s3 <- c(s=3, r=0.2, K=100, X=50, p=20) #Stable
-s4 <- c(s=4, r=0.2, K=100, X=15, p=20) #overexploited
-s5 <- c(s=5, r=0.2, K=100, X=15, p=20) #overexploited
+s1 <- c(s=1, r=0.2, K=100, X=25, p=20) #overexploited
+s2 <- c(s=2, r=0.2, K=100, X=25, p=20) #overexploited
+s3 <- c(s=3, r=0.2, K=100, X=25, p=20) #overexploited
+s4 <- c(s=4, r=0.2, K=100, X=50, p=20) #stable
+s5 <- c(s=5, r=0.2, K=100, X=50, p=20) #stable
 
 # t = tech, q1 = catchability species 1, q2 = catchability species 2...
 
@@ -105,13 +105,13 @@ output <- optimal_baskets(species, tech, cost, baskets, mort_guess, years)
 NPV <- sum(drop_na(output$profit_per_t))
 #here("health status explore") 
 # I dont know why it refuses to save in my G drive
-  csvname <- "output_b_overfish3.csv"
+  csvname <- "output_b_x3.csv"
   #csvfile <- paste(path_store, csvname, sep="")
   csvfile <- paste(csvname, sep="")
   write.table(na.omit(output),csvfile, row.names=FALSE, sep=",")
   
 #path_store <- here("health status explore") 
-  csvname <- "NPV_b_overfish3.csv"
+  csvname <- "NPV_b_x3.csv"
   #csvfile <- paste(path_store, csvname, sep="")
   csvfile <- paste(csvname, sep="")
   write.table(na.omit(NPV),csvfile, row.names=FALSE, sep=",")
