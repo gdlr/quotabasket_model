@@ -8,6 +8,7 @@ knitr::opts_chunk$set(echo = TRUE)
 
 library(kableExtra)
 library(tidyverse)
+library(here)
 ```
 
 ```{r}
@@ -79,7 +80,7 @@ kbl(species_df, escape = F, caption = "Species Parameters for baskets based on r
    kable_classic(full_width = F) %>% 
    column_spec(6, color = c("pink", "pink", "pink", "lightblue", "lightblue")) %>% 
    column_spec(7, color = c("pink", "pink", "lightblue", "pink", "lightblue")) %>% 
-   column_spec(8, color = c("pink", "lightblue", "lightblue", "pink", "lightblue")) %>% 
+   column_spec(8, color = c("pink", "lightblue", "lightblue", "pink", "pink")) %>% 
    column_spec(2, bold = T) %>% 
    add_header_above(c(" " = 5,"Basket grouping" = 3))  %>% 
    save_kable(file = here("working_model", "scratch", "tables_for_mauricio", "r_sp_params.png"), zoom = 2)

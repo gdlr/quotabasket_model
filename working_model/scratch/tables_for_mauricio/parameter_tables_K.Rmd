@@ -8,6 +8,7 @@ knitr::opts_chunk$set(echo = TRUE)
 
 library(kableExtra)
 library(tidyverse)
+library(here)
 ```
 
 ```{r}
@@ -75,11 +76,11 @@ species_df <- do.call(rbind, species) %>%
   cbind(run_13 = c("&#9679;", "&#9679;","&#9679;", "&#9679;", "&#9679;"))
 
 
-kbl(species_df, escape = F, caption = "Species Parameters for baskets based on r", col.names = c("Species", "r", "K", "Starting stock", "Price", "Run 1", "Run 2", "Run 3")) %>% 
+kbl(species_df, escape = F, caption = "Species Parameters for baskets based on K", col.names = c("Species", "r", "K", "Starting stock", "Price", "Run 1", "Run 2", "Run 3")) %>% 
    kable_classic(full_width = F) %>% 
    column_spec(6, color = c("pink", "pink", "pink", "lightblue", "lightblue")) %>% 
    column_spec(7, color = c("pink", "pink", "lightblue", "pink", "lightblue")) %>% 
-   column_spec(8, color = c("pink", "lightblue", "lightblue", "pink", "lightblue")) %>% 
+   column_spec(8, color = c("pink", "lightblue", "lightblue", "pink", "pink")) %>% 
    column_spec(2, bold = T) %>% 
    add_header_above(c(" " = 5,"Basket grouping" = 3))  %>% 
    save_kable(file = here("working_model", "scratch", "tables_for_mauricio", "K_sp_params.png"), zoom = 2)

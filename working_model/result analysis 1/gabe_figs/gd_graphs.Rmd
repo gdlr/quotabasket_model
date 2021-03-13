@@ -1,0 +1,534 @@
+---
+title: "global results"
+author: "mauricio"
+date: "3/27/2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, message=FALSE, warning=FALSE, echo=FALSE)
+
+library(tidyverse)
+library(here)
+library(scales)
+library(gridExtra)
+library(grid)
+library(kableExtra)
+library(ggtext)
+```
+
+```{r}
+# Read files results of K
+
+# data
+species_df_k <- read_csv(here("working_model","k explore","model run results files","species.csv"))
+# data
+tech_df_k <- read_csv(here("working_model","k explore","model run results files","tech_cost.csv"))
+
+# general output files
+output_sc1_k <- read_csv(here("working_model","k explore","model run results files","output_b_carry1.csv")) %>% 
+  mutate(analysis = "low basket + high basket",
+         key_variable = "K",
+         year = seq(0,30))
+output_sc2_k <- read_csv(here("working_model","k explore","model run results files","output_b_carry2.csv"))%>% 
+  mutate(analysis = "low dominant + balanced",
+         key_variable = "K",
+         year = seq(0,30))
+output_sc3_k <- read_csv(here("working_model","k explore","model run results files","output_b_carry3.csv"))%>% 
+  mutate(analysis = "high dominant + low basket",
+         key_variable = "K",
+         year = seq(0,30))
+
+# sum of profits
+
+npv_sc1_k <- read_csv(here("working_model","k explore","model run results files","NPV_b_carry1.csv")) %>% 
+  mutate(analysis = "Low basket + high basket",
+         key_variable = "K")
+npv_sc2_k <- read_csv(here("working_model","k explore","model run results files","NPV_b_carry2.csv")) %>% 
+  mutate(analysis = "Low dominant + balanced",
+         key_variable = "K")
+npv_sc3_k <- read_csv(here("working_model","k explore","model run results files","NPV_b_carry3.csv")) %>% 
+  mutate(analysis = "High dominant + low basket",
+         key_variable = "K")
+
+#Group them
+all_outputs_k <- rbind(output_sc1_k, output_sc2_k, output_sc3_k) %>% 
+  mutate(tot_profits = profit_per_t.t_1+profit_per_t.t_2+profit_per_t.t_3+profit_per_t.t_4+profit_per_t.t_5,
+         tot_stock=stock.s_1+stock.s_2+stock.s_3+stock.s_4+stock.s_5)
+
+NPVs_k <- rbind(npv_sc1_k, npv_sc2_k, npv_sc3_k) %>% 
+  rename(total_profit=x)
+
+```
+
+```{r}
+# Read files results value
+
+# data
+species_df_p <- read_csv(here("working_model","p explore","model run results files","species.csv"))
+# data
+tech_df_p <- read_csv(here("working_model","p explore","model run results files","tech_cost.csv"))
+
+# general output files
+output_sc1_p <- read_csv(here("working_model","p explore","model run results files","output_b_price1.csv")) %>% 
+  mutate(analysis = "low basket + high basket",
+         key_variable = "Value",
+         year = seq(0,30))
+output_sc2_p <- read_csv(here("working_model","p explore","model run results files","output_b_price2.csv"))%>% 
+  mutate(analysis = "low dominant + balanced",
+         key_variable = "Value",
+         year = seq(0,30))
+output_sc3_p <- read_csv(here("working_model","p explore","model run results files","output_b_price3.csv"))%>% 
+  mutate(analysis = "high dominant + low basket",
+         key_variable = "Value",
+         year = seq(0,30))
+
+# sum of profits
+
+npv_sc1_p <- read_csv(here("working_model","p explore","model run results files","NPV_b_price1.csv")) %>% 
+  mutate(analysis = "Low basket + high basket",
+         key_variable = "Value")
+npv_sc2_p <- read_csv(here("working_model","p explore","model run results files","NPV_b_price2.csv")) %>% 
+  mutate(analysis = "Low dominant + balanced",
+         key_variable = "Value")
+npv_sc3_p <- read_csv(here("working_model","p explore","model run results files","NPV_b_price3.csv")) %>% 
+  mutate(analysis = "High dominant + low basket",
+         key_variable = "Value")
+
+#Group them
+all_outputs_p <- rbind(output_sc1_p, output_sc2_p, output_sc3_p) %>% 
+  mutate(tot_profits = profit_per_t.t_1+profit_per_t.t_2+profit_per_t.t_3+profit_per_t.t_4+profit_per_t.t_5,
+         tot_stock=stock.s_1+stock.s_2+stock.s_3+stock.s_4+stock.s_5)
+
+NPVs_p <- rbind(npv_sc1_p, npv_sc2_p, npv_sc3_p) %>% 
+  rename(total_profit=x)
+```
+
+```{r}
+# Read files results r
+
+# data
+species_df_r <- read_csv(here("working_model","r explore","model run results files","species.csv"))
+# data
+tech_df_r <- read_csv(here("working_model","r explore","model run results files","tech_cost.csv"))
+
+# general output files
+output_sc1_r <- read_csv(here("working_model","r explore","model run results files","output_b_r1.csv")) %>% 
+  mutate(analysis = "low basket + high basket",
+         key_variable = "r",
+         year = seq(0,30))
+output_sc2_r <- read_csv(here("working_model","r explore","model run results files","output_b_r2.csv"))%>% 
+  mutate(analysis = "low dominant + balanced",
+         key_variable = "r",
+         year = seq(0,30))
+output_sc3_r <- read_csv(here("working_model","r explore","model run results files","output_b_r3.csv"))%>% 
+  mutate(analysis = "high dominant + low basket",
+         key_variable = "r",
+         year = seq(0,30))
+
+# sum of profits
+
+npv_sc1_r <- read_csv(here("working_model","r explore","model run results files","NPV_b_r1.csv")) %>% 
+  mutate(analysis = "Low basket + high basket",
+         key_variable = "r")
+npv_sc2_r <- read_csv(here("working_model","r explore","model run results files","NPV_b_r2.csv")) %>% 
+  mutate(analysis = "Low dominant + balanced",
+         key_variable = "r")
+npv_sc3_r <- read_csv(here("working_model","r explore","model run results files","NPV_b_r3.csv")) %>% 
+  mutate(analysis = "High dominant + low basket",
+         key_variable = "r")
+
+#Group them
+all_outputs_r <- rbind(output_sc1_r, output_sc2_r, output_sc3_r) %>% 
+  mutate(tot_profits = profit_per_t.t_1+profit_per_t.t_2+profit_per_t.t_3+profit_per_t.t_4+profit_per_t.t_5,
+         tot_stock=stock.s_1+stock.s_2+stock.s_3+stock.s_4+stock.s_5)
+
+NPVs_r <- rbind(npv_sc1_r, npv_sc2_r, npv_sc3_r) %>% 
+  rename(total_profit=x)
+
+```
+
+```{r}
+# global graphs of profits
+
+NPVs_all <- rbind(NPVs_p, NPVs_r, NPVs_k) %>% 
+  mutate(names = case_when(
+    analysis == "Low basket + high basket" ~ "hi/hi, lo/lo/lo<br>**All Same**",
+    analysis =="Low dominant + balanced" ~ "lo/hi, lo/lo/hi<br>**Very Different**",
+    analysis =="High dominant + low basket" ~ "lo/lo, lo/hi/hi<br>**Somewhat Different**")) %>% 
+  arrange(names) %>% 
+  mutate(number = c(3,3,3,1,1,1,2,2,2))
+
+
+
+#Graph
+
+npv_result <- 
+  
+  ggplot(data = NPVs_all, aes(x = fct_reorder(names, -number), y = total_profit)) +
+    geom_line(aes(color = key_variable, group = key_variable), linetype = "dotted") +
+    geom_point(aes(color = key_variable, fill = key_variable), size = 3, shape = 21) +
+  labs(title="Net profits for 3 distinct basket arrangements by trait",
+       y= "30 year net profits",
+       x= "Basket grouping",
+       color = "Grouping\nvariable",
+       fill = "Grouping\nvariable") +
+  scale_colour_manual(values = c("firebrick4", "orange4", "burlywood4"))+
+  scale_fill_manual(values = c("firebrick3", "orange1", "burlywood1")) +
+  scale_x_discrete(expand = c(.1,.1)) +
+  theme_bw(base_size = 12) +
+  theme(
+        strip.background = element_rect(fill="white"),
+              axis.ticks.length = unit(-0.05, "in"),
+              axis.text.y = element_text(margin=unit(c(0.3,0.3,0.3,0.3), "cm")),
+              axis.text.x = element_markdown(margin=unit(c(0.3,0.3,0.3,0.3), "cm")),
+        
+        )
+
+npv_result
+
+ggsave(plot = npv_result, filename = here("working_model", "result analysis 1", "gabe_figs", "basket_profits.png"), height = 5, width = 8)
+
+```
+
+```{r}
+# biomass
+
+all_ouputs_all <- rbind(all_outputs_k, all_outputs_p, all_outputs_r)
+
+bio_outputs <- all_ouputs_all %>% 
+  filter(year==30) %>% 
+  select(stock.s_1:stock.s_5, analysis, key_variable)
+  
+# rearrange table
+bio_outputs_arr <-  reshape(bio_outputs, 
+                            direction = "long",
+                            varying = list(names(bio_outputs)[1:5]),
+        v.names = "biomass",
+        idvar = c("analysis", "key_variable"),
+        timevar="species",
+        times = c("stock.s_1", "stock.s_2", "stock.s_3", "stock.s_4", "stock.s_5"))
+  
+bio_outputs_arr <- bio_outputs_arr %>% 
+  mutate(bkt_names = case_when(
+    analysis == "low basket + high basket" ~ "hi/hi, lo/lo/lo<br>**All Same**",
+    analysis =="low dominant + balanced" ~ "lo/hi, lo/lo/hi<br>**Very Different**",
+    analysis =="high dominant + low basket" ~ "lo/lo, lo/hi/hi<br>**Somewhat Different**"))  
+
+
+species_labs = c(stock.s_1 = "S1-low trait", stock.s_2 = "S2-low trait", stock.s_3 = "S3-low trait", stock.s_4 = "S4-high trait", stock.s_5 = "S5-high trait")
+
+#bio30_result <- 
+  
+ggplot(data = bio_outputs_arr) +
+  geom_point(alpha = 3, aes(x = species, y = biomass, color = key_variable, group = species))+
+  labs(title="Biomass (year 30) per species in 3 distinct basket arrangements by trait",
+       y= "30 year biomass",
+       x= "Tested trait")+
+  scale_colour_discrete("Basket arrangement")+
+  theme_bw()+
+  expand_limits(y = 0)+
+  facet_wrap(c(~bkt_names, ~key_variable)) + 
+             #labeller = labeller(species = species_labs))+
+  theme(text = element_text(size = 11))
+
+
+
+
+
+  # facet_grid(species ~ .) 
+  #facet_wrap(~ key_variable)
+
+bio30_result
+
+```
+
+
+```{r}
+# Graph for p
+
+all_ouputs_all_sc2 <- all_ouputs_all %>% 
+  filter(analysis=="low dominant + balanced",
+         key_variable=="Value" | key_variable=="r") %>% 
+  select(stock.s_1:stock.s_5, analysis, key_variable, year)
+
+
+#all_ouputs_sc2_arr <- reshape(all_ouputs_sc2, 
+ #                           direction = "long",
+  #                          varying = list(names(all_ouputs_sc2)[1:5]),
+   #     v.names = "biomass",
+    #    idvar = c("analysis", "key_variable", "year"),
+     #   timevar="species",
+      #  times = c("stock.s_1", "stock.s_2", "stock.s_3", "stock.s_4", "stock.s_5"))
+  
+
+ggplot(data = all_ouputs_all_sc2)+
+  geom_line(aes(y=stock.s_1, x=year))+ 
+  geom_line(aes(y=stock.s_2, x=year), color="royalblue", size=1)+ 
+  geom_line(aes(y=stock.s_4, x=year), color="red", size=1)+ 
+  labs(x= "Years",
+         y= "Stock Level (tons)")+
+  labs(title="Low dominant basket 1: 2 low traits + 1 high-trait",
+       y= "30 year biomass",
+       x= "Year")+
+  theme_bw()+
+  facet_grid(~key_variable)
+
+ggplot(data = all_ouputs_all_sc2)+
+  geom_line(aes(y=stock.s_3, x=year), color="royalblue", size=1)+ 
+  geom_line(aes(y=stock.s_5, x=year), color="red", size=1)+ 
+  labs(x= "Years",
+         y= "Stock Level (tons)")+
+  labs(title="Balanced basket 1:  low trait + 1 high-trait",
+       y= "30 year biomass",
+       x= "Year")+
+  theme_bw()+
+  facet_grid(~key_variable)
+
+```
+
+```{r}
+
+all_ouputs_sc2_p <- all_ouputs_all_sc2 %>% 
+  filter(key_variable=="Value")
+
+sc2_basket1_p <- ggplot(data = all_ouputs_sc2_p)+
+  geom_line(aes(y=stock.s_1, x=year))+ 
+  geom_line(aes(y=stock.s_2, x=year), color="royalblue", size=1)+ 
+  geom_line(aes(y=stock.s_4, x=year), color="red", size=1)+ 
+  labs(x= "Years",
+         y= "Stock Level (tons)")+
+  labs(title="2 low traits + 1 high-trait",
+       y= "30 year biomass",
+       x= "Year")+
+  annotate("text", x=25, y=41, 
+           label="p=20", size=4)+
+  annotate("text", x=25, y=14, 
+           label="p=40", size=4)+
+  theme_bw()+
+  coord_cartesian(ylim=c(0,60))
+
+sc2_basket2_p <- ggplot(data = all_ouputs_sc2_p)+
+  geom_line(aes(y=stock.s_3, x=year), color="royalblue", size=1)+ 
+  geom_line(aes(y=stock.s_5, x=year), color="red", size=1)+ 
+  labs(x= "Years",
+         y= "Stock Level (tons)")+
+  labs(title="1 low trait + 1 high-trait",
+       y= "30 year biomass",
+       x= "Year")+
+  annotate("text", x=25, y=55, 
+           label="p=20", size=4)+
+  annotate("text", x=25, y=36, 
+           label="p=40", size=4)+
+  theme_bw()+
+  coord_cartesian(ylim=c(0,60))
+
+#r
+all_ouputs_sc2_r <- all_ouputs_all_sc2 %>% 
+  filter(key_variable=="r")
+
+#r
+  
+sc2_basket1_r <- ggplot(data = all_ouputs_sc2_r)+
+  geom_line(aes(y=stock.s_1, x=year))+ 
+  geom_line(aes(y=stock.s_2, x=year), color="royalblue", size=1)+ 
+  geom_line(aes(y=stock.s_4, x=year), color="red", size=1)+ 
+  labs(x= "Years",
+         y= "Stock Level (tons)")+
+  labs(title="2 low traits + 1 high-trait",
+       y= "30 year biomass",
+       x= "Year")+
+  annotate("text", x=25, y=20, 
+           label="r=0.2", size=4)+
+  annotate("text", x=25, y=53, 
+           label="r=0.4", size=4)+
+  theme_bw()+
+  coord_cartesian(ylim=c(0,60))
+
+sc2_basket2_r <- ggplot(data = all_ouputs_sc2_r)+
+  geom_line(aes(y=stock.s_3, x=year), color="royalblue", size=1)+ 
+  geom_line(aes(y=stock.s_5, x=year), color="red", size=1)+ 
+  labs(x= "Years",
+         y= "Stock Level (tons)")+
+  labs(title="2 low traits + 1 high-trait",
+       y= "30 year biomass",
+       x= "Year")+
+  annotate("text", x=25, y=20, 
+           label="r=0.2", size=4)+
+  annotate("text", x=25, y=50, 
+           label="r=0.4", size=4)+
+  theme_bw()+
+  coord_cartesian(ylim=c(0,60))
+
+scenario2_p <- grid.arrange(sc2_basket1_p, sc2_basket2_p, ncol=2,
+                            top=textGrob("Low dominant basket for different fish value"))
+
+scenario2_p
+
+
+scenario2_r <- grid.arrange(sc2_basket1_r, sc2_basket2_r, ncol=2,
+                            top=textGrob("Low dominant basket for different fish growth"))
+
+scenario2_r
+```
+
+
+```{r}
+ggsave("npv_result.png", plot=npv_result)
+ggsave("bio30_result.png", plot=bio30_result)
+ggsave("scenario2_p.png", plot=scenario2_p)
+ggsave("scenario2_r.png", plot=scenario2_r)
+
+```
+
+```{r}
+all_ouputs_all_sc3 <- all_ouputs_all %>% 
+  filter(analysis=="high dominant + low basket",
+         key_variable=="Value" | key_variable=="r") %>% 
+  select(stock.s_1:stock.s_5, analysis, key_variable, year)
+
+
+all_ouputs_sc3_p <- all_ouputs_all_sc3 %>% 
+  filter(key_variable=="Value")
+
+sc3_basket1_p <- ggplot(data = all_ouputs_sc3_p)+
+  geom_line(aes(y=stock.s_1, x=year), color="royalblue")+ 
+  geom_line(aes(y=stock.s_4, x=year), size=1)+ 
+  geom_line(aes(y=stock.s_5, x=year), color="red", size=1)+ 
+  labs(x= "Years",
+         y= "Stock Level (tons)")+
+  labs(title="2 high traits + 1 low-trait",
+       y= "30 year biomass",
+       x= "Year")+
+  annotate("text", x=25, y=41, 
+           label="p=40", size=4)+
+  annotate("text", x=25, y=14, 
+           label="p=20", size=4)+
+  theme_bw()+
+  coord_cartesian(ylim=c(0,60))
+
+sc3_basket2_p <- ggplot(data = all_ouputs_sc3_p)+
+  geom_line(aes(y=stock.s_2, x=year), color="royalblue", size=1)+ 
+  geom_line(aes(y=stock.s_3, x=year), color="royalblue", size=1)+ 
+  labs(x= "Years",
+         y= "Stock Level (tons)")+
+  labs(title="2 low trait",
+       y= "30 year biomass",
+       x= "Year")+
+  annotate("text", x=25, y=55, 
+           label="p=40", size=4)+
+  annotate("text", x=25, y=36, 
+           label="p=20", size=4)+
+  theme_bw()+
+  coord_cartesian(ylim=c(0,60))
+
+sc3_basket1_p 
+sc3_basket2_p
+
+
+```
+
+```{r}
+all_ouputs_sc3_r <- all_ouputs_all_sc3 %>% 
+  filter(key_variable=="r")
+
+sc3_basket1_r <- ggplot(data = all_ouputs_sc3_r)+
+  geom_line(aes(y=stock.s_1, x=year), color="royalblue")+ 
+  geom_line(aes(y=stock.s_4, x=year), size=1)+ 
+  geom_line(aes(y=stock.s_5, x=year), color="red", size=1)+ 
+  labs(x= "Years",
+         y= "Stock Level (tons)")+
+  labs(title="2 high traits + 1 low-trait",
+       y= "30 year biomass",
+       x= "Year")+
+  annotate("text", x=25, y=41, 
+           label="p=40", size=4)+
+  annotate("text", x=25, y=14, 
+           label="p=20", size=4)+
+  theme_bw()+
+  coord_cartesian(ylim=c(0,60))
+
+sc3_basket2_r <- ggplot(data = all_ouputs_sc3_r)+
+  geom_line(aes(y=stock.s_2, x=year), color="royalblue", size=1)+ 
+  geom_line(aes(y=stock.s_3, x=year), color="royalblue", size=1)+ 
+  labs(x= "Years",
+         y= "Stock Level (tons)")+
+  labs(title="2 low trait",
+       y= "30 year biomass",
+       x= "Year")+
+  annotate("text", x=25, y=55, 
+           label="p=40", size=4)+
+  annotate("text", x=25, y=36, 
+           label="p=20", size=4)+
+  theme_bw()+
+  coord_cartesian(ylim=c(0,60))
+
+sc3_basket1_r 
+sc3_basket2_r
+```
+
+
+```{r}
+all_ouputs_all_sc3_e <- all_ouputs_all %>% 
+  filter(analysis=="high dominant + low basket",
+         key_variable=="Value" | key_variable=="r") %>% 
+  select(effort.t_1:effort.t_5, analysis, key_variable, year)
+
+
+all_ouputs_sc3_p_e <- all_ouputs_all_sc3_e %>% 
+  filter(key_variable=="Value")
+
+sc3_basket1_p_e <- ggplot(data = all_ouputs_sc3_p_e)+
+  geom_line(aes(y=effort.t_1, x=year), color="royalblue")+ 
+  geom_line(aes(y=effort.t_4, x=year), size=1)+ 
+  geom_line(aes(y=effort.t_5, x=year), color="red", size=1)+ 
+  labs(x= "Years",
+         y= "Stock Level (tons)")+
+  labs(title="2 high traits + 1 low-trait",
+       y= "30 year biomass",
+       x= "Year")
+  theme_bw()
+
+sc3_basket2_p_e <- ggplot(data = all_ouputs_sc3_p_e)+
+  geom_line(aes(y=effort.t_2, x=year), color="royalblue", size=1)+ 
+  geom_line(aes(y=effort.t_2, x=year), color="royalblue", size=1)+ 
+  labs(x= "Years",
+         y= "Stock Level (tons)")+
+  labs(title="2 low trait",
+       y= "30 year biomass",
+       x= "Year")
+  theme_bw()
+
+sc3_basket1_p_e 
+sc3_basket2_p_e
+```
+
+```{r}
+all_ouputs_sc3_r_e <- all_ouputs_all_sc3_e %>% 
+  filter(key_variable=="r")
+
+sc3_basket1_r_e <- ggplot(data = all_ouputs_sc3_r_e)+
+  geom_line(aes(y=effort.t_1, x=year), color="royalblue")+ 
+  geom_line(aes(y=effort.t_4, x=year), size=1)+ 
+  geom_line(aes(y=effort.t_5, x=year), color="red", size=1)+ 
+  labs(x= "Years",
+         y= "Stock Level (tons)")+
+  labs(title="2 high traits + 1 low-trait",
+       y= "30 year biomass",
+       x= "Year")
+  theme_bw()
+
+sc3_basket2_r_e <- ggplot(data = all_ouputs_sc3_r_e)+
+  geom_line(aes(y=effort.t_2, x=year), color="royalblue", size=1)+ 
+  geom_line(aes(y=effort.t_2, x=year), color="royalblue", size=1)+ 
+  labs(x= "Years",
+         y= "Stock Level (tons)")+
+  labs(title="2 low trait",
+       y= "30 year biomass",
+       x= "Year")
+  theme_bw()
+
+sc3_basket1_r_e 
+sc3_basket2_r_e
+```
+

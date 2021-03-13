@@ -79,8 +79,8 @@ kbl(species_df, escape = F, caption = "Species Parameters for baskets based on p
    kable_classic(full_width = F) %>% 
    column_spec(6, color = c("pink", "pink", "pink", "lightblue", "lightblue")) %>% 
    column_spec(7, color = c("pink", "pink", "lightblue", "pink", "lightblue")) %>% 
-   column_spec(8, color = c("pink", "lightblue", "lightblue", "pink", "lightblue")) %>% 
-   add_header_above(c(" " = 5,"Basket grouping" = 3))
+   column_spec(8, color = c("pink", "lightblue", "lightblue", "pink", "pink")) %>% 
+   add_header_above(c(" " = 5,"Basket grouping" = 3)) %>% 
    save_kable(file = here("working_model", "scratch", "optim", "plots", "price_sp_params.png"), zoom = 2)
 
 
