@@ -20,21 +20,23 @@ render_model = function(species_p1,
   )
 }
 
-render_model_ident = function(species_p1, species_p2, species_p3, species_p4, species_p5) {
+render_model_ident = function(species_p1, #species_p2, 
+                              species_p3, species_p4, species_p5) {
   rmarkdown::render(
-    input = "working_model/price and cost explore/model_identical_price.Rmd", # What's the input file to render?
-    params = list(species_p1=species_p1, species_p2=species_p2, species_p3=species_p3, species_p4=species_p4,
-                  #species_p5=species_p5
+    input = "C:/Users/kleigh/OneDrive/Documents/UCSB/quotabasket_model/working_model/4spec_model_identical_price.Rmd", # What's the input file to render?
+    params = list(species_p1=species_p1, #species_p2=species_p2, 
+                  species_p3=species_p3, species_p4=species_p4,species_p5=species_p5
                   ), # What are the parameters?
-    output_file = paste0("runs_", species_p1, species_p2, species_p3, species_p4, species_p5, "_mix .html") # What should I name the output file?
+    output_file = paste0("4spec_identruns_", species_p1, #species_p2, 
+                         species_p3, species_p4, species_p5, "_mix .html") # What should I name the output file?
   )
 }
 
-species_p1 = 20
-#species_p2 = 20
-species_p3 = 20
-species_p4 = 30
-species_p5 = 30
+species_p1 = 1
+#species_p2 = 1
+species_p3 = 1
+species_p4 = 1
+species_p5 = 40
 
 species_p <- as.vector(c(species_p1,
                          #species_p2,
@@ -44,7 +46,7 @@ possible_scenarios <- permutations(n=4,r=4,species_p,set=FALSE)
 
  for (i in 1:nrow(uniqu_poss_scen)){
    
-   render_model(uniqu_poss_scen[i,1], uniqu_poss_scen[i,2], uniqu_poss_scen[i,3], uniqu_poss_scen[i,4]
+   render_model_ident(uniqu_poss_scen[i,1], uniqu_poss_scen[i,2], uniqu_poss_scen[i,3], uniqu_poss_scen[i,4]
                 #, uniqu_poss_scen[i,5]
                 )
    
@@ -52,5 +54,7 @@ possible_scenarios <- permutations(n=4,r=4,species_p,set=FALSE)
 
 uniqu_poss_scen <- possible_scenarios %>% 
   unique()
+
+library(tidyverse)
 
 ```
