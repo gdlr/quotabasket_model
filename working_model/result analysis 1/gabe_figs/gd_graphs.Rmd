@@ -321,7 +321,7 @@ species_result <- ggplot(data = stock_names) +
 
 species_result
 
-ggsave(plot = species_result, filename = here("working_model", "result analysis 1", "gabe_figs", "basket_biomass.png"), height = 5, width = 8)
+ggsave(plot = species_result, filename = here("working_model", "result analysis 1", "gabe_figs", "basket_biomass.pdf"), height = 5, width = 8)
 
 
 
