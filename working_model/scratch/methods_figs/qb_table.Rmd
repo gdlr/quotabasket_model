@@ -1,0 +1,46 @@
+---
+title: "qb_examples_table"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+library(tidyverse)
+library(here)
+library(kableExtra)
+library(gt)
+```
+
+```{r}
+baskets <- read_csv(here("working_model", "scratch", "qb_examples_table", "bkt_combos_wNA.csv"), skip = 3, col_names = TRUE) 
+```
+
+```{r}
+
+gt_baskets <- baskets %>% 
+  mutate(groupname = Type) %>% 
+  mutate(rowname = Grouping) %>% 
+  select(groupname, rowname, Benefits, Drawbacks, `Real World Examples`)
+
+
+kbl(baskets) %>% 
+  kable_classic() %>% 
+  collapse_rows(columns = c(1,2), valign = "top", latex_hline = "full") %>% 
+  row_spec(1, extra_latex_after = "\\cline{3-5}") %>% 
+  save_kable(file = here("working_model", "scratch", "qb_examples_table", "full_table.png"), zoom = 3)
+
+#%>% 
+  # pack_rows("Ecology",1,15) %>% 
+  #   pack_rows("Trophic Level", 1, 3) %>% 
+  #   pack_rows("Size", 4, 6) %>% 
+  #   pack_rows("Functional Group", 7,8) %>% 
+  #   pack_rows("Status", 9, 20)
+  # pack_rows("Price", 16, 27) %>% 
+  # pack_rows("Behavior", 26, 37)
+
+
+gt(gt_baskets) 
+```
+
+

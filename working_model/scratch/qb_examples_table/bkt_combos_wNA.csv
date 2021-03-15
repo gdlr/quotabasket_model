@@ -1,0 +1,41 @@
+,,,,
+,,,,
+,,,,
+Type,Grouping,Benefits,Drawbacks,Real World Examples
+Ecology,Trophic level,Ecosystem representation,Hard to measure,-
+Ecology,Trophic level,potential for increased productivity,Hard to enforce,-
+Ecology,Trophic level,-,Hard to understand,-
+Ecology,Size,Protect important life stages,Targeting of juveniles,Minimum length
+Ecology,Size,Easy to measure and enforce,Demographic instability,Minimum mesh
+Ecology,Size,Represents some fishing dynamics (mesh sizes),-,Maximum length
+Ecology,Functional Group,Maintains ecoststem balance,Information intensive,-
+Ecology,Functional Group,Fishing similar to status quo,"Hard to manage, understand",-
+Ecology,Status,Protects overexploited species,Need some stock knowledge,-
+Ecology,Status,Does not require a full stock assessment,High impact to status quo fishing,-
+Ecology,Growth Rate,Indicator of explotability,Need some knowledge,-
+Ecology,Growth Rate,-,Wrong estimates lead to poor outcomes,-
+Ecology,Life History,Incorporates species susceptibility,Information intensive,-
+Ecology,Life History,Closer to optimal yeild?,Hard to understand,-
+Ecology,Life History,Reduces risk of overfishing,Poor information leads to unintended outcomes,-
+Price,-,-,-,-
+Price,-,-,-,-
+Price,-,-,-,-
+Price,-,-,-,-
+Price,-,-,-,-
+Price,-,-,-,-
+Price,-,-,-,-
+Price,-,-,-,-
+Price,-,-,-,-
+Price,-,-,-,-
+Fisher's behavior,Territory,Exclusive rights to fish,Fish are migratory,TURF's
+Fisher's behavior,Territory,Empower local communities,Not flexible if certain areas are degraded,-
+Fisher's behavior,Territory,Create protected or low-take areas,High enforcement costs,-
+Fisher's behavior,Territory,,High social information requirements,-
+Fisher's behavior,Time,"Low monitoring, enforcement costs","""Race to fish"" when season is open",China's summer moratorium
+Fisher's behavior,Time,"Many species, simple quota",Some fish are more susceptible in season than others,Fishery seasons
+Fisher's behavior,Time,Effort limits lead to harvest reductions,-,-
+Fisher's behavior,Fishing gear,Align baskets with fishing practices,"Encourages ""highgrading"", does not represent market",-
+Fisher's behavior,Fishing gear,"Bycatch is a target species, counts against main quota",High exit costs if quota is hit too soon,-
+Fisher's behavior,Fishing gear,-,May force technology transition,-
+Fisher's behavior,Risk,Maximize returns,High information cost,Portfolio theory
+Fisher's behavior,Risk,"Reduce variability in stocks, profits",Hard to communicate,-
