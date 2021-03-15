@@ -17,6 +17,8 @@ library(kableExtra)
 library(ggtext)
 ```
 
+# Read in K files:
+
 ```{r}
 # Read files results of K
 
@@ -26,48 +28,77 @@ species_df_k <- read_csv(here("working_model","k explore","model run results fil
 tech_df_k <- read_csv(here("working_model","k explore","model run results files","tech_cost.csv"))
 
 # general output files
-output_sc1_k <- read_csv(here("working_model","k explore","model run results files","output_b_carry1.csv")) %>% 
+output_sc1_k <- read_csv(here("working_model","k explore","model run results files","output_b_carry1.csv")) %>%
   mutate(analysis = "low basket + high basket",
          key_variable = "K",
          year = seq(0,30))
-output_sc2_k <- read_csv(here("working_model","k explore","model run results files","output_b_carry2.csv"))%>% 
+output_sc2_k <- read_csv(here("working_model","k explore","model run results files","output_b_carry2.csv"))%>%
   mutate(analysis = "low dominant + balanced",
          key_variable = "K",
          year = seq(0,30))
-output_sc3_k <- read_csv(here("working_model","k explore","model run results files","output_b_carry3.csv"))%>% 
+output_sc3_k <- read_csv(here("working_model","k explore","model run results files","output_b_carry3.csv"))%>%
   mutate(analysis = "high dominant + low basket",
          key_variable = "K",
          year = seq(0,30))
 
 # sum of profits
 
-npv_sc1_k <- read_csv(here("working_model","k explore","model run results files","NPV_b_carry1.csv")) %>% 
+ npv_sc1_k <- read_csv(here("working_model","k explore","model run results files","NPV_b_carry1.csv")) %>%
   mutate(analysis = "Low basket + high basket",
          key_variable = "K")
-npv_sc2_k <- read_csv(here("working_model","k explore","model run results files","NPV_b_carry2.csv")) %>% 
+npv_sc2_k <- read_csv(here("working_model","k explore","model run results files","NPV_b_carry2.csv")) %>%
   mutate(analysis = "Low dominant + balanced",
          key_variable = "K")
-npv_sc3_k <- read_csv(here("working_model","k explore","model run results files","NPV_b_carry3.csv")) %>% 
+npv_sc3_k <- read_csv(here("working_model","k explore","model run results files","NPV_b_carry3.csv")) %>%
   mutate(analysis = "High dominant + low basket",
          key_variable = "K")
 
 #Group them
-all_outputs_k <- rbind(output_sc1_k, output_sc2_k, output_sc3_k) %>% 
+all_outputs_k <- rbind(output_sc1_k, output_sc2_k, output_sc3_k) %>%
   mutate(tot_profits = profit_per_t.t_1+profit_per_t.t_2+profit_per_t.t_3+profit_per_t.t_4+profit_per_t.t_5,
          tot_stock=stock.s_1+stock.s_2+stock.s_3+stock.s_4+stock.s_5)
 
-NPVs_k <- rbind(npv_sc1_k, npv_sc2_k, npv_sc3_k) %>% 
+NPVs_k <- rbind(npv_sc1_k, npv_sc2_k, npv_sc3_k) %>%
   rename(total_profit=x)
 
 ```
+
+# Read in X files:
+
+```{r}
+# This works for stock levels but not profits
+x_group <- read_csv(here("working_model", "result analysis 1", "gabe_figs", "data", "by_X.csv"))
+
+x_prof <- read_csv(here("working_model", "result analysis 1", "gabe_figs", "data", "x_tot_profits.csv"))
+# Reformat so that this works with the rest of the code
+colnames(x_prof) <- c("analysis", "total_profit")
+
+x_prof_names <- x_prof %>% 
+  mutate(key_variable = "X") %>% 
+  mutate(analysis = case_when(
+    analysis == "Scenario 1" ~ "Low basket + high basket",
+    analysis == "Scenario 2" ~ "Low dominant + balanced",
+    analysis == "Scenario 3" ~ "High dominant + low basket",
+  )) %>% 
+  select(total_profit, analysis, key_variable)
+
+
+```
+
+# run, year, stock, group
+
+
+### Read in value files:
 
 ```{r}
 # Read files results value
 
 # data
 species_df_p <- read_csv(here("working_model","p explore","model run results files","species.csv"))
+
+
 # data
-tech_df_p <- read_csv(here("working_model","p explore","model run results files","tech_cost.csv"))
+# tech_df_p <- read_csv(here("working_model","p explore","model run results files","tech_cost.csv"))
 
 # general output files
 output_sc1_p <- read_csv(here("working_model","p explore","model run results files","output_b_price1.csv")) %>% 
@@ -103,6 +134,9 @@ all_outputs_p <- rbind(output_sc1_p, output_sc2_p, output_sc3_p) %>%
 NPVs_p <- rbind(npv_sc1_p, npv_sc2_p, npv_sc3_p) %>% 
   rename(total_profit=x)
 ```
+
+
+# Read in r values:
 
 ```{r}
 # Read files results r
@@ -148,16 +182,18 @@ NPVs_r <- rbind(npv_sc1_r, npv_sc2_r, npv_sc3_r) %>%
 
 ```
 
+# Graph them all
+
 ```{r}
 # global graphs of profits
 
-NPVs_all <- rbind(NPVs_p, NPVs_r, NPVs_k) %>% 
+NPVs_all <- rbind(NPVs_p, NPVs_r, NPVs_k, x_prof_names) %>% 
   mutate(names = case_when(
     analysis == "Low basket + high basket" ~ "hi/hi, lo/lo/lo<br>**All Same**",
     analysis =="Low dominant + balanced" ~ "lo/hi, lo/lo/hi<br>**Very Different**",
     analysis =="High dominant + low basket" ~ "lo/lo, lo/hi/hi<br>**Somewhat Different**")) %>% 
   arrange(names) %>% 
-  mutate(number = c(3,3,3,1,1,1,2,2,2))
+  mutate(number = c(3,3,3, 3,1,1,1, 1,2,2,2, 2))
 
 
 
@@ -173,8 +209,8 @@ npv_result <-
        x= "Basket grouping",
        color = "Grouping\nvariable",
        fill = "Grouping\nvariable") +
-  scale_colour_manual(values = c("firebrick4", "orange4", "burlywood4"))+
-  scale_fill_manual(values = c("firebrick3", "orange1", "burlywood1")) +
+  scale_colour_manual(values = c("firebrick4", "orange4", "burlywood4", "darkgreen"))+
+  scale_fill_manual(values = c("firebrick3", "orange1", "burlywood1", "forestgreen")) +
   scale_x_discrete(expand = c(.1,.1)) +
   theme_bw(base_size = 12) +
   theme(
@@ -191,6 +227,7 @@ ggsave(plot = npv_result, filename = here("working_model", "result analysis 1", 
 
 ```
 
+
 ```{r}
 # biomass
 
@@ -199,38 +236,92 @@ all_ouputs_all <- rbind(all_outputs_k, all_outputs_p, all_outputs_r)
 bio_outputs <- all_ouputs_all %>% 
   filter(year==30) %>% 
   select(stock.s_1:stock.s_5, analysis, key_variable)
+
+colnames(bio_outputs) <- c("s1", "s2", "s3", "s4", "s5", "run", "group")
+ 
+bio_pivot <- bio_outputs %>% 
+  pivot_longer(cols = 1:5,
+               names_to = "name",
+               values_to = "stock") %>% 
+  select(-year)
+
+x_new <- x_group %>% 
+  mutate(run = case_when(
+    run == "Scenario 1" ~ "low basket + high basket",
+    run == "Scenario 2" ~ "low dominant + balanced",
+    run == "Scenario 3" ~ "high dominant + low basket",
+  )) %>% 
+  select(-year)
+
+stock_graph <- rbind(bio_pivot, x_new)
+
+x_prof_names
   
 # rearrange table
-bio_outputs_arr <-  reshape(bio_outputs, 
-                            direction = "long",
-                            varying = list(names(bio_outputs)[1:5]),
-        v.names = "biomass",
-        idvar = c("analysis", "key_variable"),
-        timevar="species",
-        times = c("stock.s_1", "stock.s_2", "stock.s_3", "stock.s_4", "stock.s_5"))
-  
-bio_outputs_arr <- bio_outputs_arr %>% 
-  mutate(bkt_names = case_when(
-    analysis == "low basket + high basket" ~ "hi/hi, lo/lo/lo<br>**All Same**",
-    analysis =="low dominant + balanced" ~ "lo/hi, lo/lo/hi<br>**Very Different**",
-    analysis =="high dominant + low basket" ~ "lo/lo, lo/hi/hi<br>**Somewhat Different**"))  
-
-
-species_labs = c(stock.s_1 = "S1-low trait", stock.s_2 = "S2-low trait", stock.s_3 = "S3-low trait", stock.s_4 = "S4-high trait", stock.s_5 = "S5-high trait")
+# bio_outputs_arr <-  reshape(bio_outputs, 
+#                             direction = "long",
+#                             varying = list(names(bio_outputs)[1:5]),
+#         v.names = "biomass",
+#         idvar = c("analysis", "key_variable"),
+#         timevar="species",
+#         times = c("stock.s_1", "stock.s_2", "stock.s_3", "stock.s_4", "stock.s_5"))
+#   
+# bio_outputs_arr <- bio_outputs_arr %>% 
+#   mutate(bkt_names = case_when(
+#     analysis == "low basket + high basket" ~ "hi/hi, lo/lo/lo<br>**All Same**",
+#     analysis =="low dominant + balanced" ~ "lo/hi, lo/lo/hi<br>**Very Different**",
+#     analysis =="high dominant + low basket" ~ "lo/lo, lo/hi/hi<br>**Somewhat Different**"))  
+# 
+# 
+# species_labs = c(stock.s_1 = "S1-low trait", stock.s_2 = "S2-low trait", stock.s_3 = "S3-low trait", stock.s_4 = "S4-high trait", stock.s_5 = "S5-high trait")
 
 #bio30_result <- 
+
+
+stock_names <- stock_graph %>% 
+  mutate(run = case_when(
+    run == "low basket + high basket" ~ "hi/hi, lo/lo/lo\nAll Same",
+    run =="low dominant + balanced" ~ "lo/hi, lo/lo/hi\nVery Different",
+    run =="high dominant + low basket" ~ "lo/lo, lo/hi/hi\nSomewhat Different")) %>% 
+  arrange(run) %>% 
+  filter(group != "x") %>% 
+  mutate(rank = case_when(
+    run =="hi/hi, lo/lo/lo\nAll Same" ~ 1,
+    run =="lo/hi, lo/lo/hi\nVery Different" ~ 3,
+    run =="lo/lo, lo/hi/hi\nSomewhat Different" ~ 2))
   
-ggplot(data = bio_outputs_arr) +
-  geom_point(alpha = 3, aes(x = species, y = biomass, color = key_variable, group = species))+
+```
+
+```{r}
+species_result <- ggplot(data = stock_names) +
+  geom_point(alpha = 1, 
+             size =3,
+             shape = 21,
+             aes(x = name, y = stock, color = group, group = name, fill = group))+
   labs(title="Biomass (year 30) per species in 3 distinct basket arrangements by trait",
-       y= "30 year biomass",
-       x= "Tested trait")+
+       y= "Year 30 biomass",
+       x= "Species",
+       color = "Grouping\nvariable",
+       fill = "Grouping\nvariable")+
   scale_colour_discrete("Basket arrangement")+
-  theme_bw()+
   expand_limits(y = 0)+
-  facet_wrap(c(~bkt_names, ~key_variable)) + 
-             #labeller = labeller(species = species_labs))+
-  theme(text = element_text(size = 11))
+  facet_wrap(c(~fct_reorder(run, rank))) + 
+  scale_colour_manual(values = c("firebrick4", "orange4", "burlywood4")) +
+  scale_fill_manual(values = c("firebrick3", "orange1", "burlywood1")) +
+  theme_bw(base_size = 12) +
+  scale_y_continuous(expand = c(0,0),
+                     limits = c(0, 140)) +
+  theme(
+        strip.background = element_rect(fill="white"),
+              axis.ticks.length = unit(-0.05, "in"),
+              axis.text.y = element_text(margin=unit(c(0.3,0.3,0.3,0.3), "cm")),
+              axis.text.x = element_markdown(margin=unit(c(0.3,0.3,0.3,0.3), "cm")),
+        
+        )
+
+species_result
+
+ggsave(plot = species_result, filename = here("working_model", "result analysis 1", "gabe_figs", "basket_biomass.png"), height = 5, width = 8)
 
 
 

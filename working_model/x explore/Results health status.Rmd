@@ -20,29 +20,29 @@ library(kableExtra)
 # Read files results
 
 # data
-species_df <- read_csv(here("working_model","health status explore","model run results files","species.csv"))
+species_df <- read_csv(here("working_model","x explore","species.csv"))
 # data
-tech_df <- read_csv(here("working_model","health status explore","model run results files","tech_cost.csv"))
+tech_df <- read_csv(here("working_model","x explore","tech_cost.csv"))
 
 
 # general output files
-output_sc1 <- read_csv(here("working_model","health status explore","model run results files","output_b_overfish1.csv")) %>% 
+output_sc1 <- read_csv(here("working_model","x explore","model run results files","output_b_x1.csv")) %>% 
   mutate(run = "Scenario 1",
          year = seq(0,30))
-output_sc2 <- read_csv(here("working_model","health status explore","model run results files","output_b_overfish2.csv"))%>% 
+output_sc2 <- read_csv(here("working_model","x explore","model run results files","output_b_x2.csv"))%>% 
   mutate(run = "Scenario 2",
          year = seq(0,30))
-output_sc3 <- read_csv(here("working_model","health status explore","model run results files","output_b_overfish3.csv"))%>% 
+output_sc3 <- read_csv(here("working_model","x explore","model run results files","output_b_x3.csv"))%>% 
   mutate(run = "Scenario 3",
          year = seq(0,30))
 
 # sum of profits
 
-npv_sc1 <- read_csv(here("working_model","health status explore","model run results files","NPV_b_overfish1.csv")) %>% 
+npv_sc1 <- read_csv(here("working_model","x explore","model run results files","NPV_b_x1.csv")) %>% 
   mutate(run = "Scenario 1")
-npv_sc2 <- read_csv(here("working_model","health status explore","model run results files","NPV_b_overfish2.csv")) %>% 
+npv_sc2 <- read_csv(here("working_model","x explore","model run results files","NPV_b_x2.csv")) %>% 
   mutate(run = "Scenario 2")
-npv_sc3 <- read_csv(here("working_model","health status explore","model run results files","NPV_b_overfish3.csv")) %>% 
+npv_sc3 <- read_csv(here("working_model","x explore","model run results files","NPV_b_x3.csv")) %>% 
   mutate(run = "Scenario 3")
 
 #Group them
@@ -230,7 +230,31 @@ ggplot(data = all_outputs)+
          y= "Profit (dollars)")+
   facet_wrap(~ run, nrow=2)
 
+
+stock_df <- all_outputs %>% 
+  select(stock.s_1:stock.s_5, run, year) 
+
+colnames(stock_df) <- c("s1", "s2", "s3", "s4", "s5", "run", "year")
+
+stock_longer <- stock_df %>% 
+  pivot_longer(cols = 1:5,
+               names_to = "name",
+               values_to = "stock") %>% 
+  filter(year == 30) %>% 
+  mutate(group = "x")
+
+profit_df <- all_outputs %>% 
+  select(run, year, tot_profits) %>% 
+  group_by(run) %>% 
+  summarize(profits = sum(tot_profits, na.rm = TRUE))
+
+
+#write_csv(stock_longer, here("working_model", "result analysis 1", "gabe_figs", "data", "by_X.csv"))
+#write_csv(profit_df, here("working_model", "result analysis 1", "gabe_figs", "data", "x_tot_profits.csv"))
 ```
+
+
+
 ```{r}
 # Graph
 p_1gr <- ggplot(data = all_outputs, aes(y=profit_per_t.t_1, x=year, group=run, color=run))+
