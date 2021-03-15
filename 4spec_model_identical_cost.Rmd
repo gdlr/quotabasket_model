@@ -1,14 +1,14 @@
 ---
-title: "default price runs"
+title: "ident cost runs"
 author: "Kat Leigh"
 date: "2/26/2021"
 output: html_document
 params:
-  species_p1: 20
-  #species_p2: 30
-  species_p3: 20
-  species_p4: 20
-  species_p5: 20
+  species_c1: 30
+  #species_c2: 30
+  species_c3: 30
+  species_c4: 20
+  species_c5: 20
 ---
 
 ```{r setup, include=FALSE}
@@ -53,30 +53,30 @@ run this entire document for each scenario you want to test
 # Species:
 # s = species, r, K, X, p
 
-s1 <- c(s=1, r=0.15, K=100, X=50, p=params$species_p1) 
-#s2 <- c(s=2, r=0.2, K=100, X=50, p=params$species_p2)
-s3 <- c(s=3, r=0.2, K=100, X=50, p=params$species_p3)
-s4 <- c(s=4, r=0.3, K=100, X=50, p=params$species_p4)
-s5 <- c(s=5, r=0.4, K=100, X=50, p=params$species_p5)
+s1 <- c(s=1, r=0.2, K=100, X=50, p=20) 
+#s2 <- c(s=2, r=0.2, K=100, X=50, p=20)
+s3 <- c(s=3, r=0.2, K=100, X=50, p=20)
+s4 <- c(s=4, r=0.2, K=100, X=50, p=20)
+s5 <- c(s=5, r=0.2, K=100, X=50, p=20)
 
 # t = tech, q1 = catchability species 1, q2 = catchability species 2...
 
-t1 <- c(t=1, q1=0.04#, q2=0.01
-        , q3=0.01, q4=0.01, q5 = 0.01)
-#t2 <- c(t=2, q1=0.01#, q2=0.04, q3=0.01, q4=0.01, q5 = 0.01)
-t3 <- c(t=2, q1=0.01#, q2=0.01
-        , q3=0.04, q4=0.01, q5 = 0.01)
-t4 <- c(t=2, q1=0.01#, q2=0.01
-        , q3=0.01, q4=0.04, q5 = 0.01)
-t5 <- c(t=2, q1=0.01#, q2=0.01
-        , q3=0.01, q4=0.01, q5 = 0.04)
+t1 <- c(t=1, q1=0.04#, q2=0.04
+        , q3=0.04, q4=0.04, q5 = 0.04)
+#t2 <- c(t=2, q1=0.04#, q2=0.04, q3=0.04, q4=0.04, q5 = 0.04)
+t3 <- c(t=2, q1=0.04#, q2=0.04
+        , q3=0.04, q4=0.04, q5 = 0.04)
+t4 <- c(t=2, q1=0.04#, q2=0.04
+        , q3=0.04, q4=0.04, q5 = 0.04)
+t5 <- c(t=2, q1=0.04#, q2=0.04
+        , q3=0.04, q4=0.04, q5 = 0.04)
 
 # Tech cost: t = tech, cost = cost per unit effort
-c1 <- c(t=1, cost=1)
-#c2 <- c(t=2, cost=1)
-c3 <- c(t=3, cost=1)
-c4 <- c(t=4, cost=1)
-c5 <- c(t=5, cost=1)
+c1 <- c(t=1, cost=params$species_c1)
+#c2 <- c(t=2, cost=params$species_c2)
+c3 <- c(t=3, cost=params$species_c3)
+c4 <- c(t=4, cost=params$species_c4)
+c5 <- c(t=5, cost=params$species_c5)
 
 # Baskets: binary matrix of # species x # baskets, where 1 means that species is in that basket
 
@@ -182,10 +182,11 @@ optimals <- rbind(optimal_basket_av_pft, optimal_basket_NPV, optimal_basket_stoc
 # this is designed to automatically extract the 3 optimal basket arrangements as well as their summary info. just change the file name for each run!
 
 path_store <- "C:/Users/kleigh/OneDrive/Documents/UCSB/quotabasket_model/working_model/price and cost explore/"
-  csvname <- paste(s1[5],#".",s2[5],
-                   ".",s3[5],".",s4[5],".",s5[5],".csv",sep="")
-  csvfile <- paste(path_store, "4spec_opt_NPV_uni_def", csvname, sep="")
+  csvname <- paste(c1[2],#".",s2[2],
+                   ".",c3[2],".",c4[2],".",c5[2],".csv",sep="")
+  csvfile <- paste(path_store, "4spec_opt_NPV_ident_c", csvname, sep="")
   write.table(get(str_split(optimal_basket_NPV$basket, pattern = "_")[[1]][2]),csvfile, row.names=FALSE, sep=",")
+  
   
 # path_store <- "C:/Users/kleigh/OneDrive/Documents/UCSB/quotabasket_model/working_model/price and cost explore/"
 #   csvname <- paste(s1[5],".",s2[5],".",s3[5],".",s4[5],".",s5[5],".csv",sep="")
