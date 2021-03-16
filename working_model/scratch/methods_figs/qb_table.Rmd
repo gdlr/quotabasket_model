@@ -13,7 +13,7 @@ library(gt)
 ```
 
 ```{r}
-baskets <- read_csv(here("working_model", "scratch", "qb_examples_table", "bkt_combos_wNA.csv"), skip = 3, col_names = TRUE) 
+baskets <- read_csv(here("working_model", "scratch", "qb_examples_table", "bkt_combos.csv"), skip = 3, col_names = TRUE) 
 ```
 
 ```{r}
@@ -24,7 +24,7 @@ gt_baskets <- baskets %>%
   select(groupname, rowname, Benefits, Drawbacks, `Real World Examples`)
 
 
-kbl(baskets) %>% 
+kbl(baskets, caption = "Example basket grouping") %>% 
   kable_classic() %>% 
   collapse_rows(columns = c(1,2), valign = "top", latex_hline = "full") %>% 
   row_spec(1, extra_latex_after = "\\cline{3-5}") %>% 
