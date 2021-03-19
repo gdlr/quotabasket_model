@@ -18,6 +18,8 @@ library(ggtext)
 ```
 
 ```{r}
+# run this
+
 mult_df_k <- read_csv(here("working_model","multiple runs","results","mult_k.csv")) %>% 
   mutate(key_variable="K")
 mult_df_r <- read_csv(here("working_model","multiple runs","results","mult_r.csv"))%>% 
@@ -26,6 +28,37 @@ mult_df_p <- read_csv(here("working_model","multiple runs","results","mult_p.csv
   mutate(key_variable="Value")
 mult_df_x <- read_csv(here("working_model","multiple runs","results","mult_x.csv"))%>% 
   mutate(key_variable="x")
+
+# I used this file that i externally created with the data of the mult_R
+
+case_r <- read_csv(here("working_model","multiple runs","results","case_r.csv"))%>% 
+  mutate(key_variable="r")
+
+mult_r2 <-  reshape(case_r, 
+                            direction = "long",
+                            varying = list(names(case_r)[9:11]),
+        v.names = "Combination",
+        idvar = c("sc2","sc1"),
+        timevar="analysis",
+        times = c("All_same", "Very_different", "Somewhat_different"))
+
+mult_r2g <- ggplot(data = mult_r2, aes(x = param1, y = Combination)) +
+    geom_line(alpha = 3, aes(color = analysis), size=1)+
+  labs(title="Extra net profits over the lowest profit basket",
+       y= "30 years net profits",
+       x= "Growth rait for low trait species")+
+  scale_colour_discrete("Basket arrangement")+
+  theme_bw() +
+  theme(text = element_text(size = 12))
+
+ggsave("mult_r2g.png", plot=mult_r2g)
+
+
+```
+
+
+```{r}
+# not used code
 
 # join
 NPVs_df_all <- rbind(mult_df_k, mult_df_r, mult_df_p, mult_df_x) %>% 
@@ -58,14 +91,15 @@ NVPs_df_all_clean <- NPVs_df_all_arr%>%
 
 ```{r}
 
+# not used code! dont run
+
 mult_k <- ggplot(data = mult_df_k)+
   geom_line(aes(y=sc1, x=param1), color="red")+ 
   geom_line(aes(y=sc2, x=param2), color="blue")+ 
   geom_line(aes(y=sc3, x=param3), color="black")+ 
   theme_minimal()+
   labs(x= "Carrying capacity for low trait",
-         y= "30 year profits")+
-  facet_wrap(~ key_variable, nrow=3)
+         y= "30 year profits")
 
 mult_r <-ggplot(data = mult_df_r)+
   geom_line(aes(y=sc1, x=param1), color="red")+ 
@@ -73,8 +107,7 @@ mult_r <-ggplot(data = mult_df_r)+
   geom_line(aes(y=sc3, x=param3), color="black")+ 
   theme_minimal()+
   labs(x= "Intrinsic growth for low trait",
-         y= "30 year profits")+
-  facet_wrap(~ key_variable, nrow=3)
+         y= "30 year profits")
 
 mult_p <-ggplot(data = mult_df_p)+
   geom_line(aes(y=sc1, x=param1), color="red")+ 
@@ -82,8 +115,7 @@ mult_p <-ggplot(data = mult_df_p)+
   geom_line(aes(y=sc3, x=param3), color="black")+ 
   theme_minimal()+
   labs(x= "Price for low trait",
-         y= "30 year profits")+
-  facet_wrap(~ key_variable, nrow=3)
+         y= "30 year profits")
 
 mult_x <-ggplot(data = mult_df_x)+
   geom_line(aes(y=sc1, x=param1), color="red")+ 
@@ -91,13 +123,11 @@ mult_x <-ggplot(data = mult_df_x)+
   geom_line(aes(y=sc3, x=param3), color="black")+ 
   theme_minimal()+
   labs(x= "Initial biomass for low trait",
-         y= "30 year profits")+
-  facet_wrap(~ key_variable, nrow=3)
+         y= "30 year profits")
 
 ggsave("mult_x.png", plot=mult_x)
 ggsave("mulr_k.png", plot=mult_k)
 ggsave("mult_p.png", plot=mult_p)
 ggsave("mult_r.png", plot=mult_r)
-
 ```
 
