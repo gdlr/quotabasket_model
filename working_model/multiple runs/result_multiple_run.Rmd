@@ -1,0 +1,89 @@
+---
+title: "Results multiple runs"
+author: "mauricio"
+date: "3/13/2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, message=FALSE, warning=FALSE, echo=FALSE)
+
+library(tidyverse)
+library(here)
+library(scales)
+library(gridExtra)
+library(grid)
+library(kableExtra)
+library(ggtext)
+```
+
+```{r}
+mult_df_k <- read_csv(here("working_model","multiple runs","results","mult_k.csv")) %>% 
+  mutate(key_variable="K")
+mult_df_r <- read_csv(here("working_model","multiple runs","results","mult_r.csv"))%>% 
+  mutate(key_variable="r")
+mult_df_p <- read_csv(here("working_model","multiple runs","results","mult_p.csv")) %>% 
+  mutate(key_variable="Value")
+mult_df_x <- read_csv(here("working_model","multiple runs","results","mult_x.csv"))%>% 
+  mutate(key_variable="x")
+
+# join
+NPVs_df_all <- rbind(mult_df_k, mult_df_r, mult_df_p, mult_df_x) %>% 
+  select(runs, key_variable, sc1, sc2, sc3)
+
+# rearrange table
+NPVs_df_all_arr <-  reshape(NPVs_df_all, 
+                            direction = "long",
+                            varying = list(names(NPVs_df_all)[3:5]),
+        v.names = "NPV",
+        idvar = c("key_variable","runs"),
+        timevar="analysis",
+        times = c("sc1", "sc2", "sc3"))
+
+NVPs_df_all_clean <- NPVs_df_all_arr%>% 
+  mutate(names = case_when(
+    analysis == "sc1" ~ "All Same",
+    analysis =="sc2" ~ "Very Different",
+    analysis =="sc3" ~ "Somewhat Different"),
+    number = case_when(
+    analysis == "sc1" ~ 1,
+    analysis =="sc2" ~ 2,
+    analysis =="sc3" ~ 3)) %>% 
+  arrange(names)
+
+# max 
+# NPVs_df_all[, max:=pmax(mult_df_k,mult_df_r,mult_df_p, mult_df_x)]
+
+```
+
+```{r}
+
+ggplot(data = mult_df_k)+
+  geom_line(aes(y=sc1, x=runs), color="red")+ 
+  geom_line(aes(y=sc2, x=runs), color="blue")+ 
+  geom_line(aes(y=sc3, x=runs), color="black")+ 
+  theme_minimal()+
+  labs(x= "Carrying capacity for low trait",
+         y= "30 year profits")+
+  facet_wrap(~ key_variable, nrow=3)
+
+ggplot(data = mult_df_r)+
+  geom_line(aes(y=sc1, x=runs), color="red")+ 
+  geom_line(aes(y=sc2, x=runs), color="blue")+ 
+  geom_line(aes(y=sc3, x=runs), color="black")+ 
+  theme_minimal()+
+  labs(x= "Carrying capacity for low trait",
+         y= "30 year profits")+
+  facet_wrap(~ key_variable, nrow=3)
+
+ggplot(data = mult_df_p)+
+  geom_line(aes(y=sc1, x=runs), color="red")+ 
+  geom_line(aes(y=sc2, x=runs), color="blue")+ 
+  geom_line(aes(y=sc3, x=runs), color="black")+ 
+  theme_minimal()+
+  labs(x= "Carrying capacity for low trait",
+         y= "30 year profits")+
+  facet_wrap(~ key_variable, nrow=3)
+
+```
+

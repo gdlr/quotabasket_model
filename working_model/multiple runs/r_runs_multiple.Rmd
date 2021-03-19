@@ -1,0 +1,188 @@
+---
+title: "overfished with overfished, stable with stable"
+author: "Mauricio Collado"
+date: "2/27/2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+library(tidyverse)
+library(ggplot2)
+library(here)
+library(quadprog)
+library(future)
+```
+
+### Preparing the inputs and outputs for `qb_stock.r`:
+
+For each species, we need:
+
+* r - growth rate
+* K - carrying capacity
+* X - starting stock
+* p - price
+
+For each technology we need:
+
+* Catchability per species
+* Cost per unit effort
+
+# Inputs
+
+## Step 1: Input parameters
+```{r}
+################################### define variables
+# t = tech, q1 = catchability species 1, q2 = catchability species 2...
+
+t1 <- c(t=1, q1=0.04, q2=0.01, q3=0.01, q4=0.01, q5 = 0.01)
+t2 <- c(t=2, q1=0.01, q2=0.04, q3=0.01, q4=0.01, q5 = 0.01)
+t3 <- c(t=3, q1=0.01, q2=0.01, q3=0.04, q4=0.01, q5 = 0.01)
+t4 <- c(t=4, q1=0.01, q2=0.01, q3=0.01, q4=0.04, q5 = 0.01)
+t5 <- c(t=5, q1=0.01, q2=0.01, q3=0.01, q4=0.01, q5 = 0.04)
+
+# Tech cost: t = tech, cost = cost per unit effort
+c1 <- c(t=1, cost=1)
+c2 <- c(t=2, cost=1)
+c3 <- c(t=3, cost=1)
+c4 <- c(t=4, cost=1)
+c5 <- c(t=5, cost=1)
+
+# This is a guess of optimal mortality for each bakset. A good starting point is r/2.
+mort_guess = c(0.2, 0.2)
+
+# Years
+years = 30
+
+# save data
+tech = list(t1, t2, t3, t4, t5)
+cost = list(c1, c2, c3, c4, c5)
+
+#call function
+source(here("working_model", "functions", "optimal_baskets.R"))
+
+
+vec_param1 <-seq(0.02, 0.4, by = 0.02)
+vec_param2 <-seq(0.02, 0.4, by = 0.02)
+vec_param3 <-seq(0.02, 0.4, by = 0.02)
+
+# all combinations?
+# param_list <- list(vec_param1, vec_param2, vec_param3)
+# test_e4 <- expand.grid(param_list)
+
+test <- data.frame(vec_param1, vec_param2, vec_param3)
+
+###################################FUNCTION
+
+test_profit_mult <- function(param){
+
+param1 <- vector(length = param)
+param2 <- vector(length = param)
+param3 <- vector(length = param)
+sc1 <- vector(length = param)
+sc2 <- vector(length = param)
+sc3 <- vector(length = param)
+
+for(y in 1:param){ 
+  
+  
+param1[y]=test$vec_param1[y]
+param2[y]=test$vec_param2[y]
+param3[y]=test$vec_param3[y]
+
+s1 <- c(s=1, r=test$vec_param1[y], K=100, X=50, p=20) #overexploited
+s2 <- c(s=2, r=test$vec_param2[y], K=100, X=50, p=20) #overexploited
+s3 <- c(s=3, r=test$vec_param3[y], K=100, X=50, p=20) #overexploited
+s4 <- c(s=4, r=0.4, K=100, X=50, p=20) #stable
+s5 <- c(s=5, r=0.4, K=100, X=50, p=20) #stable
+
+# Baskets: binary matrix of # species x # baskets, where 1 means that species is in that basket
+
+
+# b3 <- c(s1 = 0, s2 = 0, s3 = 1, s4 = 0, s5 = 0)
+# b4 <- c(s1 = 0, s2 = 0, s3 = 0, s4 = 1, s5 = 0)
+# b5 <- c(s1 = 0, s2 = 0, s3 = 0, s4 = 0, s5 = 1)
+
+
+# Quotas: position = basket, number is the harvest limit.
+# We want this to be 0.1 of the preceding stock under constant mortality, so this will have to change to just input constant m.
+
+# Change these to reflect the number of species and technologies above:
+species = list(s1, s2, s3, s4, s5)
+
+# scenario 1
+b1 <- c(s1 = 1, s2 = 1, s3 = 1, s4 = 0, s5 = 0)
+b2 <- c(s1 = 0, s2 = 0, s3 = 0, s4 = 1, s5 = 1)
+
+baskets = list(b1, b2) #, b3, b4, b5)
+
+output <- optimal_baskets(species, tech, cost, baskets, mort_guess, years)
+
+sc1[y]<- sum(drop_na(output$profit_per_t))
+
+
+#scenario 2
+b1 <- c(s1 = 1, s2 = 1, s3 = 0, s4 = 1, s5 = 0)
+b2 <- c(s1 = 0, s2 = 0, s3 = 1, s4 = 0, s5 = 1)
+
+baskets = list(b1, b2) #, b3, b4, b5)
+
+output <- optimal_baskets(species, tech, cost, baskets, mort_guess, years)
+
+sc2[y]<- sum(drop_na(output$profit_per_t))
+
+
+#scenario 3
+b1 <- c(s1 = 1, s2 = 0, s3 = 0, s4 = 1, s5 = 1)
+b2 <- c(s1 = 0, s2 = 1, s3 = 1, s4 = 0, s5 = 0)
+
+baskets = list(b1, b2) #, b3, b4, b5)
+
+output <- optimal_baskets(species, tech, cost, baskets, mort_guess, years)
+
+sc3[y]<- sum(drop_na(output$profit_per_t))
+
+
+}
+
+data.frame(runs = seq(1, param, by = 1),
+           param1=param1,
+           param2=param2,
+           param3=param3,
+             sc1 = sc1, 
+             sc2 = sc2, 
+             sc3 = sc3
+)
+
+}
+
+```
+
+```{r}
+test_up <- test_profit_mult(param=20)
+  
+```
+
+```{r}
+csvname <- "mult_r.csv"
+  #csvfile <- paste(path_store, csvname, sep="")
+  csvfile <- paste(csvname, sep="")
+  write.table(na.omit(test_up),csvfile, row.names=FALSE, sep=",")
+  
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

@@ -242,7 +242,7 @@ ggplot(data = all_ouputs_all_sc2)+
   labs(x= "Years",
          y= "Stock Level (tons)")+
   labs(title="Balanced basket 1:  low trait + 1 high-trait",
-       y= "30 year biomass",
+       y= "Stocks",
        x= "Year")+
   theme_bw()+
   facet_grid(~key_variable)
@@ -260,7 +260,7 @@ sc2_basket1_p <- ggplot(data = all_ouputs_sc2_p)+
   geom_line(aes(y=stock.s_4, x=year), color="red", size=1)+ 
   labs(x= "Years",
          y= "Stock Level (tons)")+
-  labs(title="2 low traits + 1 high-trait",
+  labs(title="2 low profit + 1 high profit",
        y= "30 year biomass",
        x= "Year")+
   annotate("text", x=25, y=41, 
@@ -275,8 +275,8 @@ sc2_basket2_p <- ggplot(data = all_ouputs_sc2_p)+
   geom_line(aes(y=stock.s_5, x=year), color="red", size=1)+ 
   labs(x= "Years",
          y= "Stock Level (tons)")+
-  labs(title="1 low trait + 1 high-trait",
-       y= "30 year biomass",
+  labs(title="1 low profit + 1 high profit",
+       y= "Biomass",
        x= "Year")+
   annotate("text", x=25, y=55, 
            label="p=20", size=4)+
@@ -323,7 +323,7 @@ sc2_basket2_r <- ggplot(data = all_ouputs_sc2_r)+
   coord_cartesian(ylim=c(0,60))
 
 scenario2_p <- grid.arrange(sc2_basket1_p, sc2_basket2_p, ncol=2,
-                            top=textGrob("Low dominant basket for different fish value"))
+                            top=textGrob("sSomewhat different baskets for different fish profit"))
 
 scenario2_p
 
