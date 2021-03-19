@@ -187,13 +187,13 @@ NPVs_r <- rbind(npv_sc1_r, npv_sc2_r, npv_sc3_r) %>%
 ```{r}
 # global graphs of profits
 
-NPVs_all <- rbind(NPVs_p, NPVs_r, NPVs_k, x_prof_names) %>% 
+NPVs_all <- rbind(NPVs_p, NPVs_r, NPVs_k) %>% 
   mutate(names = case_when(
     analysis == "Low basket + high basket" ~ "hi/hi, lo/lo/lo<br>**All Same**",
     analysis =="Low dominant + balanced" ~ "lo/hi, lo/lo/hi<br>**Very Different**",
     analysis =="High dominant + low basket" ~ "lo/lo, lo/hi/hi<br>**Somewhat Different**")) %>% 
   arrange(names) %>% 
-  mutate(number = c(3,3,3, 3,1,1,1, 1,2,2,2, 2))
+  mutate(number = c(3,3,3,1,1,1,2,2,2))
 
 
 
@@ -224,6 +224,8 @@ npv_result <-
 npv_result
 
 ggsave(plot = npv_result, filename = here("working_model", "result analysis 1", "gabe_figs", "basket_profits.png"), height = 5, width = 8)
+ggsave(plot = npv_result, filename = here("working_model", "result analysis 1", "gabe_figs", "basket_profits.pdf"), height = 5, width = 8)
+
 
 ```
 
@@ -413,7 +415,58 @@ sc2_basket2_p <- ggplot(data = all_ouputs_sc2_p)+
            label="p=40", size=4)+
   theme_bw()+
   coord_cartesian(ylim=c(0,60))
+```
 
+
+# Gabe Graph
+```{r}
+sc2_basket2_p <- 
+  
+  ggplot(data = all_ouputs_sc2_p)+
+  geom_line(aes(y=stock.s_1, x=year), color = "skyblue4", size = 1)+ 
+  geom_line(aes(y=stock.s_2, x=year), color="turquoise3", size=1)+ 
+  geom_line(aes(y=stock.s_4, x=year), color="firebrick", size=1)+ 
+  labs(x= "Years",
+         y= "Stock Level (tons)")+
+  labs(title="Basket 2: lo/lo/hi",
+       y= NULL,
+       x= "Year")+
+  annotate("text", x=25, y=42, 
+           label="p=20", size=4)+
+  annotate("text", x=25, y=14, 
+           label="p=40", size=4)+
+  theme_bw()+
+  coord_cartesian(ylim=c(0,60))
+
+sc2_basket1_p <- ggplot(data = all_ouputs_sc2_p)+
+  geom_line(aes(y=stock.s_3, x=year), color="deepskyblue3", size=1)+ 
+  geom_line(aes(y=stock.s_5, x=year), color="tomato", size=1)+ 
+  labs(x= "Years",
+         y= "Stock Level (tons)")+
+  labs(title="Basket 1: lo/hi",
+       y= "Biomass",
+       x= "Year")+
+  annotate("text", x=25, y=55, 
+           label="p=20", size=4)+
+  annotate("text", x=25, y=36, 
+           label="p=40", size=4)+
+  theme_bw()+
+  coord_cartesian(ylim=c(0,60))
+
+mau_fig <- sc2_basket1_p + sc2_basket2_p &
+  scale_y_continuous(expand = c(0,0), limits = c(0, 65)) &
+  scale_x_continuous(expand = c(0,0)) &
+  theme(strip.background = element_rect(fill="white"),
+        axis.ticks.length = unit(-0.05, "in"),
+        axis.text.y = element_text(margin=unit(c(0.3,0.3,0.3,0.3), "cm")),
+        axis.text.x = element_text(margin=unit(c(0.3,0.3,0.3,0.3), "cm")))
+
+ggsave(plot = mau_fig, here("working_model", "scratch", "mauricio_figs", "fig_7.pdf"), height = 5, width = 8)
+
+```
+
+
+```{r}
 #r
 all_ouputs_sc2_r <- all_ouputs_all_sc2 %>% 
   filter(key_variable=="r")
@@ -462,6 +515,7 @@ scenario2_r <- grid.arrange(sc2_basket1_r, sc2_basket2_r, ncol=2,
 
 scenario2_r
 ```
+
 
 
 ```{r}
@@ -622,4 +676,54 @@ sc3_basket2_r_e <- ggplot(data = all_ouputs_sc3_r_e)+
 sc3_basket1_r_e 
 sc3_basket2_r_e
 ```
+
+
+```{r}
+per_yr_bio_pft_hvst_mort <- all_outputs_r %>%
+  select(stock.s_1:harvest.s_5, profit_per_t.t_1:profit_per_t.t_5, mortality1, mortality2, analysis, year, tot_profits, tot_stock) %>%
+  dplyr::group_by(year, analysis, mortality1, mortality2) %>%
+  pivot_longer(cols = c(stock.s_1:profit_per_t.t_5))
+df_stock2 <- per_yr_bio_pft_hvst_mort %>%
+  filter(name %in% c('stock.s_1', 'stock.s_2', 'stock.s_3', 'stock.s_4', 'stock.s_5')) %>% ungroup() %>% droplevels() %>%
+  mutate(QB = c(rep(c(1,1,1,2,2),31), rep(c(1,1,2,1,2),31),rep(c(1,2,2,1,1),31)))
+df_hvst2 <- per_yr_bio_pft_hvst_mort %>%
+  filter(name %in% c('harvest.s_1', 'harvest.s_2', 'harvest.s_3', 'harvest.s_4', 'harvest.s_5')) %>% ungroup() %>% droplevels() %>%
+  mutate(QB = c(rep(c(1,1,1,2,2),31), rep(c(1,1,2,1,2),31),rep(c(1,2,2,1,1),31)))
+
+gg_hvst_sp2 <- 
+  ggplot(df_hvst2)+
+  geom_line(aes(x = year, y = value, color = name, linetype = as.factor(QB)
+                ), position=position_nudge(1), show.legend = FALSE)+
+  labs(y= "Harvest",
+       x= NULL,
+       color = 'Stock',
+       linetype = 'Basket')+ facet_wrap(~analysis)
+
+gg_bio_sp2 <-
+  ggplot(df_stock2)+
+  geom_line(aes(x = year, y = value, color = name, linetype = as.factor(QB)
+                ), position=position_nudge(1))+
+  labs(y= "Biomass",
+       x= "Year",
+       color = 'Stock',
+       linetype = 'Basket')+
+  facet_wrap(~analysis) +
+  theme(
+        strip.background = element_rect(fill="white"),)
+  
+  
+kat_plot <- gg_hvst_sp2 / gg_bio_sp2 +
+  plot_layout(guides = "collect") & 
+  theme_bw() +
+  theme(strip.background = element_rect(fill="white"),
+        axis.ticks.length = unit(-0.05, "in"),
+        axis.text.y = element_text(margin=unit(c(0.3,0.3,0.3,0.3), "cm")),
+        axis.text.x = element_text(margin=unit(c(0.3,0.3,0.3,0.3), "cm"))) &
+  scale_x_continuous(expand = c(0,0)) &
+  scale_color_manual(values = c("skyblue4", "turquoise3", "deepskyblue3", "firebrick", "tomato"))
+
+kat_plot
+ggsave(plot = kat_plot, here("working_model", "scratch", "kat_figs", "figs", "kat_plot.pdf"), height = 5, width = 8)
+```
+
 
