@@ -72,7 +72,7 @@ ggplot(data = mult_df_r)+
   geom_line(aes(y=sc2, x=runs), color="blue")+ 
   geom_line(aes(y=sc3, x=runs), color="black")+ 
   theme_minimal()+
-  labs(x= "Carrying capacity for low trait",
+  labs(x= "Intrinsic growth for low trait",
          y= "30 year profits")+
   facet_wrap(~ key_variable, nrow=3)
 
@@ -81,7 +81,16 @@ ggplot(data = mult_df_p)+
   geom_line(aes(y=sc2, x=runs), color="blue")+ 
   geom_line(aes(y=sc3, x=runs), color="black")+ 
   theme_minimal()+
-  labs(x= "Carrying capacity for low trait",
+  labs(x= "Price for low trait",
+         y= "30 year profits")+
+  facet_wrap(~ key_variable, nrow=3)
+
+ggplot(data = mult_df_x)+
+  geom_line(aes(y=sc1, x=runs), color="red")+ 
+  geom_line(aes(y=sc2, x=runs), color="blue")+ 
+  geom_line(aes(y=sc3, x=runs), color="black")+ 
+  theme_minimal()+
+  labs(x= "Initial biomass for low trait",
          y= "30 year profits")+
   facet_wrap(~ key_variable, nrow=3)
 
