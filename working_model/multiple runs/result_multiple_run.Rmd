@@ -58,41 +58,46 @@ NVPs_df_all_clean <- NPVs_df_all_arr%>%
 
 ```{r}
 
-ggplot(data = mult_df_k)+
-  geom_line(aes(y=sc1, x=runs), color="red")+ 
-  geom_line(aes(y=sc2, x=runs), color="blue")+ 
-  geom_line(aes(y=sc3, x=runs), color="black")+ 
+mult_k <- ggplot(data = mult_df_k)+
+  geom_line(aes(y=sc1, x=param1), color="red")+ 
+  geom_line(aes(y=sc2, x=param2), color="blue")+ 
+  geom_line(aes(y=sc3, x=param3), color="black")+ 
   theme_minimal()+
   labs(x= "Carrying capacity for low trait",
          y= "30 year profits")+
   facet_wrap(~ key_variable, nrow=3)
 
-ggplot(data = mult_df_r)+
-  geom_line(aes(y=sc1, x=runs), color="red")+ 
-  geom_line(aes(y=sc2, x=runs), color="blue")+ 
-  geom_line(aes(y=sc3, x=runs), color="black")+ 
+mult_r <-ggplot(data = mult_df_r)+
+  geom_line(aes(y=sc1, x=param1), color="red")+ 
+  geom_line(aes(y=sc2, x=param2), color="blue")+ 
+  geom_line(aes(y=sc3, x=param3), color="black")+ 
   theme_minimal()+
   labs(x= "Intrinsic growth for low trait",
          y= "30 year profits")+
   facet_wrap(~ key_variable, nrow=3)
 
-ggplot(data = mult_df_p)+
-  geom_line(aes(y=sc1, x=runs), color="red")+ 
-  geom_line(aes(y=sc2, x=runs), color="blue")+ 
-  geom_line(aes(y=sc3, x=runs), color="black")+ 
+mult_p <-ggplot(data = mult_df_p)+
+  geom_line(aes(y=sc1, x=param1), color="red")+ 
+  geom_line(aes(y=sc2, x=param2), color="blue")+ 
+  geom_line(aes(y=sc3, x=param3), color="black")+ 
   theme_minimal()+
   labs(x= "Price for low trait",
          y= "30 year profits")+
   facet_wrap(~ key_variable, nrow=3)
 
-ggplot(data = mult_df_x)+
-  geom_line(aes(y=sc1, x=runs), color="red")+ 
-  geom_line(aes(y=sc2, x=runs), color="blue")+ 
-  geom_line(aes(y=sc3, x=runs), color="black")+ 
+mult_x <-ggplot(data = mult_df_x)+
+  geom_line(aes(y=sc1, x=param1), color="red")+ 
+  geom_line(aes(y=sc2, x=param2), color="blue")+ 
+  geom_line(aes(y=sc3, x=param3), color="black")+ 
   theme_minimal()+
   labs(x= "Initial biomass for low trait",
          y= "30 year profits")+
   facet_wrap(~ key_variable, nrow=3)
+
+ggsave("mult_x.png", plot=mult_x)
+ggsave("mulr_k.png", plot=mult_k)
+ggsave("mult_p.png", plot=mult_p)
+ggsave("mult_r.png", plot=mult_r)
 
 ```
 

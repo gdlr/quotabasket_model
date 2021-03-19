@@ -90,7 +90,7 @@ bio4_sc1 <- vector(length = param)
 bio5_sc1 <- vector(length = param)
 
 bio1_sc2 <- vector(length = param)
-bio2_sc2<- vector(length = param)
+bio2_sc2 <- vector(length = param)
 bio3_sc2 <- vector(length = param)
 bio4_sc2 <- vector(length = param)
 bio5_sc2 <- vector(length = param)
