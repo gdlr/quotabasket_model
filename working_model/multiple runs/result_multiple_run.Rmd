@@ -33,7 +33,12 @@ mult_df_x <- read_csv(here("working_model","multiple runs","results","mult_x.csv
 
 case_r <- read_csv(here("working_model","multiple runs","results","case_r.csv"))%>% 
   mutate(key_variable="r")
+case_k <- read_csv(here("working_model","multiple runs","results","case_k.csv"))%>% 
+  mutate(key_variable="k")
+case_p <- read_csv(here("working_model","multiple runs","results","case_p.csv"))%>% 
+  mutate(key_variable="k")
 
+# RESHAPE THEM
 mult_r2 <-  reshape(case_r, 
                             direction = "long",
                             varying = list(names(case_r)[9:11]),
@@ -42,16 +47,59 @@ mult_r2 <-  reshape(case_r,
         timevar="analysis",
         times = c("All_same", "Very_different", "Somewhat_different"))
 
+mult_p2 <-  reshape(case_p, 
+                            direction = "long",
+                            varying = list(names(case_p)[9:11]),
+        v.names = "Combination",
+        idvar = c("sc2","sc1"),
+        timevar="analysis",
+        times = c("All_same", "Very_different", "Somewhat_different"))
+
+mult_k2 <-  reshape(case_k, 
+                            direction = "long",
+                            varying = list(names(case_k)[9:11]),
+        v.names = "Combination",
+        idvar = c("sc2","sc1"),
+        timevar="analysis",
+        times = c("All_same", "Very_different", "Somewhat_different"))
+
+
+#graph r
+
 mult_r2g <- ggplot(data = mult_r2, aes(x = param1, y = Combination)) +
     geom_line(alpha = 3, aes(color = analysis), size=1)+
   labs(title="Extra net profits over the lowest profit basket",
-       y= "30 years net profits",
-       x= "Growth rait for low trait species")+
+       y= "30 year net profits",
+       x= "Growth rate for low trait species")+
   scale_colour_discrete("Basket arrangement")+
   theme_bw() +
   theme(text = element_text(size = 12))
 
+#graph p
+mult_p2g <- ggplot(data = mult_p2, aes(x = param1, y = Combination)) +
+    geom_line(alpha = 3, aes(color = analysis), size=1)+
+  labs(title="Extra net profits over the lowest profit basket",
+       y= "30 year net profits",
+       x= "Price for low trait species")+
+  scale_colour_discrete("Basket arrangement")+
+  theme_bw() +
+  theme(text = element_text(size = 12))
+
+#graph k
+mult_k2g <- ggplot(data = mult_k2, aes(x = param1, y = Combination)) +
+    geom_line(alpha = 3, aes(color = analysis), size=1)+
+  labs(title="Extra net profits over the lowest profit basket",
+       y= "30 year net profits",
+       x= "Carrying capacity for low trait species")+
+  scale_colour_discrete("Basket arrangement")+
+  theme_bw() +
+  theme(text = element_text(size = 12))
+
+
+
 ggsave("mult_r2g.png", plot=mult_r2g)
+ggsave("mult_p2g.png", plot=mult_p2g)
+ggsave("mult_k2g.png", plot=mult_k2g)
 
 
 ```
@@ -88,6 +136,12 @@ NVPs_df_all_clean <- NPVs_df_all_arr%>%
 # NPVs_df_all[, max:=pmax(mult_df_k,mult_df_r,mult_df_p, mult_df_x)]
 
 ```
+
+```{r}
+
+```
+
+
 
 ```{r}
 
